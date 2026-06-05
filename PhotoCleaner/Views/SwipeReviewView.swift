@@ -118,6 +118,7 @@ struct SwipeReviewView: View {
     @State private var toast: ToastInfo?
     @State private var hasLoaded = false
     @State private var showCategoryPicker = false
+    @State private var showMetadata = false
     @State private var currentCategory: PhotoCategory
 
     enum ExitDirection { case none, left, right, up }
@@ -178,6 +179,13 @@ struct SwipeReviewView: View {
         .toolbar(.hidden, for: .navigationBar)
         .sheet(isPresented: $showPendingSheet) {
             PendingDeletionView(vm: vm)
+        }
+        .sheet(isPresented: $showMetadata) {
+            if let asset = vm.currentAsset {
+                PhotoMetadataSheet(asset: asset)
+                    .presentationDetents([.medium, .large])
+                    .presentationDragIndicator(.visible)
+            }
         }
         .sheet(isPresented: $showCategoryPicker) {
             CategoryPickerSheet(currentId: currentCategory.id) { newCategory in
@@ -316,8 +324,11 @@ struct SwipeReviewView: View {
         ZStack {
             if let underlying = underlyingAsset {
                 PhotoCardView(asset: underlying)
-                    .scaleEffect(0.95)
-                    .opacity(0.6)
+                    // 不再用 opacity 让背景图透出（会显得脏）
+                    // 改用 scale + offset 露出顶部一条边缘做堆叠感
+                    .scaleEffect(0.93)
+                    .offset(y: 18)
+                    .allowsHitTesting(false)
             }
 
             if let asset = vm.currentAsset {
@@ -502,6 +513,15 @@ struct SwipeReviewView: View {
 
     private var bottomBar: some View {
         HStack {
+            // 左下：信息按钮（弹元数据 sheet）
+            actionButton(symbol: "info.circle", title: "信息", color: .white,
+                         disabled: vm.currentAsset == nil) {
+                UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                showMetadata = true
+            }
+
+            Spacer()
+
             actionButton(symbol: "arrow.uturn.backward", title: "撤销", color: .white,
                          disabled: vm.deleteHistory.isEmpty) {
                 UIImpactFeedbackGenerator(style: .soft).impactOccurred()
@@ -526,7 +546,7 @@ struct SwipeReviewView: View {
                 trigger(.markDelete, direction: .up)
             }
         }
-        .padding(.horizontal, 20)
+        .padding(.horizontal, 16)
     }
 
     @ViewBuilder

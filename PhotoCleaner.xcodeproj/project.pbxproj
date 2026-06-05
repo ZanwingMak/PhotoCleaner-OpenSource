@@ -25,6 +25,8 @@
 		BF000000000000000000A010 /* PhotosBrowserView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0000000000000000000A010 /* PhotosBrowserView.swift */; };
 		BF000000000000000000A011 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0000000000000000000A011 /* SettingsView.swift */; };
 		BF000000000000000000A012 /* ThemeManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0000000000000000000A012 /* ThemeManager.swift */; };
+		BF000000000000000000A013 /* PhotoMetadataSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0000000000000000000A013 /* PhotoMetadataSheet.swift */; };
+		BF000000000000000000A014 /* PhotoDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0000000000000000000A014 /* PhotoDetailView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -47,6 +49,8 @@
 		F0000000000000000000A010 /* PhotosBrowserView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotosBrowserView.swift; sourceTree = "<group>"; };
 		F0000000000000000000A011 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		F0000000000000000000A012 /* ThemeManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThemeManager.swift; sourceTree = "<group>"; };
+		F0000000000000000000A013 /* PhotoMetadataSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoMetadataSheet.swift; sourceTree = "<group>"; };
+		F0000000000000000000A014 /* PhotoDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoDetailView.swift; sourceTree = "<group>"; };
 		F0000000000000000000B001 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		F0000000000000000000B002 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -127,6 +131,8 @@
 				F0000000000000000000A009 /* PendingDeletionView.swift */,
 				F0000000000000000000A010 /* PhotosBrowserView.swift */,
 				F0000000000000000000A011 /* SettingsView.swift */,
+				F0000000000000000000A013 /* PhotoMetadataSheet.swift */,
+				F0000000000000000000A014 /* PhotoDetailView.swift */,
 				G000000000000000000000008 /* Components */,
 			);
 			path = Views;
@@ -232,6 +238,8 @@
 				BF000000000000000000A010 /* PhotosBrowserView.swift in Sources */,
 				BF000000000000000000A011 /* SettingsView.swift in Sources */,
 				BF000000000000000000A012 /* ThemeManager.swift in Sources */,
+				BF000000000000000000A013 /* PhotoMetadataSheet.swift in Sources */,
+				BF000000000000000000A014 /* PhotoDetailView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

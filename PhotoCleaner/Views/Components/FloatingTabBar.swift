@@ -15,10 +15,10 @@ enum TabBarItem: String, CaseIterable, Identifiable {
 
     var symbol: String {
         switch self {
-        case .organize: return "sparkles.rectangle.stack"
-        case .photos:   return "photo.on.rectangle.angled"
+        case .organize: return "sparkles.rectangle.stack.fill"
+        case .photos:   return "photo.fill.on.rectangle.fill"
         case .albums:   return "square.stack.fill"
-        case .more:     return "ellipsis"
+        case .more:     return "square.grid.2x2.fill"
         }
     }
 }

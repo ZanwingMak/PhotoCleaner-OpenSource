@@ -26,13 +26,25 @@ struct CategoryListView: View {
             ZStack(alignment: .bottom) {
                 backgroundLayer
 
-                Group {
-                    switch topTab {
-                    case .unsorted: unsortedScroll
-                    case .albums:   albumsScroll
+                // 顶部固定 header（greeting + segmented）保证两个 tab 位置一致
+                VStack(spacing: 0) {
+                    VStack(alignment: .leading, spacing: 14) {
+                        topGreetingBar
+                        segmentedTabs
                     }
+                    .padding(.horizontal, 20)
+                    .padding(.top, 8)
+                    .padding(.bottom, 10)
+
+                    // 内容区
+                    Group {
+                        switch topTab {
+                        case .unsorted: unsortedScroll
+                        case .albums:   albumsScroll
+                        }
+                    }
+                    .transition(.opacity)
                 }
-                .transition(.opacity)
 
                 FloatingTabBar(selected: tabBarItem) { item in
                     handleTabBarTap(item)
@@ -89,8 +101,6 @@ struct CategoryListView: View {
     private var unsortedScroll: some View {
         ScrollView(showsIndicators: false) {
             VStack(alignment: .leading, spacing: 24) {
-                topGreetingBar
-                segmentedTabs
                 heroStorageCard
                 smartSuggestionRow
                 quickPickRow
@@ -99,7 +109,7 @@ struct CategoryListView: View {
                 Color.clear.frame(height: 120)
             }
             .padding(.horizontal, 20)
-            .padding(.top, 8)
+            .padding(.top, 4)
         }
     }
 
@@ -108,9 +118,6 @@ struct CategoryListView: View {
     private var albumsScroll: some View {
         ScrollView(showsIndicators: false) {
             VStack(alignment: .leading, spacing: 0) {
-                topGreetingBar
-                segmentedTabs.padding(.bottom, 16)
-
                 ForEach(albumRows, id: \.id) { category in
                     NavigationLink(value: category) {
                         AlbumRow(category: category, count: library.categoryCounts[category.id])

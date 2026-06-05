@@ -15,6 +15,9 @@ struct SettingsView: View {
     @AppStorage("thumbnail_hq")           private var hqThumbnails = true
     @AppStorage("confirm_before_delete")  private var confirmBeforeDelete = true
 
+    @State private var isScanning = false
+    @State private var toast: ToastInfo?
+
     var body: some View {
         NavigationStack {
             ZStack {
@@ -43,10 +46,7 @@ struct SettingsView: View {
                             infoRow(label: "已扫描照片", symbol: "photo.on.rectangle",
                                      value: "\(library.categoryCounts[PhotoCategory.allPhotos.id] ?? 0)")
                             divider
-                            actionRow(label: "重新扫描分类", symbol: "arrow.clockwise",
-                                       tint: AppPalette.brand) {
-                                Task { await library.refreshCategoryCounts() }
-                            }
+                            scanRow
                         }
 
                         section("关于") {
@@ -69,10 +69,10 @@ struct SettingsView: View {
                     .padding(.top, 8)
                 }
             }
+            .toast($toast)
             .navigationTitle("设置")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                // 关闭按钮：用系统 Button 样式，不再叠 Circle 背景
                 ToolbarItem(placement: .topBarTrailing) {
                     Button("关闭") {
                         dismiss()
@@ -80,6 +80,61 @@ struct SettingsView: View {
                     .tint(AppPalette.brand)
                 }
             }
+        }
+    }
+
+    /// 重新扫描分类按钮 — 含 loading + 完成 toast
+    private var scanRow: some View {
+        Button {
+            Task { await rescanWithFeedback() }
+        } label: {
+            HStack(spacing: 14) {
+                ZStack {
+                    Circle()
+                        .fill(AppPalette.brand.opacity(0.18))
+                        .frame(width: 30, height: 30)
+                    if isScanning {
+                        ProgressView()
+                            .progressViewStyle(.circular)
+                            .tint(AppPalette.brand)
+                            .scaleEffect(0.7)
+                    } else {
+                        Image(systemName: "arrow.clockwise")
+                            .font(.system(size: 13, weight: .bold))
+                            .foregroundStyle(AppPalette.brand)
+                    }
+                }
+                Text(isScanning ? "正在扫描…" : "重新扫描分类")
+                    .font(.system(size: 15, weight: .medium))
+                    .foregroundStyle(AppPalette.textPrimary(for: theme))
+                Spacer()
+                if !isScanning {
+                    Image(systemName: "chevron.right")
+                        .font(.system(size: 12, weight: .bold))
+                        .foregroundStyle(AppPalette.textTertiary(for: theme))
+                }
+            }
+            .padding(.horizontal, 14)
+            .padding(.vertical, 12)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .disabled(isScanning)
+    }
+
+    /// 执行重新扫描 + 反馈
+    private func rescanWithFeedback() async {
+        UIImpactFeedbackGenerator(style: .soft).impactOccurred()
+        isScanning = true
+        await library.refreshCategoryCounts()
+        isScanning = false
+        UINotificationFeedbackGenerator().notificationOccurred(.success)
+        withAnimation(.spring(response: 0.4, dampingFraction: 0.7)) {
+            toast = ToastInfo(
+                symbol: "checkmark.circle.fill",
+                text: "扫描完成 · \(library.categoryCounts[PhotoCategory.allPhotos.id] ?? 0) 张",
+                tint: AppPalette.success
+            )
         }
     }
 

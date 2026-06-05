@@ -1,0 +1,36 @@
+# Xcode 工程相关
+xcuserdata/
+*.xcuserstate
+DerivedData/
+*.swp
+.DS_Store
+
+# 构建产物
+build/
+*.ipa
+*.xcarchive
+*.dSYM.zip
+
+# Swift Package Manager
+.swiftpm/
+Package.resolved
+
+# CocoaPods
+Pods/
+
+# Carthage
+Carthage/Build
+
+# fastlane
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots/**/*.png
+fastlane/test_output
+
+# IDE
+.vscode/
+.idea/
+
+# 临时文件
+*.log
+*.tmp

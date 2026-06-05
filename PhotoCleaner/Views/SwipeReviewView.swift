@@ -16,6 +16,7 @@ struct SwipeReviewView: View {
     @State private var exitDirection: ExitDirection = .none
     @State private var showPendingSheet = false
     @State private var toast: ToastInfo?
+    @State private var hasLoaded = false
 
     enum ExitDirection { case none, left, right, up }
 
@@ -39,8 +40,10 @@ struct SwipeReviewView: View {
 
                 GeometryReader { geo in
                     ZStack {
-                        if vm.assets.isEmpty {
+                        if !hasLoaded {
                             ProgressView().tint(.white)
+                        } else if vm.assets.isEmpty {
+                            emptyState
                         } else if !vm.hasMore {
                             finishedState
                         } else {
@@ -66,6 +69,7 @@ struct SwipeReviewView: View {
         .task {
             let assets = library.fetchAssets(for: category)
             vm.assets = assets
+            hasLoaded = true
         }
     }
 
@@ -403,6 +407,33 @@ struct SwipeReviewView: View {
         }
         .buttonStyle(.plain)
         .disabled(disabled)
+    }
+
+    // MARK: - 空状态
+
+    private var emptyState: some View {
+        VStack(spacing: 16) {
+            Image(systemName: "tray")
+                .font(.system(size: 56))
+                .foregroundStyle(.white.opacity(0.4))
+            Text("这个分类没有照片")
+                .font(.title3.weight(.semibold))
+                .foregroundStyle(.white)
+            Text("换一个分类试试")
+                .font(.callout)
+                .foregroundStyle(.white.opacity(0.55))
+            Button {
+                dismiss()
+            } label: {
+                Text("返回")
+                    .font(.system(size: 15, weight: .semibold))
+                    .padding(.horizontal, 22).padding(.vertical, 11)
+                    .background(Capsule().fill(Color.white.opacity(0.12)))
+                    .foregroundStyle(.white)
+            }
+            .padding(.top, 8)
+        }
+        .padding()
     }
 
     // MARK: - 完成态

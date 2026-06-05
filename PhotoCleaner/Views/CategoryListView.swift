@@ -18,6 +18,8 @@ struct CategoryListView: View {
     @State private var tabBarItem: TabBarItem = .organize
     @State private var toast: ToastInfo?
     @State private var reviewedCount: Int = 0   // 本次会话已审核数
+    @State private var showSettings = false
+    @State private var showPhotosBrowser = false
 
     var body: some View {
         NavigationStack {
@@ -43,6 +45,12 @@ struct CategoryListView: View {
             .toolbar(.hidden, for: .navigationBar)
             .navigationDestination(for: PhotoCategory.self) { category in
                 SwipeReviewView(category: category)
+            }
+            .sheet(isPresented: $showSettings) {
+                SettingsView()
+            }
+            .sheet(isPresented: $showPhotosBrowser) {
+                PhotosBrowserView()
             }
             .task {
                 if library.categoryCounts.isEmpty {
@@ -145,14 +153,10 @@ struct CategoryListView: View {
                     .foregroundStyle(AppPalette.textPrimary)
             }
             Spacer()
-            // 设置药丸
+            // 设置入口
             Button {
                 UIImpactFeedbackGenerator(style: .soft).impactOccurred()
-                withAnimation(.spring(response: 0.4, dampingFraction: 0.7)) {
-                    toast = ToastInfo(symbol: "wrench.and.screwdriver.fill",
-                                       text: "设置面板开发中",
-                                       tint: AppPalette.brand)
-                }
+                showSettings = true
             } label: {
                 Image(systemName: "slider.horizontal.3")
                     .font(.system(size: 16, weight: .semibold))
@@ -445,14 +449,18 @@ struct CategoryListView: View {
                 tabBarItem = .albums
                 topTab = .albums
             }
-        case .photos, .more:
-            tabBarItem = item
-            withAnimation(.spring(response: 0.4, dampingFraction: 0.7)) {
-                toast = ToastInfo(symbol: "wrench.and.screwdriver.fill",
-                                   text: "「\(item.rawValue)」功能开发中",
-                                   tint: .yellow)
+        case .photos:
+            // 短暂高亮，弹出全库网格 sheet
+            tabBarItem = .photos
+            showPhotosBrowser = true
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
+                withAnimation { tabBarItem = .organize }
             }
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
+        case .more:
+            // 短暂高亮，弹出设置 sheet
+            tabBarItem = .more
+            showSettings = true
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
                 withAnimation { tabBarItem = .organize }
             }
         }

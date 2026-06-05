@@ -35,6 +35,8 @@ SWIFT_FILES=(
   "$SRC_DIR/Views/CategoryListView.swift"
   "$SRC_DIR/Views/SwipeReviewView.swift"
   "$SRC_DIR/Views/PendingDeletionView.swift"
+  "$SRC_DIR/Views/PhotosBrowserView.swift"
+  "$SRC_DIR/Views/SettingsView.swift"
   "$SRC_DIR/Views/Components/LiquidGlassCard.swift"
   "$SRC_DIR/Views/Components/PhotoCardView.swift"
   "$SRC_DIR/Views/Components/FloatingTabBar.swift"

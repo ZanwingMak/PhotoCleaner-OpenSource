@@ -5,6 +5,31 @@
 
 ---
 
+## [0.5.0] - 2026-06-05
+
+### 新增 — 补完功能闭环
+- **照片浏览器（`PhotosBrowserView`）**：底部 Tab Bar 点「照片」打开
+  - 3 列方形缩略图网格，2pt 间距，懒加载 + cancel
+  - 视频右下角带 video 角标
+  - 顶部「全部照片 · N」标题 + 左上 X 关闭
+- **设置面板（`SettingsView`）**：右上齿轮或底部「更多」打开
+  - 顶部品牌头：渐变 logo + PhotoCleaner 名称 + slogan
+  - 三个分组：浏览体验（触觉/高清缩略图/二次确认开关）/ 数据（已扫描计数/重新扫描）/ 关于（版本/GitHub/反馈/更新日志）
+  - 偏好用 `@AppStorage` 持久化
+  - 暖橙圆形图标气泡 + 自定义深色 list 风格
+
+### 修复
+- **滑动审核空状态 bug**：之前 fetchAssets 返回空列表时永远显示 ProgressView，
+  现在区分 `hasLoaded` 与 `assets.isEmpty`，空时显示「这个分类没有照片」+ 返回按钮
+
+### 变更
+- TabBar 行为接入实际功能：
+  - 「照片」→ 弹 `PhotosBrowserView` sheet
+  - 「更多」→ 弹 `SettingsView` sheet
+  - 右上齿轮 → 弹 `SettingsView` sheet（与「更多」共用同一界面）
+
+---
+
 ## [0.4.0] - 2026-06-05
 
 ### 新增 — 自有视觉语言

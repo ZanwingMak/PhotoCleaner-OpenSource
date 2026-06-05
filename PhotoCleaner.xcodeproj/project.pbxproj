@@ -22,6 +22,8 @@
 		BF000000000000000000A00D /* ToastView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0000000000000000000A00D /* ToastView.swift */; };
 		BF000000000000000000A00E /* RingProgress.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0000000000000000000A00E /* RingProgress.swift */; };
 		BF000000000000000000A00F /* AppPalette.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0000000000000000000A00F /* AppPalette.swift */; };
+		BF000000000000000000A010 /* PhotosBrowserView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0000000000000000000A010 /* PhotosBrowserView.swift */; };
+		BF000000000000000000A011 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0000000000000000000A011 /* SettingsView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -41,6 +43,8 @@
 		F0000000000000000000A00D /* ToastView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToastView.swift; sourceTree = "<group>"; };
 		F0000000000000000000A00E /* RingProgress.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RingProgress.swift; sourceTree = "<group>"; };
 		F0000000000000000000A00F /* AppPalette.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppPalette.swift; sourceTree = "<group>"; };
+		F0000000000000000000A010 /* PhotosBrowserView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotosBrowserView.swift; sourceTree = "<group>"; };
+		F0000000000000000000A011 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		F0000000000000000000B001 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		F0000000000000000000B002 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -118,6 +122,8 @@
 				F0000000000000000000A007 /* CategoryListView.swift */,
 				F0000000000000000000A008 /* SwipeReviewView.swift */,
 				F0000000000000000000A009 /* PendingDeletionView.swift */,
+				F0000000000000000000A010 /* PhotosBrowserView.swift */,
+				F0000000000000000000A011 /* SettingsView.swift */,
 				G000000000000000000000008 /* Components */,
 			);
 			path = Views;
@@ -220,6 +226,8 @@
 				BF000000000000000000A00D /* ToastView.swift in Sources */,
 				BF000000000000000000A00E /* RingProgress.swift in Sources */,
 				BF000000000000000000A00F /* AppPalette.swift in Sources */,
+				BF000000000000000000A010 /* PhotosBrowserView.swift in Sources */,
+				BF000000000000000000A011 /* SettingsView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

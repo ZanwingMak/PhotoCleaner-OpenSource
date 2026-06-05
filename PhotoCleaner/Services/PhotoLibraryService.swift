@@ -38,6 +38,11 @@ final class PhotoLibraryService: ObservableObject {
         self.authorizationStatus = status
     }
 
+    /// 主动同步系统授权状态（用于 app 重新激活时刷新）
+    func refreshAuthorizationStatus() {
+        self.authorizationStatus = PHPhotoLibrary.authorizationStatus(for: .readWrite)
+    }
+
     var hasAccess: Bool {
         authorizationStatus == .authorized || authorizationStatus == .limited
     }

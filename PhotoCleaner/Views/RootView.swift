@@ -8,6 +8,7 @@ import Photos
 
 struct RootView: View {
     @EnvironmentObject private var library: PhotoLibraryService
+    @Environment(\.scenePhase) private var scenePhase
 
     var body: some View {
         Group {
@@ -23,6 +24,19 @@ struct RootView: View {
             }
         }
         .animation(.easeInOut(duration: 0.3), value: library.authorizationStatus)
+        .task {
+            // 启动时主动调一次 requestAuthorization，TCC 已 grant 时不会弹窗直接返回
+            if library.authorizationStatus == .notDetermined {
+                await library.requestAuthorization()
+            } else {
+                library.refreshAuthorizationStatus()
+            }
+        }
+        .onChange(of: scenePhase) { _, phase in
+            if phase == .active {
+                library.refreshAuthorizationStatus()
+            }
+        }
     }
 }
 

@@ -5,6 +5,37 @@
 
 ---
 
+## [0.6.0] - 2026-06-06
+
+### 新增
+- **主题切换**：设置里新增「外观」分组
+  - 5 个主题色块横向选择：跟随系统 / 默认深色 / 浅色 / 焦糖暖 / 冷色调
+  - 选中态橙色描边 + 主题名加粗，触觉反馈
+  - 偏好 `@AppStorage` 持久化，启动即生效
+- **`ThemeManager`** 全局主题管理器，注入到 App 入口
+- **`AppPalette` 主题感知 API**：`bgPrimary(for:)`/`bgCard(for:)`/`textPrimary(for:)` 等方法根据当前主题返回不同色值
+- **滑动审核顶部分类切换**：点击顶部「分类名 ⌄」胶囊弹出 `CategoryPickerSheet`
+  - 三个分组：快速合集 / 智能分类 / 系统相册
+  - 当前分类高亮橙色 + ✓，点击切换无需返回首页
+- **Tab Bar 高亮同步**：顶部「整理/相簿」切换时底部 tab bar 同步高亮
+
+### 修复
+- **底部 Tab Bar 液态玻璃增强**：
+  - iOS 26 用 `.glassEffect.tint(brand.opacity(0.05))` 厚玻璃 + 品牌微光
+  - 边缘高光渐变环 + 底部阴影遮罩，更立体
+  - 选中 tab 改用品牌橙渐变胶囊 + 发光阴影
+  - SF Symbol 切换时加 `.symbolEffect(.bounce)`
+- **设置右上关闭按钮 2 层圆圈**：去掉 Button 自定义 Circle 背景，改用系统 ToolbarItem 文本按钮「关闭」
+- **相簿列表整行可点**：`AlbumRow` 加 `.contentShape(Rectangle())`，Spacer 区域也响应点击
+- **待删除缩略图 × 按钮被裁切**：用 ZStack + padding 6pt 给 × 留出空间，不再 offset 出界
+- **第一张图按钮无法点击**：SwipeReviewView 重构为 ZStack overlay 结构，topBar/bottomBar `.zIndex(10)` 浮在卡片之上，永远可点
+- **底部 tab bar 遮挡内容**：首页 ScrollView 底部 padding 从 90pt 增到 120pt
+
+### 变更
+- Tab Bar 图标更新：`integrate` 改为 `sparkles.rectangle.stack`，「更多」改为 `ellipsis`
+
+---
+
 ## [0.5.0] - 2026-06-05
 
 ### 新增 — 补完功能闭环

@@ -167,7 +167,8 @@ struct PendingThumbnail: View {
     @State private var requestID: PHImageRequestID?
 
     var body: some View {
-        ZStack(alignment: .topTrailing) {
+        // 用 padding 让 ZStack 整体有空间容纳 × 按钮在角落，按钮不被 grid cell 边界裁切
+        ZStack {
             // 缩略图
             ZStack {
                 Color(.systemGray6)
@@ -179,14 +180,23 @@ struct PendingThumbnail: View {
             }
             .frame(height: 110)
             .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+            .padding(6) // 给 × 留位置
 
-            // 移除按钮
-            Button(action: onRemove) {
-                Image(systemName: "xmark.circle.fill")
-                    .font(.system(size: 22))
-                    .foregroundStyle(.white, .black.opacity(0.55))
+            // 移除按钮：右上角，落在 padding 区域内
+            VStack {
+                HStack {
+                    Spacer()
+                    Button(action: onRemove) {
+                        Image(systemName: "xmark.circle.fill")
+                            .font(.system(size: 22))
+                            .foregroundStyle(.white, .black.opacity(0.65))
+                            .background(Circle().fill(.white).padding(4))
+                            .contentShape(Circle())
+                    }
+                    .buttonStyle(.plain)
+                }
+                Spacer()
             }
-            .padding(4)
         }
         .onAppear {
             requestID = library.loadImage(for: asset, targetSize: CGSize(width: 280, height: 280)) { img in

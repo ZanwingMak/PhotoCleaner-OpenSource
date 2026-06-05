@@ -6,6 +6,106 @@
 import SwiftUI
 import Photos
 
+/// 顶部胶囊点击后弹出的分类选择 sheet
+struct CategoryPickerSheet: View {
+    @Environment(\.dismiss) private var dismiss
+    let currentId: String
+    let onPick: (PhotoCategory) -> Void
+
+    var body: some View {
+        NavigationStack {
+            ZStack {
+                AppPalette.bgPrimary.ignoresSafeArea()
+                ScrollView {
+                    VStack(spacing: 16) {
+                        section("快速合集") {
+                            ForEach(PhotoCategory.quickPicks) { cat in
+                                row(cat)
+                            }
+                        }
+                        section("智能分类") {
+                            ForEach(PhotoCategory.InferredKind.allCases, id: \.self) { kind in
+                                row(.inferred(kind))
+                            }
+                        }
+                        section("系统相册") {
+                            row(.allPhotos)
+                            row(.smartAlbum(.smartAlbumFavorites, title: "收藏",
+                                            symbol: "heart.fill", tint: .red))
+                            row(.smartAlbum(.smartAlbumVideos, title: "视频",
+                                            symbol: "video.fill", tint: .green))
+                            row(.smartAlbum(.smartAlbumRecentlyAdded, title: "最近添加",
+                                            symbol: "clock.fill", tint: .yellow))
+                        }
+                        Color.clear.frame(height: 30)
+                    }
+                    .padding(.horizontal, 20)
+                    .padding(.top, 8)
+                }
+            }
+            .preferredColorScheme(.dark)
+            .navigationTitle("切换分类")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button("关闭") { dismiss() }.tint(AppPalette.brand)
+                }
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func section(_ title: String, @ViewBuilder content: () -> some View) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text(title)
+                .font(.system(size: 12, weight: .semibold))
+                .foregroundStyle(AppPalette.textSecondary)
+                .padding(.leading, 4)
+
+            VStack(spacing: 4) {
+                content()
+            }
+        }
+    }
+
+    /// 单个分类行
+    private func row(_ cat: PhotoCategory) -> some View {
+        let selected = (cat.id == currentId)
+        return Button {
+            UIImpactFeedbackGenerator(style: .light).impactOccurred()
+            onPick(cat)
+        } label: {
+            HStack(spacing: 14) {
+                ZStack {
+                    Circle().fill(cat.tint.opacity(0.18))
+                        .frame(width: 36, height: 36)
+                    Image(systemName: cat.symbol)
+                        .font(.system(size: 14, weight: .bold))
+                        .foregroundStyle(cat.tint)
+                }
+                Text(cat.title)
+                    .font(.system(size: 15, weight: .medium))
+                    .foregroundStyle(AppPalette.textPrimary)
+                Spacer()
+                if selected {
+                    Image(systemName: "checkmark.circle.fill")
+                        .font(.system(size: 18, weight: .bold))
+                        .foregroundStyle(AppPalette.brand)
+                }
+            }
+            .padding(.horizontal, 14)
+            .padding(.vertical, 10)
+            .background(
+                RoundedRectangle(cornerRadius: 14, style: .continuous)
+                    .fill(selected ? AppPalette.brand.opacity(0.12)
+                                   : AppPalette.bgCard)
+            )
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+    }
+}
+
 struct SwipeReviewView: View {
     let category: PhotoCategory
     @EnvironmentObject private var library: PhotoLibraryService
@@ -17,11 +117,14 @@ struct SwipeReviewView: View {
     @State private var showPendingSheet = false
     @State private var toast: ToastInfo?
     @State private var hasLoaded = false
+    @State private var showCategoryPicker = false
+    @State private var currentCategory: PhotoCategory
 
     enum ExitDirection { case none, left, right, up }
 
     init(category: PhotoCategory) {
         self.category = category
+        _currentCategory = State(initialValue: category)
         _vm = StateObject(wrappedValue: SwipeReviewViewModel(assets: []))
     }
 
@@ -29,35 +132,45 @@ struct SwipeReviewView: View {
         ZStack {
             Color.black.ignoresSafeArea()
 
+            // 中间内容层：卡片或状态视图，给 toolbar 留出 inset
+            GeometryReader { geo in
+                ZStack {
+                    if !hasLoaded {
+                        ProgressView().tint(.white)
+                    } else if vm.assets.isEmpty {
+                        emptyState
+                    } else if !vm.hasMore {
+                        finishedState
+                    } else {
+                        cardArea(in: CGSize(width: geo.size.width,
+                                            height: geo.size.height - 196))
+                        directionOverlay(in: geo.size)
+                    }
+                }
+                .frame(width: geo.size.width, height: geo.size.height)
+            }
+            .padding(.top, 96)    // 给 topBar + metaLine 留空间
+            .padding(.bottom, 100) // 给 bottomBar 留空间
+
+            // 顶部 overlay：用 zIndex 强制在卡片之上
             VStack(spacing: 0) {
                 topBar
                     .padding(.horizontal, 16)
                     .padding(.top, 8)
-
                 metaLine
                     .padding(.top, 6)
-                    .padding(.bottom, 4)
+                Spacer()
+            }
+            .zIndex(10)
 
-                GeometryReader { geo in
-                    ZStack {
-                        if !hasLoaded {
-                            ProgressView().tint(.white)
-                        } else if vm.assets.isEmpty {
-                            emptyState
-                        } else if !vm.hasMore {
-                            finishedState
-                        } else {
-                            cardArea(in: geo.size)
-                            directionOverlay(in: geo.size)
-                        }
-                    }
-                    .frame(width: geo.size.width, height: geo.size.height)
-                }
-
+            // 底部 overlay
+            VStack(spacing: 0) {
+                Spacer()
                 bottomBar
                     .padding(.horizontal, 16)
-                    .padding(.bottom, 8)
+                    .padding(.bottom, 12)
             }
+            .zIndex(10)
         }
         .toast($toast)
         .preferredColorScheme(.dark)
@@ -66,11 +179,34 @@ struct SwipeReviewView: View {
         .sheet(isPresented: $showPendingSheet) {
             PendingDeletionView(vm: vm)
         }
-        .task {
-            let assets = library.fetchAssets(for: category)
-            vm.assets = assets
-            hasLoaded = true
+        .sheet(isPresented: $showCategoryPicker) {
+            CategoryPickerSheet(currentId: currentCategory.id) { newCategory in
+                switchCategory(to: newCategory)
+            }
+            .presentationDetents([.medium, .large])
+            .presentationDragIndicator(.visible)
         }
+        .task {
+            await loadAssets(for: currentCategory)
+        }
+    }
+
+    /// 切换分类：清空 VM 状态，重新加载
+    private func switchCategory(to newCategory: PhotoCategory) {
+        currentCategory = newCategory
+        hasLoaded = false
+        vm.assets = []
+        vm.currentIndex = 0
+        vm.pendingDeletion = []
+        vm.deleteHistory = []
+        showCategoryPicker = false
+        Task { await loadAssets(for: newCategory) }
+    }
+
+    private func loadAssets(for cat: PhotoCategory) async {
+        let assets = library.fetchAssets(for: cat)
+        vm.assets = assets
+        hasLoaded = true
     }
 
     // MARK: - 顶部三件套
@@ -92,20 +228,27 @@ struct SwipeReviewView: View {
 
             Spacer()
 
-            // 中央胶囊
-            HStack(spacing: 6) {
-                Text(category.title)
-                    .font(.system(size: 15, weight: .semibold))
-                    .foregroundStyle(.white)
-                Image(systemName: "chevron.down")
-                    .font(.system(size: 11, weight: .semibold))
-                    .foregroundStyle(.white.opacity(0.7))
+            // 中央胶囊：点击弹出分类选择 sheet
+            Button {
+                UIImpactFeedbackGenerator(style: .soft).impactOccurred()
+                showCategoryPicker = true
+            } label: {
+                HStack(spacing: 6) {
+                    Text(currentCategory.title)
+                        .font(.system(size: 15, weight: .semibold))
+                        .foregroundStyle(.white)
+                    Image(systemName: "chevron.down")
+                        .font(.system(size: 11, weight: .semibold))
+                        .foregroundStyle(.white.opacity(0.7))
+                }
+                .padding(.horizontal, 16)
+                .padding(.vertical, 10)
+                .background {
+                    Capsule().fill(Color.white.opacity(0.12))
+                }
+                .contentShape(Capsule())
             }
-            .padding(.horizontal, 16)
-            .padding(.vertical, 10)
-            .background {
-                Capsule().fill(Color.white.opacity(0.12))
-            }
+            .buttonStyle(.plain)
 
             Spacer()
 

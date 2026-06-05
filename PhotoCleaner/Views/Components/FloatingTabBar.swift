@@ -1,12 +1,12 @@
 //
 //  FloatingTabBar.swift
-//  仿参考的浮动药丸式 Tab Bar（液态玻璃），每个 tab 可点击
+//  浮动药丸式 Tab Bar：iOS 26 厚液态玻璃 + 边缘高光 + 选中态品牌色发光
 //
 
 import SwiftUI
 
 enum TabBarItem: String, CaseIterable, Identifiable {
-    case organize = "未整理"
+    case organize = "整理"
     case photos   = "照片"
     case albums   = "相簿"
     case more     = "更多"
@@ -15,41 +15,78 @@ enum TabBarItem: String, CaseIterable, Identifiable {
 
     var symbol: String {
         switch self {
-        case .organize: return "rectangle.portrait.on.rectangle.portrait"
-        case .photos:   return "square.grid.2x2.fill"
+        case .organize: return "sparkles.rectangle.stack"
+        case .photos:   return "photo.on.rectangle.angled"
         case .albums:   return "square.stack.fill"
-        case .more:     return "line.3.horizontal"
+        case .more:     return "ellipsis"
         }
     }
 }
 
-/// 浮动 tab bar：点击触发 onTap 闭包，未实现的 tab 弹 toast
 struct FloatingTabBar: View {
     let selected: TabBarItem
     let onTap: (TabBarItem) -> Void
 
     var body: some View {
-        HStack(spacing: 0) {
+        HStack(spacing: 4) {
             ForEach(TabBarItem.allCases) { item in
                 tabButton(item)
             }
         }
-        .padding(.horizontal, 6)
-        .padding(.vertical, 6)
+        .padding(.horizontal, 7)
+        .padding(.vertical, 7)
         .background {
             if #available(iOS 26.0, *) {
+                // iOS 26 厚液态玻璃，带品牌色微弱 tint
                 Capsule(style: .continuous)
                     .fill(.clear)
-                    .glassEffect(.regular, in: .capsule)
+                    .glassEffect(.regular.tint(AppPalette.brand.opacity(0.05)),
+                                  in: .capsule)
             } else {
+                // 降级版：双层叠加营造厚玻璃感
                 Capsule(style: .continuous)
                     .fill(.ultraThinMaterial)
                     .overlay {
-                        Capsule().strokeBorder(.white.opacity(0.08), lineWidth: 1)
+                        Capsule().fill(
+                            LinearGradient(
+                                colors: [Color.white.opacity(0.12),
+                                         Color.white.opacity(0.02)],
+                                startPoint: .top, endPoint: .bottom
+                            )
+                        )
                     }
             }
         }
-        .shadow(color: .black.opacity(0.35), radius: 18, x: 0, y: 8)
+        // 顶部高光环（液态玻璃感觉的关键）
+        .overlay {
+            Capsule(style: .continuous)
+                .strokeBorder(
+                    LinearGradient(
+                        colors: [Color.white.opacity(0.35),
+                                 Color.white.opacity(0.05),
+                                 Color.white.opacity(0.15)],
+                        startPoint: .topLeading, endPoint: .bottomTrailing
+                    ),
+                    lineWidth: 0.8
+                )
+        }
+        // 内阴影底部，让玻璃看起来更厚
+        .overlay {
+            Capsule()
+                .stroke(Color.black.opacity(0.4), lineWidth: 1)
+                .blur(radius: 3)
+                .offset(y: 2)
+                .mask {
+                    Capsule().fill(
+                        LinearGradient(
+                            colors: [Color.clear, Color.black],
+                            startPoint: .top, endPoint: .bottom
+                        )
+                    )
+                }
+        }
+        .shadow(color: .black.opacity(0.5), radius: 24, x: 0, y: 12)
+        .shadow(color: AppPalette.brand.opacity(0.12), radius: 18, x: 0, y: 0)
     }
 
     @ViewBuilder
@@ -61,21 +98,29 @@ struct FloatingTabBar: View {
         } label: {
             VStack(spacing: 3) {
                 Image(systemName: item.symbol)
-                    .font(.system(size: 18, weight: isSelected ? .semibold : .regular))
+                    .font(.system(size: 18, weight: isSelected ? .bold : .regular))
                     .foregroundStyle(isSelected ? .white : .white.opacity(0.55))
+                    .symbolEffect(.bounce, value: isSelected)
                 Text(item.rawValue)
-                    .font(.system(size: 11, weight: .medium))
+                    .font(.system(size: 10, weight: isSelected ? .bold : .medium))
                     .foregroundStyle(isSelected ? .white : .white.opacity(0.55))
             }
             .frame(maxWidth: .infinity)
             .padding(.vertical, 8)
             .background {
                 if isSelected {
+                    // 选中态：暖橙渐变胶囊
                     Capsule(style: .continuous)
-                        .fill(Color.white.opacity(0.12))
+                        .fill(AppPalette.brandGradient)
+                        .overlay {
+                            Capsule().strokeBorder(.white.opacity(0.25), lineWidth: 1)
+                        }
+                        .shadow(color: AppPalette.brand.opacity(0.45),
+                                radius: 10, x: 0, y: 4)
                 }
             }
             .contentShape(Rectangle())
+            .animation(.spring(response: 0.35, dampingFraction: 0.7), value: isSelected)
         }
         .buttonStyle(.plain)
     }

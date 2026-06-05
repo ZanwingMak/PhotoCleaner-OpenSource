@@ -30,6 +30,7 @@ SWIFT_FILES=(
   "$SRC_DIR/Models/PhotoCategory.swift"
   "$SRC_DIR/Services/PhotoLibraryService.swift"
   "$SRC_DIR/Services/PhotoClassifier.swift"
+  "$SRC_DIR/Services/ThemeManager.swift"
   "$SRC_DIR/ViewModels/SwipeReviewViewModel.swift"
   "$SRC_DIR/Views/RootView.swift"
   "$SRC_DIR/Views/CategoryListView.swift"

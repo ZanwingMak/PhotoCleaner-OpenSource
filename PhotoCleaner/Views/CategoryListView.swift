@@ -96,7 +96,7 @@ struct CategoryListView: View {
                 quickPickRow
                 bentoCategoryGrid
                 monthlyTimeline
-                Color.clear.frame(height: 90)
+                Color.clear.frame(height: 120)
             }
             .padding(.horizontal, 20)
             .padding(.top, 8)
@@ -121,7 +121,7 @@ struct CategoryListView: View {
                         .frame(height: 1)
                 }
 
-                Color.clear.frame(height: 90)
+                Color.clear.frame(height: 120)
             }
             .padding(.horizontal, 20)
             .padding(.top, 8)
@@ -193,6 +193,8 @@ struct CategoryListView: View {
                     UIImpactFeedbackGenerator(style: .soft).impactOccurred()
                     withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
                         topTab = tab
+                        // 同步底部 tab bar 高亮
+                        tabBarItem = (tab == .unsorted) ? .organize : .albums
                     }
                 } label: {
                     VStack(spacing: 6) {
@@ -726,5 +728,7 @@ private struct AlbumRow: View {
                 .foregroundStyle(AppPalette.textTertiary)
         }
         .padding(.vertical, 14)
+        // 让整行（含 Spacer 区域）都参与 hit testing
+        .contentShape(Rectangle())
     }
 }

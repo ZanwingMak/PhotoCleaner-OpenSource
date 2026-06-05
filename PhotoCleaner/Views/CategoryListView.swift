@@ -15,11 +15,12 @@ private enum TopTab: String, CaseIterable {
 struct CategoryListView: View {
     @EnvironmentObject private var library: PhotoLibraryService
     @State private var topTab: TopTab = .unsorted
+    @State private var tabBarItem: TabBarItem = .organize
+    @State private var toast: ToastInfo?
 
     var body: some View {
         NavigationStack {
             ZStack(alignment: .bottom) {
-                // 全屏黑底（参考是 pure black）
                 Color.black.ignoresSafeArea()
 
                 Group {
@@ -30,10 +31,13 @@ struct CategoryListView: View {
                 }
 
                 // 底部浮动 Tab Bar
-                FloatingTabBar(selected: .organize)
-                    .padding(.horizontal, 18)
-                    .padding(.bottom, 8)
+                FloatingTabBar(selected: tabBarItem) { item in
+                    handleTabBarTap(item)
+                }
+                .padding(.horizontal, 18)
+                .padding(.bottom, 8)
             }
+            .toast($toast)
             .preferredColorScheme(.dark)
             .toolbarBackground(.hidden, for: .navigationBar)
             .navigationBarTitleDisplayMode(.inline)
@@ -47,6 +51,38 @@ struct CategoryListView: View {
                 if library.categoryCounts.isEmpty {
                     await library.refreshCategoryCounts()
                 }
+            }
+        }
+    }
+
+    /// 处理 tab bar 点击
+    private func handleTabBarTap(_ item: TabBarItem) {
+        switch item {
+        case .organize:
+            // 已经在整理首页：切到「未整理」segment
+            withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+                tabBarItem = .organize
+                topTab = .unsorted
+            }
+        case .albums:
+            // 切到「相簿」segment
+            withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+                tabBarItem = .albums
+                topTab = .albums
+            }
+        case .photos, .more:
+            // 占位功能，弹 toast
+            tabBarItem = item
+            withAnimation(.spring(response: 0.4, dampingFraction: 0.7)) {
+                toast = ToastInfo(
+                    symbol: "wrench.and.screwdriver.fill",
+                    text: "「\(item.rawValue)」功能开发中",
+                    tint: .yellow
+                )
+            }
+            // 0.6 秒后弹回到「整理」状态，避免 selected 卡在占位 tab
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
+                withAnimation { tabBarItem = .organize }
             }
         }
     }

@@ -19,6 +19,7 @@
 		BF000000000000000000A00A /* LiquidGlassCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0000000000000000000A00A /* LiquidGlassCard.swift */; };
 		BF000000000000000000A00B /* PhotoCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0000000000000000000A00B /* PhotoCardView.swift */; };
 		BF000000000000000000A00C /* FloatingTabBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0000000000000000000A00C /* FloatingTabBar.swift */; };
+		BF000000000000000000A00D /* ToastView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0000000000000000000A00D /* ToastView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -35,6 +36,7 @@
 		F0000000000000000000A00A /* LiquidGlassCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiquidGlassCard.swift; sourceTree = "<group>"; };
 		F0000000000000000000A00B /* PhotoCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoCardView.swift; sourceTree = "<group>"; };
 		F0000000000000000000A00C /* FloatingTabBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FloatingTabBar.swift; sourceTree = "<group>"; };
+		F0000000000000000000A00D /* ToastView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToastView.swift; sourceTree = "<group>"; };
 		F0000000000000000000B001 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		F0000000000000000000B002 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -123,6 +125,7 @@
 				F0000000000000000000A00A /* LiquidGlassCard.swift */,
 				F0000000000000000000A00B /* PhotoCardView.swift */,
 				F0000000000000000000A00C /* FloatingTabBar.swift */,
+				F0000000000000000000A00D /* ToastView.swift */,
 			);
 			path = Components;
 			sourceTree = "<group>";
@@ -208,6 +211,7 @@
 				BF000000000000000000A00A /* LiquidGlassCard.swift in Sources */,
 				BF000000000000000000A00B /* PhotoCardView.swift in Sources */,
 				BF000000000000000000A00C /* FloatingTabBar.swift in Sources */,
+				BF000000000000000000A00D /* ToastView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -5,6 +5,41 @@
 
 ---
 
+## [0.3.0] - 2026-06-05
+
+### 新增
+- **AppIcon**：暖橙渐变背景 + 三张堆叠卡片 + 山形相片图案 + 右下角绿色对勾
+  - 用 `scripts/generate-icon.swift` (CoreGraphics) 生成 1024x1024 主图
+  - `build-ipa.sh` 自动用 `sips` 缩放成 iPhone/iPad 各尺寸（60/76/83.5/29/40 pt × 2x/3x）
+  - Info.plist 自动注入 `CFBundleIcons` 和 `CFBundleIcons~ipad`
+- **Toast 系统**：玻璃药丸式顶部浮现提示
+  - `Components/ToastView.swift` + `.toast($binding)` 修饰器
+  - 上滑加入待删除时弹「已加入待删除 · N」红色 toast
+  - 占位 tab 点击弹「功能开发中」黄色 toast
+  - 1.6 秒自动消失
+
+### 变更
+- **滑动方向再次修正**（最终对齐 iOS 标准照片浏览方向）：
+  - **左滑** = 下一张（之前是前一张）
+  - **右滑** = 前一张（之前是下一张）
+  - 上滑 = 加入待删除（不变）
+- 拖拽方向提示重新设计：取消粗描边矩形大字，改为轻量玻璃药丸（SF Symbol + 简短标签）
+  - 左滑时屏幕左侧浮现「← 下一张」
+  - 右滑时屏幕右侧浮现「前一张 →」
+  - 上滑时屏幕顶部浮现红色「🗑 加入待删除」
+  - iOS 26 使用 `.glassEffect`，iOS 17–25 降级 `.ultraThinMaterial`
+- 浮动 Tab Bar 接入点击处理：
+  - 「未整理」→ 切到首页未整理 segment
+  - 「相簿」→ 切到首页相簿 segment
+  - 「照片 / 更多」→ 弹「功能开发中」toast，0.6s 后回到「未整理」高亮
+
+### 修复
+- **X 关闭按钮无响应**：所有 Button 加 `.contentShape(Rectangle())` + `.buttonStyle(.plain)`
+  明确 hit test 区域，配合 `.frame(44×44)` 满足 Apple HIG 触控目标尺寸
+- **顶部 toolbar 元数据行 leading padding 优化**
+
+---
+
 ## [0.2.0] - 2026-06-05
 
 ### 新增

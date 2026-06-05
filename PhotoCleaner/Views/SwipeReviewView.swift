@@ -1,7 +1,6 @@
 //
 //  SwipeReviewView.swift
-//  滑动审核：左滑前一张 / 右滑下一张 / 上滑加入待删除
-//  仿参考的顶部胶囊 + 元数据条 + 底部三按钮（撤销 / 保留 / 删除）
+//  滑动审核：左滑下一张 / 右滑前一张 / 上滑加入待删除（iOS 标准浏览方向）
 //
 
 import SwiftUI
@@ -16,6 +15,7 @@ struct SwipeReviewView: View {
     @State private var dragOffset: CGSize = .zero
     @State private var exitDirection: ExitDirection = .none
     @State private var showPendingSheet = false
+    @State private var toast: ToastInfo?
 
     enum ExitDirection { case none, left, right, up }
 
@@ -31,7 +31,7 @@ struct SwipeReviewView: View {
             VStack(spacing: 0) {
                 topBar
                     .padding(.horizontal, 16)
-                    .padding(.top, 4)
+                    .padding(.top, 8)
 
                 metaLine
                     .padding(.top, 6)
@@ -56,6 +56,7 @@ struct SwipeReviewView: View {
                     .padding(.bottom, 8)
             }
         }
+        .toast($toast)
         .preferredColorScheme(.dark)
         .navigationBarBackButtonHidden(true)
         .toolbar(.hidden, for: .navigationBar)
@@ -68,22 +69,26 @@ struct SwipeReviewView: View {
         }
     }
 
-    // MARK: - 顶部三件套：X 关闭 / 分类胶囊 / 垃圾桶
+    // MARK: - 顶部三件套
 
     private var topBar: some View {
-        HStack {
+        HStack(spacing: 0) {
+            // X 关闭：明确 contentShape 确保整个 frame 可点
             Button {
+                UIImpactFeedbackGenerator(style: .light).impactOccurred()
                 dismiss()
             } label: {
                 Image(systemName: "xmark")
                     .font(.system(size: 18, weight: .semibold))
                     .foregroundStyle(.white)
-                    .frame(width: 40, height: 40)
+                    .frame(width: 44, height: 44)
+                    .contentShape(Rectangle())
             }
+            .buttonStyle(.plain)
 
             Spacer()
 
-            // 中央胶囊：分类名 + 下拉箭头
+            // 中央胶囊
             HStack(spacing: 6) {
                 Text(category.title)
                     .font(.system(size: 15, weight: .semibold))
@@ -102,22 +107,24 @@ struct SwipeReviewView: View {
 
             // 垃圾桶 + badge
             Button {
+                UIImpactFeedbackGenerator(style: .light).impactOccurred()
                 showPendingSheet = true
             } label: {
                 trashWithBadge
-                    .frame(width: 40, height: 40)
+                    .frame(width: 44, height: 44)
+                    .contentShape(Rectangle())
             }
+            .buttonStyle(.plain)
         }
     }
 
     /// 垃圾桶 + 内嵌不裁切的红色 badge
     private var trashWithBadge: some View {
         ZStack(alignment: .topTrailing) {
-            // 给图标留出右上角空间，badge 不会跑出 ZStack
             Image(systemName: "trash")
                 .font(.system(size: 18, weight: .regular))
                 .foregroundStyle(.white)
-                .padding(.top, 6)
+                .padding(.top, 8)
                 .padding(.trailing, 4)
 
             if !vm.pendingDeletion.isEmpty {
@@ -132,23 +139,21 @@ struct SwipeReviewView: View {
         }
     }
 
-    // MARK: - 元数据行（位置 / 总数 · 日期 · 时间）
+    // MARK: - 元数据行
 
     private var metaLine: some View {
         Group {
             if let asset = vm.currentAsset {
-                let f = DateFormatter()
-                let _ = (f.dateFormat = "yyyy年M月d日")
-                let timeF = DateFormatter()
-                let _ = (timeF.dateFormat = "HH:mm")
+                let df = DateFormatter(); let _ = (df.dateFormat = "yyyy年M月d日")
+                let tf = DateFormatter(); let _ = (tf.dateFormat = "HH:mm")
                 let date = asset.creationDate ?? Date()
 
                 HStack(spacing: 8) {
                     Text("\(vm.currentIndex + 1) / \(vm.assets.count)")
                     Text("·")
-                    Text(f.string(from: date))
+                    Text(df.string(from: date))
                     Text("·")
-                    Text(timeF.string(from: date))
+                    Text(tf.string(from: date))
                 }
                 .font(.system(size: 12, weight: .medium))
                 .foregroundStyle(.white.opacity(0.55))
@@ -158,18 +163,16 @@ struct SwipeReviewView: View {
         }
     }
 
-    // MARK: - 卡片区域（包含底层卡和当前拖拽卡）
+    // MARK: - 卡片区域
 
     private func cardArea(in size: CGSize) -> some View {
         ZStack {
-            // 底层：下一张（如果当前是 next 方向，下一张在右；左滑时实际是 prev，那底层应该是 prev）
             if let underlying = underlyingAsset {
                 PhotoCardView(asset: underlying)
                     .scaleEffect(0.95)
                     .opacity(0.6)
             }
 
-            // 当前卡
             if let asset = vm.currentAsset {
                 PhotoCardView(asset: asset)
                     .id(asset.localIdentifier)
@@ -184,16 +187,15 @@ struct SwipeReviewView: View {
         .padding(.vertical, 8)
     }
 
-    /// 底层卡选择：根据拖拽方向预览
+    /// 底层卡：手指向左拖（h<0）想看下一张；向右拖（h>0）想看前一张
     private var underlyingAsset: PHAsset? {
-        // 拖拽过程中：若手指向左拖（dx<0）想看 prev；向右拖（dx>0）想看 next
-        if dragOffset.width < -20, let prev = previewPrevAsset {
-            return prev
-        }
-        if dragOffset.width > 20, let next = previewNextAsset {
+        if dragOffset.width < -20, let next = previewNextAsset {
             return next
         }
-        return previewNextAsset // 默认露出下一张
+        if dragOffset.width > 20, let prev = previewPrevAsset {
+            return prev
+        }
+        return previewNextAsset
     }
 
     private var previewNextAsset: PHAsset? {
@@ -208,7 +210,6 @@ struct SwipeReviewView: View {
         return vm.assets[i]
     }
 
-    /// 当前卡片偏移
     private var currentCardOffset: CGSize {
         switch exitDirection {
         case .left:  return CGSize(width: -800, height: dragOffset.height * 0.3)
@@ -223,7 +224,7 @@ struct SwipeReviewView: View {
         return Double(dragOffset.width / 28)
     }
 
-    // MARK: - 拖拽手势
+    // MARK: - 拖拽手势（iOS 标准方向）
 
     private func dragGesture(in size: CGSize) -> some Gesture {
         DragGesture()
@@ -236,35 +237,34 @@ struct SwipeReviewView: View {
                 let hThreshold: CGFloat = 100
                 let upThreshold: CGFloat = -130
 
-                // 上滑优先：删除
+                // 上滑优先
                 if v < upThreshold && abs(v) > abs(h) {
                     trigger(.markDelete, direction: .up)
                     return
                 }
-                // 左滑（手指向左）→ 前一张
+                // 左滑（手指向左）→ 下一张（标准方向）
                 if h < -hThreshold {
-                    if vm.canGoPrevious {
-                        trigger(.previous, direction: .left)
-                    } else {
-                        dragOffset = .zero
-                    }
-                    return
-                }
-                // 右滑（手指向右）→ 下一张
-                if h > hThreshold {
                     if vm.canGoNext {
-                        trigger(.next, direction: .right)
+                        trigger(.next, direction: .left)
                     } else {
                         dragOffset = .zero
                     }
                     return
                 }
-                // 未达阈值：回弹
+                // 右滑（手指向右）→ 前一张
+                if h > hThreshold {
+                    if vm.canGoPrevious {
+                        trigger(.previous, direction: .right)
+                    } else {
+                        dragOffset = .zero
+                    }
+                    return
+                }
                 dragOffset = .zero
             }
     }
 
-    /// 触发动作：先播离场动画，再切换数据
+    /// 触发动作 + toast
     private func trigger(_ action: SwipeAction, direction: ExitDirection) {
         let style: UIImpactFeedbackGenerator.FeedbackStyle = (action == .markDelete) ? .heavy : .light
         UIImpactFeedbackGenerator(style: style).impactOccurred()
@@ -275,73 +275,98 @@ struct SwipeReviewView: View {
             vm.handle(action)
             dragOffset = .zero
             exitDirection = .none
+
+            // markDelete 触发 toast
+            if action == .markDelete {
+                withAnimation(.spring(response: 0.4, dampingFraction: 0.7)) {
+                    toast = ToastInfo(
+                        symbol: "trash.fill",
+                        text: "已加入待删除 · \(vm.pendingDeletion.count)",
+                        tint: .red
+                    )
+                }
+            }
         }
     }
 
-    // MARK: - 拖拽方向提示（前一张 / 下一张 / 待删除）
+    // MARK: - 拖拽方向提示（轻量玻璃药丸版）
 
     private func directionOverlay(in size: CGSize) -> some View {
         ZStack {
+            // 左滑 → 下一张：右侧出现小箭头玻璃片
             if dragOffset.width < -30 && dragOffset.height > -60 {
-                directionLabel(text: "前一张", color: .blue, symbol: "arrow.left")
+                arrowChip(symbol: "arrow.left", label: "下一张", tint: .white)
                     .opacity(min(1, abs(dragOffset.width) / 100))
-                    .offset(x: -size.width * 0.25)
+                    .scaleEffect(0.9 + min(0.2, abs(dragOffset.width) / 500))
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.leading, 20)
             }
+            // 右滑 → 前一张：左侧出现小箭头玻璃片
             if dragOffset.width > 30 && dragOffset.height > -60 {
-                directionLabel(text: "下一张", color: .green, symbol: "arrow.right")
+                arrowChip(symbol: "arrow.right", label: "前一张", tint: .white)
                     .opacity(min(1, abs(dragOffset.width) / 100))
-                    .offset(x: size.width * 0.25)
+                    .scaleEffect(0.9 + min(0.2, abs(dragOffset.width) / 500))
+                    .frame(maxWidth: .infinity, alignment: .trailing)
+                    .padding(.trailing, 20)
             }
+            // 上滑 → 加入待删除：屏幕顶部红色玻璃片
             if dragOffset.height < -30 {
-                directionLabel(text: "加入待删除", color: .red, symbol: "arrow.up")
+                arrowChip(symbol: "trash.fill", label: "加入待删除", tint: .red)
                     .opacity(min(1, abs(dragOffset.height) / 130))
-                    .offset(y: -size.height * 0.18)
+                    .scaleEffect(0.9 + min(0.2, abs(dragOffset.height) / 600))
+                    .frame(maxHeight: .infinity, alignment: .top)
+                    .padding(.top, 12)
             }
         }
         .allowsHitTesting(false)
+        .animation(.spring(response: 0.3, dampingFraction: 0.7), value: dragOffset == .zero)
     }
 
-    private func directionLabel(text: String, color: Color, symbol: String) -> some View {
+    /// 玻璃药丸：图标 + 标签
+    private func arrowChip(symbol: String, label: String, tint: Color) -> some View {
         HStack(spacing: 8) {
             Image(systemName: symbol)
-                .font(.system(size: 22, weight: .heavy))
-            Text(text)
-                .font(.system(size: 22, weight: .heavy, design: .rounded))
+                .font(.system(size: 17, weight: .bold))
+                .foregroundStyle(tint)
+            Text(label)
+                .font(.system(size: 15, weight: .semibold))
+                .foregroundStyle(.white)
         }
-        .foregroundStyle(color)
-        .padding(.horizontal, 18).padding(.vertical, 10)
-        .overlay {
-            RoundedRectangle(cornerRadius: 14)
-                .strokeBorder(color, lineWidth: 3)
+        .padding(.horizontal, 16)
+        .padding(.vertical, 12)
+        .background {
+            if #available(iOS 26.0, *) {
+                Capsule().fill(.clear)
+                    .glassEffect(.regular.tint(tint.opacity(tint == .red ? 0.35 : 0.0)), in: .capsule)
+            } else {
+                Capsule().fill(.ultraThinMaterial)
+                    .overlay {
+                        Capsule().fill(tint.opacity(tint == .red ? 0.25 : 0.05))
+                    }
+                    .overlay {
+                        Capsule().strokeBorder(.white.opacity(0.18), lineWidth: 1)
+                    }
+            }
         }
+        .shadow(color: .black.opacity(0.4), radius: 16, x: 0, y: 6)
     }
 
-    // MARK: - 底部三按钮（撤销 / 保留 / 删除）
+    // MARK: - 底部三按钮
 
     private var bottomBar: some View {
         HStack {
-            // 左：撤销
-            actionButton(
-                symbol: "arrow.uturn.backward",
-                title: "撤销",
-                color: .white,
-                disabled: vm.deleteHistory.isEmpty
-            ) {
+            actionButton(symbol: "arrow.uturn.backward", title: "撤销", color: .white,
+                         disabled: vm.deleteHistory.isEmpty) {
                 UIImpactFeedbackGenerator(style: .soft).impactOccurred()
                 vm.undoLastDelete()
             }
 
             Spacer()
 
-            // 中：保留（手动确认保留当前并前进）
-            actionButton(
-                symbol: "arrow.down",
-                title: "保留",
-                color: .white,
-                disabled: !vm.hasMore
-            ) {
+            actionButton(symbol: "arrow.down", title: "保留", color: .white,
+                         disabled: !vm.hasMore) {
                 if vm.canGoNext {
-                    trigger(.next, direction: .right)
+                    trigger(.next, direction: .left)
                 } else {
                     UIImpactFeedbackGenerator(style: .light).impactOccurred()
                 }
@@ -349,13 +374,8 @@ struct SwipeReviewView: View {
 
             Spacer()
 
-            // 右：删除（标记当前并前进）
-            actionButton(
-                symbol: "xmark",
-                title: "删除",
-                color: .red,
-                disabled: !vm.hasMore
-            ) {
+            actionButton(symbol: "xmark", title: "删除", color: .red,
+                         disabled: !vm.hasMore) {
                 trigger(.markDelete, direction: .up)
             }
         }
@@ -378,7 +398,10 @@ struct SwipeReviewView: View {
                     .font(.system(size: 14, weight: .semibold))
                     .foregroundStyle(color.opacity(disabled ? 0.3 : 1))
             }
+            .frame(width: 64, height: 64)
+            .contentShape(Rectangle())
         }
+        .buttonStyle(.plain)
         .disabled(disabled)
     }
 

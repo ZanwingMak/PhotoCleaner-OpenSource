@@ -1,11 +1,10 @@
 //
 //  FloatingTabBar.swift
-//  仿参考的浮动药丸式 Tab Bar（液态玻璃）
+//  仿参考的浮动药丸式 Tab Bar（液态玻璃），每个 tab 可点击
 //
 
 import SwiftUI
 
-/// Tab Bar 上的 4 个目的地（当前实现只有「整理」可用，其它为占位）
 enum TabBarItem: String, CaseIterable, Identifiable {
     case organize = "未整理"
     case photos   = "照片"
@@ -24,9 +23,10 @@ enum TabBarItem: String, CaseIterable, Identifiable {
     }
 }
 
-/// 浮动 tab bar：液态玻璃药丸 + 选中项白色高亮胶囊
+/// 浮动 tab bar：点击触发 onTap 闭包，未实现的 tab 弹 toast
 struct FloatingTabBar: View {
     let selected: TabBarItem
+    let onTap: (TabBarItem) -> Void
 
     var body: some View {
         HStack(spacing: 0) {
@@ -52,25 +52,31 @@ struct FloatingTabBar: View {
         .shadow(color: .black.opacity(0.35), radius: 18, x: 0, y: 8)
     }
 
-    /// 单个 tab 按钮
     @ViewBuilder
     private func tabButton(_ item: TabBarItem) -> some View {
         let isSelected = (item == selected)
-        VStack(spacing: 3) {
-            Image(systemName: item.symbol)
-                .font(.system(size: 18, weight: isSelected ? .semibold : .regular))
-                .foregroundStyle(isSelected ? .white : .white.opacity(0.55))
-            Text(item.rawValue)
-                .font(.system(size: 11, weight: .medium))
-                .foregroundStyle(isSelected ? .white : .white.opacity(0.55))
-        }
-        .frame(maxWidth: .infinity)
-        .padding(.vertical, 8)
-        .background {
-            if isSelected {
-                Capsule(style: .continuous)
-                    .fill(Color.white.opacity(0.12))
+        Button {
+            UIImpactFeedbackGenerator(style: .soft).impactOccurred()
+            onTap(item)
+        } label: {
+            VStack(spacing: 3) {
+                Image(systemName: item.symbol)
+                    .font(.system(size: 18, weight: isSelected ? .semibold : .regular))
+                    .foregroundStyle(isSelected ? .white : .white.opacity(0.55))
+                Text(item.rawValue)
+                    .font(.system(size: 11, weight: .medium))
+                    .foregroundStyle(isSelected ? .white : .white.opacity(0.55))
             }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 8)
+            .background {
+                if isSelected {
+                    Capsule(style: .continuous)
+                        .fill(Color.white.opacity(0.12))
+                }
+            }
+            .contentShape(Rectangle())
         }
+        .buttonStyle(.plain)
     }
 }

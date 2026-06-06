@@ -5,6 +5,32 @@
 
 ---
 
+## [0.8.0] - 2026-06-06
+
+### 新增
+- **多语言支持**：中 / 英 / 日 / 韩 / 跟随系统，共 5 个选项
+  - `LanguageManager` + `L10n` 字典管理所有 user-facing 字符串
+  - 中文作为 key，提供英/日/韩译文
+  - `@AppStorage` 持久化偏好，跟随系统时自动识别 `Locale.current.language.languageCode`
+  - 设置里新增「语言」分组，横向 5 按钮选择，立即生效
+- **README 多语言版本**：`README.md` 默认中文 +  `README.en.md` / `README.ja.md` / `README.ko.md`
+  - 每个文件顶部带语言切换链接
+
+### 修复
+- **IPA 文件名包含版本号**：`build-ipa.sh` 自动从 CHANGELOG 顶部解析最新版本号，
+  产物为 `PhotoCleaner-v0.8.0.ipa`，Info.plist 的 `CFBundleShortVersionString` 同步更新
+- **照片大图页收藏按钮状态未即时刷新**：
+  - 收藏 toggle 后立即更新 `@State isFavorite`（UI 即时变化）
+  - `performChanges` 完成后 `assetsRefreshTick += 1` 触发重新 fetch PHAsset
+  - 失败时回滚 state；切换照片时 `refreshFavoriteState()` 同步
+  - 解决 `PHAsset` 不可变导致 `asset.isFavorite` 读取旧值的问题
+
+### 变更
+- 设置内显示版本号自动更新到 0.8.0
+- `TabBarItem.rawValue` 直接作为 i18n key（中文）传给 `lm.t()`
+
+---
+
 ## [0.7.0] - 2026-06-06
 
 ### 新增

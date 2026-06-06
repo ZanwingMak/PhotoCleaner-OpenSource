@@ -16,10 +16,16 @@ struct PhotoDetailView: View {
     @State private var currentIndex: Int = 0
     @State private var showMetadata = false
     @State private var showChrome = true   // 顶部/底部 UI 是否显示
+    @State private var isFavorite = false  // 当前照片是否收藏（独立 state，避免 PHAsset 不刷新）
+    @State private var assetsRefreshTick = 0 // 用于强制刷新 PHAsset 状态
 
     private var currentAsset: PHAsset? {
         guard currentIndex >= 0, currentIndex < assets.count else { return nil }
-        return assets[currentIndex]
+        // 重新 fetch 拿最新 PHAsset（修改 isFavorite 等需要新实例）
+        _ = assetsRefreshTick
+        let id = assets[currentIndex].localIdentifier
+        let fetched = PHAsset.fetchAssets(withLocalIdentifiers: [id], options: nil)
+        return fetched.firstObject ?? assets[currentIndex]
     }
 
     var body: some View {
@@ -58,6 +64,10 @@ struct PhotoDetailView: View {
         .statusBarHidden(!showChrome)
         .onAppear {
             currentIndex = assets.firstIndex(where: { $0.localIdentifier == startAsset.localIdentifier }) ?? 0
+            refreshFavoriteState()
+        }
+        .onChange(of: currentIndex) { _, _ in
+            refreshFavoriteState()
         }
         .sheet(isPresented: $showMetadata) {
             if let asset = currentAsset {
@@ -120,9 +130,9 @@ struct PhotoDetailView: View {
 
     private var bottomBar: some View {
         HStack(spacing: 18) {
-            // 收藏 / 取消收藏
-            iconButton(symbol: currentAsset?.isFavorite == true ? "heart.fill" : "heart",
-                        tint: currentAsset?.isFavorite == true ? .red : .white) {
+            // 收藏 / 取消收藏（用 isFavorite state 而非 PHAsset.isFavorite，保证即时刷新）
+            iconButton(symbol: isFavorite ? "heart.fill" : "heart",
+                        tint: isFavorite ? .red : .white) {
                 toggleFavorite()
             }
 
@@ -169,10 +179,29 @@ struct PhotoDetailView: View {
 
     private func toggleFavorite() {
         guard let asset = currentAsset else { return }
-        PHPhotoLibrary.shared().performChanges {
+        let newValue = !asset.isFavorite
+        // 立即更新 UI state，避免等系统回调的延迟
+        isFavorite = newValue
+
+        PHPhotoLibrary.shared().performChanges({
             let r = PHAssetChangeRequest(for: asset)
-            r.isFavorite = !asset.isFavorite
-        }
+            r.isFavorite = newValue
+        }, completionHandler: { success, _ in
+            DispatchQueue.main.async {
+                if success {
+                    // 强制 fetch 最新 PHAsset
+                    assetsRefreshTick += 1
+                } else {
+                    // 失败回滚
+                    isFavorite = !newValue
+                }
+            }
+        })
+    }
+
+    /// 切换当前照片时同步 isFavorite state
+    private func refreshFavoriteState() {
+        isFavorite = currentAsset?.isFavorite ?? false
     }
 
     private func openInPhotosApp() {

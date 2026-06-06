@@ -27,6 +27,8 @@
 		BF000000000000000000A012 /* ThemeManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0000000000000000000A012 /* ThemeManager.swift */; };
 		BF000000000000000000A013 /* PhotoMetadataSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0000000000000000000A013 /* PhotoMetadataSheet.swift */; };
 		BF000000000000000000A014 /* PhotoDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0000000000000000000A014 /* PhotoDetailView.swift */; };
+		BF000000000000000000A015 /* LanguageManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0000000000000000000A015 /* LanguageManager.swift */; };
+		BF000000000000000000A016 /* L10n.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0000000000000000000A016 /* L10n.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -51,6 +53,8 @@
 		F0000000000000000000A012 /* ThemeManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThemeManager.swift; sourceTree = "<group>"; };
 		F0000000000000000000A013 /* PhotoMetadataSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoMetadataSheet.swift; sourceTree = "<group>"; };
 		F0000000000000000000A014 /* PhotoDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoDetailView.swift; sourceTree = "<group>"; };
+		F0000000000000000000A015 /* LanguageManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LanguageManager.swift; sourceTree = "<group>"; };
+		F0000000000000000000A016 /* L10n.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = L10n.swift; sourceTree = "<group>"; };
 		F0000000000000000000B001 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		F0000000000000000000B002 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -110,6 +114,8 @@
 				F0000000000000000000A003 /* PhotoLibraryService.swift */,
 				F0000000000000000000A004 /* PhotoClassifier.swift */,
 				F0000000000000000000A012 /* ThemeManager.swift */,
+				F0000000000000000000A015 /* LanguageManager.swift */,
+				F0000000000000000000A016 /* L10n.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -240,6 +246,8 @@
 				BF000000000000000000A012 /* ThemeManager.swift in Sources */,
 				BF000000000000000000A013 /* PhotoMetadataSheet.swift in Sources */,
 				BF000000000000000000A014 /* PhotoDetailView.swift in Sources */,
+				BF000000000000000000A015 /* LanguageManager.swift in Sources */,
+				BF000000000000000000A016 /* L10n.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

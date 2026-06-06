@@ -8,12 +8,13 @@ import SwiftUI
 import Photos
 
 private enum TopTab: String, CaseIterable {
-    case unsorted = "整理"
-    case albums   = "相簿"
+    case unsorted
+    case albums
 }
 
 struct CategoryListView: View {
     @EnvironmentObject private var library: PhotoLibraryService
+    @EnvironmentObject private var lm: LanguageManager
     @State private var topTab: TopTab = .unsorted
     @State private var tabBarItem: TabBarItem = .organize
     @State private var toast: ToastInfo?
@@ -152,7 +153,7 @@ struct CategoryListView: View {
     private var topGreetingBar: some View {
         HStack(alignment: .center) {
             VStack(alignment: .leading, spacing: 2) {
-                Text(greetingHello)
+                Text(lm.t(greetingHello))
                     .font(.system(size: 13, weight: .medium))
                     .foregroundStyle(AppPalette.textSecondary)
                 Text("PhotoCleaner")
@@ -200,15 +201,13 @@ struct CategoryListView: View {
                     UIImpactFeedbackGenerator(style: .soft).impactOccurred()
                     withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
                         topTab = tab
-                        // 同步底部 tab bar 高亮
                         tabBarItem = (tab == .unsorted) ? .organize : .albums
                     }
                 } label: {
                     VStack(spacing: 6) {
-                        Text(tab.rawValue)
+                        Text(lm.t(tab == .unsorted ? "整理" : "相簿"))
                             .font(.system(size: 17, weight: .semibold))
                             .foregroundStyle(topTab == tab ? AppPalette.textPrimary : AppPalette.textSecondary)
-                        // 下划线
                         Capsule()
                             .fill(topTab == tab ? AppPalette.brand : Color.clear)
                             .frame(width: 24, height: 3)
@@ -314,13 +313,13 @@ struct CategoryListView: View {
 
     private var smartSuggestionRow: some View {
         VStack(alignment: .leading, spacing: 12) {
-            sectionTitle("智能建议", subtitle: "先清这些最划算")
+            sectionTitle(lm.t("智能建议"), subtitle: lm.t("先清这些最划算"))
 
             HStack(spacing: 12) {
                 NavigationLink(value: PhotoCategory.inferred(.screenshot)) {
                     SuggestionCard(
                         symbol: "rectangle.dashed",
-                        label: "陈年截图",
+                        label: lm.t("陈年截图"),
                         count: library.categoryCounts[PhotoCategory.inferred(.screenshot).id] ?? 0,
                         tint: .blue,
                         background: LinearGradient(
@@ -335,7 +334,7 @@ struct CategoryListView: View {
                 NavigationLink(value: PhotoCategory.inferred(.largeFile)) {
                     SuggestionCard(
                         symbol: "externaldrive.badge.exclamationmark",
-                        label: "占空间大户",
+                        label: lm.t("占空间大户"),
                         count: library.categoryCounts[PhotoCategory.inferred(.largeFile).id] ?? 0,
                         tint: AppPalette.danger,
                         background: LinearGradient(
@@ -354,7 +353,7 @@ struct CategoryListView: View {
 
     private var quickPickRow: some View {
         VStack(alignment: .leading, spacing: 12) {
-            sectionTitle("时间游戏", subtitle: "换个角度看你的相册")
+            sectionTitle(lm.t("时间游戏"), subtitle: lm.t("换个角度看你的相册"))
 
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 10) {
@@ -374,7 +373,7 @@ struct CategoryListView: View {
 
     private var bentoCategoryGrid: some View {
         VStack(alignment: .leading, spacing: 12) {
-            sectionTitle("分类", subtitle: nil)
+            sectionTitle(lm.t("分类"), subtitle: nil)
 
             // 不规则网格：用两列，部分卡片高，部分卡片矮
             HStack(alignment: .top, spacing: 12) {
@@ -409,7 +408,7 @@ struct CategoryListView: View {
 
     private var monthlyTimeline: some View {
         VStack(alignment: .leading, spacing: 12) {
-            sectionTitle("时间线", subtitle: "按月份回顾")
+            sectionTitle(lm.t("时间线"), subtitle: lm.t("按月份回顾"))
 
             VStack(spacing: 0) {
                 ForEach(Array(library.monthBuckets.enumerated()), id: \.element.id) { idx, bucket in

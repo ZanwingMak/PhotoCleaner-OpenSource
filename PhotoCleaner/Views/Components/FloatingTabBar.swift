@@ -26,6 +26,7 @@ enum TabBarItem: String, CaseIterable, Identifiable {
 struct FloatingTabBar: View {
     let selected: TabBarItem
     let onTap: (TabBarItem) -> Void
+    @EnvironmentObject private var lm: LanguageManager
 
     var body: some View {
         HStack(spacing: 4) {
@@ -101,7 +102,7 @@ struct FloatingTabBar: View {
                     .font(.system(size: 18, weight: isSelected ? .bold : .regular))
                     .foregroundStyle(isSelected ? .white : .white.opacity(0.55))
                     .symbolEffect(.bounce, value: isSelected)
-                Text(item.rawValue)
+                Text(lm.t(item.rawValue))
                     .font(.system(size: 10, weight: isSelected ? .bold : .medium))
                     .foregroundStyle(isSelected ? .white : .white.opacity(0.55))
             }

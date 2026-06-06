@@ -10,6 +10,7 @@ struct SettingsView: View {
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject private var library: PhotoLibraryService
     @EnvironmentObject private var themeManager: ThemeManager
+    @EnvironmentObject private var lm: LanguageManager
 
     @AppStorage("haptics_enabled")        private var hapticsEnabled = true
     @AppStorage("thumbnail_hq")           private var hqThumbnails = true
@@ -27,38 +28,42 @@ struct SettingsView: View {
                     VStack(spacing: 22) {
                         brandHeader
 
-                        section("外观") {
+                        section(lm.t("外观")) {
                             themePickerRow
                         }
 
-                        section("浏览体验") {
-                            toggleRow(label: "触觉反馈", symbol: "iphone.gen2.radiowaves.left.and.right",
+                        section(lm.t("语言")) {
+                            languagePickerRow
+                        }
+
+                        section(lm.t("浏览体验")) {
+                            toggleRow(label: lm.t("触觉反馈"), symbol: "iphone.gen2.radiowaves.left.and.right",
                                        binding: $hapticsEnabled)
                             divider
-                            toggleRow(label: "高清缩略图", symbol: "rectangle.stack",
+                            toggleRow(label: lm.t("高清缩略图"), symbol: "rectangle.stack",
                                        binding: $hqThumbnails)
                             divider
-                            toggleRow(label: "删除前二次确认", symbol: "checkmark.shield",
+                            toggleRow(label: lm.t("删除前二次确认"), symbol: "checkmark.shield",
                                        binding: $confirmBeforeDelete)
                         }
 
-                        section("数据") {
-                            infoRow(label: "已扫描照片", symbol: "photo.on.rectangle",
+                        section(lm.t("数据")) {
+                            infoRow(label: lm.t("已扫描照片"), symbol: "photo.on.rectangle",
                                      value: "\(library.categoryCounts[PhotoCategory.allPhotos.id] ?? 0)")
                             divider
                             scanRow
                         }
 
-                        section("关于") {
-                            infoRow(label: "版本", symbol: "info.circle", value: "0.6.0")
+                        section(lm.t("关于")) {
+                            infoRow(label: lm.t("版本"), symbol: "info.circle", value: "0.8.0")
                             divider
-                            linkRow(label: "GitHub 仓库", symbol: "chevron.left.forwardslash.chevron.right",
+                            linkRow(label: lm.t("GitHub 仓库"), symbol: "chevron.left.forwardslash.chevron.right",
                                      url: "https://github.com/ZanwingMak/PhotoCleaner")
                             divider
-                            linkRow(label: "反馈问题", symbol: "exclamationmark.bubble",
+                            linkRow(label: lm.t("反馈问题"), symbol: "exclamationmark.bubble",
                                      url: "https://github.com/ZanwingMak/PhotoCleaner/issues")
                             divider
-                            linkRow(label: "更新日志", symbol: "list.bullet.rectangle",
+                            linkRow(label: lm.t("更新日志"), symbol: "list.bullet.rectangle",
                                      url: "https://github.com/ZanwingMak/PhotoCleaner/blob/main/CHANGELOG.md")
                         }
 
@@ -70,17 +75,63 @@ struct SettingsView: View {
                 }
             }
             .toast($toast)
-            .navigationTitle("设置")
+            .navigationTitle(lm.t("设置"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button("关闭") {
+                    Button(lm.t("关闭")) {
                         dismiss()
                     }
                     .tint(AppPalette.brand)
                 }
             }
         }
+    }
+
+    // MARK: - 语言选择行
+
+    private var languagePickerRow: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack(spacing: 14) {
+                iconBubble("character.bubble", tint: AppPalette.brand)
+                Text(lm.t("语言"))
+                    .font(.system(size: 15, weight: .medium))
+                    .foregroundStyle(AppPalette.textPrimary(for: theme))
+                Spacer()
+                Text(lm.current.title)
+                    .font(.system(size: 13, weight: .medium))
+                    .foregroundStyle(AppPalette.textSecondary(for: theme))
+            }
+
+            // 横向 5 个语言按钮
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 8) {
+                    ForEach(AppLanguage.allCases) { lang in
+                        Button {
+                            UIImpactFeedbackGenerator(style: .soft).impactOccurred()
+                            lm.set(lang)
+                        } label: {
+                            let isSelected = lm.current == lang
+                            Text(lang.title)
+                                .font(.system(size: 13, weight: isSelected ? .bold : .medium))
+                                .foregroundStyle(isSelected ? .white : AppPalette.textSecondary(for: theme))
+                                .padding(.horizontal, 14)
+                                .padding(.vertical, 8)
+                                .background {
+                                    if isSelected {
+                                        Capsule().fill(AppPalette.brandGradient)
+                                    } else {
+                                        Capsule().fill(Color.white.opacity(0.08))
+                                    }
+                                }
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+            }
+        }
+        .padding(.horizontal, 14)
+        .padding(.vertical, 14)
     }
 
     /// 重新扫描分类按钮 — 含 loading + 完成 toast

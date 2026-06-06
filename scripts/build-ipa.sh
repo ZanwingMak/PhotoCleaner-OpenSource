@@ -13,7 +13,12 @@ SRC_DIR="$PROJECT_DIR/PhotoCleaner"
 BUILD_DIR="$PROJECT_DIR/build"
 ICONS_DIR="$BUILD_DIR/icons"
 APP_DIR="$BUILD_DIR/PhotoCleaner.app"
-IPA_PATH="$BUILD_DIR/PhotoCleaner.ipa"
+
+# 从 CHANGELOG 最新版本号取（首行 `## [X.Y.Z]`）
+VERSION="$(grep -m1 -oE '## \[[0-9]+\.[0-9]+\.[0-9]+\]' "$PROJECT_DIR/CHANGELOG.md" | head -1 | tr -d '[]## ')"
+if [ -z "$VERSION" ]; then VERSION="0.0.0"; fi
+
+IPA_PATH="$BUILD_DIR/PhotoCleaner-v${VERSION}.ipa"
 
 BUNDLE_ID="com.maizhenying.PhotoCleaner"
 APP_NAME="PhotoCleaner"
@@ -31,6 +36,8 @@ SWIFT_FILES=(
   "$SRC_DIR/Services/PhotoLibraryService.swift"
   "$SRC_DIR/Services/PhotoClassifier.swift"
   "$SRC_DIR/Services/ThemeManager.swift"
+  "$SRC_DIR/Services/LanguageManager.swift"
+  "$SRC_DIR/Services/L10n.swift"
   "$SRC_DIR/ViewModels/SwipeReviewViewModel.swift"
   "$SRC_DIR/Views/RootView.swift"
   "$SRC_DIR/Views/CategoryListView.swift"
@@ -83,6 +90,8 @@ plutil -replace CFBundleIdentifier -string "$BUNDLE_ID" "$APP_DIR/Info.plist"
 plutil -replace CFBundleName -string "$APP_NAME" "$APP_DIR/Info.plist"
 plutil -replace CFBundlePackageType -string "APPL" "$APP_DIR/Info.plist"
 plutil -replace CFBundleDevelopmentRegion -string "en" "$APP_DIR/Info.plist"
+plutil -replace CFBundleShortVersionString -string "$VERSION" "$APP_DIR/Info.plist"
+plutil -replace CFBundleVersion -string "$VERSION" "$APP_DIR/Info.plist"
 plutil -replace MinimumOSVersion -string "$MIN_IOS" "$APP_DIR/Info.plist"
 plutil -replace DTPlatformName -string "iphoneos" "$APP_DIR/Info.plist"
 

@@ -341,6 +341,7 @@ struct SwipeReviewView: View {
 
             if let prev = prevAsset, !isVerticalDrag {
                 PhotoCardView(asset: prev)
+                    .id("prev-\(prev.localIdentifier)") // 切换索引时强制重建，避免复用旧 image
                     .scaleEffect(prevScale)
                     .offset(x: prevOffsetX(in: size))
                     .rotation3DEffect(
@@ -356,6 +357,7 @@ struct SwipeReviewView: View {
 
             if let next = nextAsset, !isVerticalDrag {
                 PhotoCardView(asset: next)
+                    .id("next-\(next.localIdentifier)")
                     .scaleEffect(nextScale)
                     .offset(x: nextOffsetX(in: size))
                     .rotation3DEffect(

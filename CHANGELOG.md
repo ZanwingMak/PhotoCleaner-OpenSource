@@ -5,6 +5,16 @@
 
 ---
 
+## [0.9.5] - 2026-06-07
+
+### 修复
+- **滑动审核预览前后图片错位**：之前 PhotoCardView 在 prev/next 位置没加 `.id()`，
+  当 currentIndex 切换时 SwiftUI 复用了旧的 view（包括 `@State image`），
+  导致预览看到的是「自己/上一次的图片」而不是真正的前/后一张。
+  现在 prev/next 各加 `.id("prev-<localId>")` / `.id("next-<localId>")` 强制重建。
+
+---
+
 ## [0.9.4] - 2026-06-07
 
 ### 修复

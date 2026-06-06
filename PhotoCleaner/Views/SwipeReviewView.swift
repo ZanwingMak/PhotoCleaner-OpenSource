@@ -322,7 +322,17 @@ struct SwipeReviewView: View {
 
     private func cardArea(in size: CGSize) -> some View {
         ZStack {
-            // 只显示当前卡，不再做堆叠预览（避免透出后面的图片）
+            // 堆叠预览：仅在拖拽中或离场时显示，根据方向选对应的前/后一张
+            // 静止时不显示，避免常驻叠图干扰
+            if let underlying = underlyingAsset {
+                PhotoCardView(asset: underlying)
+                    .scaleEffect(underlyingScale)
+                    .opacity(underlyingOpacity)
+                    .allowsHitTesting(false)
+                    .transition(.opacity)
+            }
+
+            // 当前卡
             if let asset = vm.currentAsset {
                 PhotoCardView(asset: asset)
                     .id(asset.localIdentifier)
@@ -334,10 +344,43 @@ struct SwipeReviewView: View {
                     .transition(.opacity.combined(with: .scale(scale: 0.95)))
             }
         }
-        // 切换照片时让 transition 生效
         .animation(.easeInOut(duration: 0.22), value: vm.currentIndex)
         .padding(.horizontal, 16)
         .padding(.vertical, 8)
+    }
+
+    /// 拖拽方向对应的底层卡：左滑/上滑 → 下一张；右滑 → 前一张
+    /// 静止时返回 nil，避免常驻叠图
+    private var underlyingAsset: PHAsset? {
+        // 只有正在拖拽或离场动画中才显示
+        let isInteracting = dragOffset != .zero || exitDirection != .none
+        guard isInteracting else { return nil }
+
+        // 左滑（h<0）或上滑（v<0）→ 下一张
+        if dragOffset.width < -30 || dragOffset.height < -30 || exitDirection == .left || exitDirection == .up {
+            let i = vm.currentIndex + 1
+            guard i < vm.assets.count else { return nil }
+            return vm.assets[i]
+        }
+        // 右滑（h>0）→ 前一张
+        if dragOffset.width > 30 || exitDirection == .right {
+            let i = vm.currentIndex - 1
+            guard i >= 0 else { return nil }
+            return vm.assets[i]
+        }
+        return nil
+    }
+
+    /// 底层卡缩放：拖得越远越接近正常大小
+    private var underlyingScale: CGFloat {
+        let dist = max(abs(dragOffset.width), abs(dragOffset.height))
+        return 0.88 + min(0.12, dist / 800)
+    }
+
+    /// 底层卡不透明度：拖得越远越实
+    private var underlyingOpacity: Double {
+        let dist = max(abs(dragOffset.width), abs(dragOffset.height))
+        return min(1.0, 0.4 + Double(dist) / 280)
     }
 
     private var currentCardOffset: CGSize {

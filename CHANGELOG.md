@@ -5,6 +5,31 @@
 
 ---
 
+## [0.9.1] - 2026-06-06
+
+### 新增
+- **滑动审核交互式堆叠预览**：
+  - 静止时只显示当前卡（不叠图，保持干净）
+  - 拖拽开始时底层卡 fade in + 缩放（从 0.88 → 1.0），根据方向：
+    - 左滑 / 上滑 → 显示**下一张**作为底层
+    - 右滑 → 显示**前一张**作为底层
+  - 拖得越远，底层卡越实（不透明度按距离 / 280 渐变到 1.0）
+  - 离场动画期间也显示底层卡，让飞出的卡和下一张有视觉衔接
+  - 上滑加入待删除时同样显示下一张做衔接
+
+### 修复
+- **主屏 AppIcon 不显示**：之前用散装 PNG 放在 .app 根目录 + Info.plist `CFBundleIcons.CFBundleIconFiles`
+  数组的方式，被 iOS 13+ 弃用，SpringBoard 不识别 → 显示默认白色图标
+- **改为 asset catalog 编译方案**（与 Xcode 标准流程一致）：
+  - `Assets.xcassets/AppIcon.appiconset` 加入 1024 主图引用
+  - `build-ipa.sh` 用 `xcrun actool` 编译 → 生成 `Assets.car`（含所有尺寸渲染）
+  - actool 同时输出 partial.plist 含 `CFBundleIconName = "AppIcon"`，
+    用 Python 合并进主 Info.plist（这是 iOS 14+ 主屏识别图标的关键 key）
+  - simulator 版用 `--platform iphonesimulator`，真机版用 `--platform iphoneos` 分别编译
+- 通过 `assetutil --info` 验证：Assets.car 内 AppIcon @phone @pad 两个 idiom 渲染齐全（397KB 主图 SHA1 28E216...）
+
+---
+
 ## [0.9.0] - 2026-06-06
 
 ### 新增

@@ -250,17 +250,27 @@ private struct ZoomablePhoto: View {
     @EnvironmentObject private var library: PhotoLibraryService
 
     @State private var image: UIImage?
+    @State private var livePhoto: PHLivePhoto?
     @State private var reqID: PHImageRequestID?
+    @State private var liveReqID: PHImageRequestID?
     @State private var scale: CGFloat = 1.0
     @State private var lastScale: CGFloat = 1.0
     @State private var offset: CGSize = .zero
     @State private var lastOffset: CGSize = .zero
 
+    private var isLivePhoto: Bool {
+        asset.mediaSubtypes.contains(.photoLive)
+    }
+
     var body: some View {
         GeometryReader { geo in
             ZStack {
                 Color.black
-                if let image {
+                // Live Photo 用 PHLivePhotoView（自动触摸长按播放），无 zoom
+                if isLivePhoto, let livePhoto {
+                    LivePhotoView(livePhoto: livePhoto)
+                        .frame(width: geo.size.width, height: geo.size.height)
+                } else if let image {
                     Image(uiImage: image)
                         .resizable()
                         .scaledToFit()
@@ -315,14 +325,21 @@ private struct ZoomablePhoto: View {
             .frame(width: geo.size.width, height: geo.size.height)
         }
         .onAppear {
-            let scale = UIScreen.main.scale
-            let size = CGSize(width: 1200 * scale, height: 1200 * scale)
+            let s = UIScreen.main.scale
+            let size = CGSize(width: 1200 * s, height: 1200 * s)
             reqID = library.loadImage(for: asset, targetSize: size) { img in
                 image = img
+            }
+            // 如果是 Live Photo，额外取 PHLivePhoto
+            if isLivePhoto {
+                liveReqID = library.loadLivePhoto(for: asset, targetSize: size) { live in
+                    livePhoto = live
+                }
             }
         }
         .onDisappear {
             if let id = reqID { library.cancelImageRequest(id) }
+            if let id = liveReqID { library.cancelImageRequest(id) }
         }
     }
 }

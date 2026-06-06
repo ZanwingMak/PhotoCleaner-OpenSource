@@ -5,6 +5,22 @@
 
 ---
 
+## [0.9.0] - 2026-06-06
+
+### 新增
+- **Live Photo 支持**：检测 `PHAsset.mediaSubtypes.contains(.photoLive)`，
+  用 `PHLivePhotoView`（封装为 SwiftUI 的 `LivePhotoView.swift`）渲染
+  - `PhotoCardView`（滑动审核）：是 Live Photo 时显示 LivePhotoView，加载完后自动 hint 播放
+  - `PhotoDetailView`（全屏大图）：Live Photo 长按播放（系统行为），其他照片支持缩放
+  - 元数据胶囊上新增 **LIVE** 角标
+- **`PhotoLibraryService.loadLivePhoto(for:targetSize:completion:)`** 新方法
+
+### 修复
+- **去掉照片卡的模糊放大底图**：之前 `PhotoCardView` 用同图 `.blur(radius: 40).opacity(0.55)`
+  作为电影感外框，被吐槽「白金模糊背景」遮盖视觉；改为纯深色 `#0F0E0D` 背景，主图 `.scaledToFit` 居中
+
+---
+
 ## [0.8.1] - 2026-06-06
 
 ### 修复

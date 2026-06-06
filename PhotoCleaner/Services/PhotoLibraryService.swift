@@ -158,6 +158,25 @@ final class PhotoLibraryService: ObservableObject {
         imageManager.cancelImageRequest(id)
     }
 
+    /// 异步加载 Live Photo
+    @discardableResult
+    func loadLivePhoto(
+        for asset: PHAsset,
+        targetSize: CGSize,
+        completion: @escaping (PHLivePhoto?) -> Void
+    ) -> PHImageRequestID {
+        let options = PHLivePhotoRequestOptions()
+        options.deliveryMode = .highQualityFormat
+        options.isNetworkAccessAllowed = true
+
+        return imageManager.requestLivePhoto(
+            for: asset, targetSize: targetSize,
+            contentMode: .aspectFit, options: options
+        ) { livePhoto, _ in
+            DispatchQueue.main.async { completion(livePhoto) }
+        }
+    }
+
     /// 批量删除（系统弹原生确认）
     func deleteAssets(_ assets: [PHAsset]) async -> Bool {
         guard !assets.isEmpty else { return true }

@@ -9,7 +9,7 @@ enum L10n {
     static let dict: [String: [AppLanguage: String]] = [
         // 通用
         "PhotoCleaner": [.zh: "PhotoCleaner", .en: "PhotoCleaner", .ja: "PhotoCleaner", .ko: "PhotoCleaner"],
-        "整理你的照片库，腾出存储空间": [.en: "Organize your photo library", .ja: "写真ライブラリを整理", .ko: "사진 라이브러리 정리"],
+        "整理你的照片库，腾出存储空间": [.en: "Tidy your photo library, free up space", .ja: "写真ライブラリを整理して空き容量を確保", .ko: "사진 라이브러리 정리, 저장 공간 확보"],
         "关闭": [.en: "Close", .ja: "閉じる", .ko: "닫기"],
         "取消": [.en: "Cancel", .ja: "キャンセル", .ko: "취소"],
         "确认": [.en: "Confirm", .ja: "確認", .ko: "확인"],
@@ -222,6 +222,10 @@ enum L10n {
         "全选": [.en: "Select All", .ja: "全選択", .ko: "전체 선택"],
         "全不选": [.en: "Deselect All", .ja: "全解除", .ko: "전체 해제"],
         "选择": [.en: "Select", .ja: "選択", .ko: "선택"],
-        "已选 %d 张": [.en: "%d Selected", .ja: "%d 枚選択", .ko: "%d 장 선택됨"]
+        "已选 %d 张": [.en: "%d Selected", .ja: "%d 枚選択", .ko: "%d 장 선택됨"],
+
+        // 月份 + 量词
+        "%d 月": [.en: "%d", .ja: "%d 月", .ko: "%d월"],
+
     ]
 }

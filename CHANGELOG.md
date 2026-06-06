@@ -5,6 +5,22 @@
 
 ---
 
+## [0.9.4] - 2026-06-07
+
+### 修复
+- **设置版本号动态读取**：之前硬编码 "0.8.0"，现在从 `Bundle.main.infoDictionary["CFBundleShortVersionString"]` 读取，跟随每次 build-ipa.sh 自动更新
+- **照片/相簿/设置 i18n 完整覆盖**：
+  - SettingsView：brand 副标 / 「主题」标签 / themeSwatch 内每个主题名 / 「正在扫描…」/「重新扫描分类」/ 扫描完成 toast / 底部隐私声明
+  - CategoryListView：「潜在可释放」/「基于 N 张照片估算」/ SuggestionCard 「张」/ QuickPickCard 标题+「张」/ BentoCard 标题+「张」/ AlbumRow 分类名 / TimelineRow 月份
+- **月份本地化**：TimelineRow 改用 `DateFormatter.setLocalizedDateFormatFromTemplate("MMM")` + `lm.effective.localeIdentifier`，自动出 "Jun"/"6月"/"6월"
+- **元数据日期本地化**：SwipeReviewView / PhotoMetadataSheet / PhotoDetailView 三处 DateFormatter 全部去掉硬编码 "yyyy年M月d日"，改 `setLocalizedDateFormatFromTemplate("yMMMdHm")`
+
+### 新增
+- `AppLanguage.localeIdentifier` 属性：用于 DateFormatter / NumberFormatter 等 system 格式化
+- L10n 字典补「张」「%d 月」「整理你的照片库，腾出存储空间」等约 10 个新 key
+
+---
+
 ## [0.9.3] - 2026-06-06
 
 ### 新增

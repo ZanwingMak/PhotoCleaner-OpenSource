@@ -238,7 +238,7 @@ struct CategoryListView: View {
             HStack(alignment: .center, spacing: 20) {
                 VStack(alignment: .leading, spacing: 8) {
                     Label {
-                        Text("潜在可释放")
+                        Text(lm.t("潜在可释放"))
                             .font(.system(size: 13, weight: .medium))
                     } icon: {
                         Image(systemName: "sparkles")
@@ -258,7 +258,7 @@ struct CategoryListView: View {
                     }
 
                     // 副标
-                    Text("基于 \(totalCount.formatted()) 张照片估算")
+                    Text(String(format: lm.t("基于 %d 张照片估算"), totalCount))
                         .font(.system(size: 12, weight: .medium))
                         .foregroundStyle(AppPalette.textTertiary)
                 }
@@ -478,6 +478,7 @@ struct CategoryListView: View {
 // MARK: - 智能建议卡
 
 private struct SuggestionCard: View {
+    @EnvironmentObject private var lm: LanguageManager
     let symbol: String
     let label: String
     let count: Int
@@ -503,7 +504,7 @@ private struct SuggestionCard: View {
                     Text("\(count)")
                         .font(.system(size: 28, weight: .heavy, design: .rounded))
                         .foregroundStyle(.white)
-                    Text("张")
+                    Text(lm.t("张"))
                         .font(.system(size: 12, weight: .medium))
                         .foregroundStyle(.white.opacity(0.7))
                 }
@@ -527,6 +528,7 @@ private struct SuggestionCard: View {
 // MARK: - 横向 Quick Pick 卡
 
 private struct QuickPickCard: View {
+    @EnvironmentObject private var lm: LanguageManager
     let category: PhotoCategory
     let count: Int?
 
@@ -547,11 +549,11 @@ private struct QuickPickCard: View {
             }
 
             VStack(alignment: .leading, spacing: 2) {
-                Text(category.title)
+                Text(lm.t(category.title))
                     .font(.system(size: 16, weight: .bold))
                     .foregroundStyle(.white)
                 if let count {
-                    Text("\(count) 张")
+                    Text("\(count) \(lm.t("张"))")
                         .font(.system(size: 11, weight: .medium))
                         .foregroundStyle(.white.opacity(0.75))
                 }
@@ -576,6 +578,7 @@ private struct QuickPickCard: View {
 // MARK: - Bento 单卡（不规则网格成员）
 
 private struct BentoCard: View {
+    @EnvironmentObject private var lm: LanguageManager
     let category: PhotoCategory
     let count: Int?
     let height: CGFloat
@@ -615,7 +618,7 @@ private struct BentoCard: View {
 
                 Spacer(minLength: 0)
 
-                Text(category.title)
+                Text(lm.t(category.title))
                     .font(.system(size: 15, weight: .semibold))
                     .foregroundStyle(AppPalette.textPrimary)
                     .lineLimit(1)
@@ -624,7 +627,7 @@ private struct BentoCard: View {
                     Text("\(count ?? 0)")
                         .font(.system(size: 24, weight: .heavy, design: .rounded))
                         .foregroundStyle(AppPalette.textPrimary)
-                    Text("张")
+                    Text(lm.t("张"))
                         .font(.system(size: 11, weight: .medium))
                         .foregroundStyle(AppPalette.textTertiary)
                 }
@@ -638,6 +641,7 @@ private struct BentoCard: View {
 // MARK: - 月份时间线一行
 
 private struct TimelineRow: View {
+    @EnvironmentObject private var lm: LanguageManager
     let month: Int
     let year: Int
     let count: Int
@@ -662,9 +666,9 @@ private struct TimelineRow: View {
             }
             .frame(width: 16)
 
-            // 月份名
+            // 月份名（按当前语言本地化）
             VStack(alignment: .leading, spacing: 2) {
-                Text("\(month) 月")
+                Text(monthDisplay)
                     .font(.system(size: 16, weight: .semibold, design: .rounded))
                     .foregroundStyle(AppPalette.textPrimary)
                 Text("\(year)")
@@ -699,11 +703,25 @@ private struct TimelineRow: View {
     private var countRatio: Double {
         min(1.0, Double(count) / 1000.0)
     }
+
+    /// 月份本地化显示：中文 / 日文 = "6月"；英文 = "Jun"；韩文 = "6월"
+    private var monthDisplay: String {
+        var comp = DateComponents()
+        comp.year = year; comp.month = month
+        guard let date = Calendar.current.date(from: comp) else {
+            return "\(month)"
+        }
+        let f = DateFormatter()
+        f.locale = Locale(identifier: lm.effective.localeIdentifier)
+        f.setLocalizedDateFormatFromTemplate("MMM")
+        return f.string(from: date)
+    }
 }
 
 // MARK: - 相簿一行（简版）
 
 private struct AlbumRow: View {
+    @EnvironmentObject private var lm: LanguageManager
     let category: PhotoCategory
     let count: Int?
 
@@ -717,7 +735,7 @@ private struct AlbumRow: View {
                     .foregroundStyle(category.tint)
             }
 
-            Text(category.title)
+            Text(lm.t(category.title))
                 .font(.system(size: 16, weight: .medium))
                 .foregroundStyle(AppPalette.textPrimary)
 

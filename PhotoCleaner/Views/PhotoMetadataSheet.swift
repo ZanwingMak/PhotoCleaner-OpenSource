@@ -213,7 +213,8 @@ struct PhotoMetadataSheet: View {
     private func format(_ date: Date?) -> String {
         guard let date else { return "—" }
         let f = DateFormatter()
-        f.dateFormat = "yyyy年M月d日 HH:mm"
+        f.locale = Locale(identifier: lm.effective.localeIdentifier)
+        f.setLocalizedDateFormatFromTemplate("yMMMdHm")
         return f.string(from: date)
     }
 

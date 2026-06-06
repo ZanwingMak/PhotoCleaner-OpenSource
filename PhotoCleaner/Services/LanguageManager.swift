@@ -29,6 +29,17 @@ enum AppLanguage: String, CaseIterable, Identifiable {
         case .ko:     return "k.circle"
         }
     }
+
+    /// 用于 DateFormatter / NumberFormatter 等系统格式化
+    var localeIdentifier: String {
+        switch self {
+        case .system: return Locale.current.identifier
+        case .zh:     return "zh-Hans"
+        case .en:     return "en"
+        case .ja:     return "ja"
+        case .ko:     return "ko"
+        }
+    }
 }
 
 @MainActor

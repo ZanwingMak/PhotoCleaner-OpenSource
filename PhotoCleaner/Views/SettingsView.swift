@@ -55,7 +55,7 @@ struct SettingsView: View {
                         }
 
                         section(lm.t("关于")) {
-                            infoRow(label: lm.t("版本"), symbol: "info.circle", value: "0.8.0")
+                            infoRow(label: lm.t("版本"), symbol: "info.circle", value: appVersion)
                             divider
                             linkRow(label: lm.t("GitHub 仓库"), symbol: "chevron.left.forwardslash.chevron.right",
                                      url: "https://github.com/ZanwingMak/PhotoCleaner")
@@ -155,7 +155,7 @@ struct SettingsView: View {
                             .foregroundStyle(AppPalette.brand)
                     }
                 }
-                Text(isScanning ? "正在扫描…" : "重新扫描分类")
+                Text(isScanning ? lm.t("正在扫描…") : lm.t("重新扫描分类"))
                     .font(.system(size: 15, weight: .medium))
                     .foregroundStyle(AppPalette.textPrimary(for: theme))
                 Spacer()
@@ -181,15 +181,26 @@ struct SettingsView: View {
         isScanning = false
         UINotificationFeedbackGenerator().notificationOccurred(.success)
         withAnimation(.spring(response: 0.4, dampingFraction: 0.7)) {
+            let count = library.categoryCounts[PhotoCategory.allPhotos.id] ?? 0
             toast = ToastInfo(
                 symbol: "checkmark.circle.fill",
-                text: "扫描完成 · \(library.categoryCounts[PhotoCategory.allPhotos.id] ?? 0) 张",
+                text: String(format: lm.t("扫描完成 · %d 张"), count),
                 tint: AppPalette.success
             )
         }
     }
 
     private var theme: AppTheme { themeManager.current }
+
+    /// 从 Info.plist 读取当前 build 的版本号，避免硬编码
+    private var appVersion: String {
+        let short = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String
+        let build = Bundle.main.infoDictionary?["CFBundleVersion"] as? String
+        if let s = short, let b = build, s != b {
+            return "\(s) (\(b))"
+        }
+        return short ?? "—"
+    }
 
     // MARK: - 顶部品牌头
 
@@ -208,7 +219,7 @@ struct SettingsView: View {
             Text("PhotoCleaner")
                 .font(.system(size: 22, weight: .bold, design: .rounded))
                 .foregroundStyle(AppPalette.textPrimary(for: theme))
-            Text("整理你的照片库，腾出存储空间")
+            Text(lm.t("整理你的照片库，腾出存储空间"))
                 .font(.system(size: 13))
                 .foregroundStyle(AppPalette.textSecondary(for: theme))
         }
@@ -222,11 +233,11 @@ struct SettingsView: View {
         VStack(alignment: .leading, spacing: 12) {
             HStack(spacing: 14) {
                 iconBubble("paintbrush.fill", tint: AppPalette.brand)
-                Text("主题")
+                Text(lm.t("主题"))
                     .font(.system(size: 15, weight: .medium))
                     .foregroundStyle(AppPalette.textPrimary(for: theme))
                 Spacer()
-                Text(themeManager.current.title)
+                Text(lm.t(themeManager.current.title))
                     .font(.system(size: 13, weight: .medium))
                     .foregroundStyle(AppPalette.textSecondary(for: theme))
             }
@@ -267,7 +278,7 @@ struct SettingsView: View {
                     .foregroundStyle(t == .light ? .black : .white)
                     .opacity(0.8)
             }
-            Text(t.title)
+            Text(lm.t(t.title))
                 .font(.system(size: 10, weight: isSelected ? .bold : .medium))
                 .foregroundStyle(isSelected ? AppPalette.brand
                                             : AppPalette.textSecondary(for: theme))
@@ -394,7 +405,7 @@ struct SettingsView: View {
             Image(systemName: "lock.fill")
                 .font(.system(size: 14, weight: .bold))
                 .foregroundStyle(AppPalette.textTertiary(for: theme))
-            Text("PhotoCleaner 在本地处理你的所有照片\n绝不上传任何数据")
+            Text(lm.t("PhotoCleaner 在本地处理你的所有照片\n绝不上传任何数据"))
                 .font(.system(size: 11))
                 .foregroundStyle(AppPalette.textTertiary(for: theme))
                 .multilineTextAlignment(.center)

@@ -238,7 +238,7 @@ struct PhotoDetailView: View {
     private func formattedDate(_ date: Date?) -> String {
         guard let date else { return "" }
         let f = DateFormatter()
-        f.dateFormat = "yyyy年M月d日 HH:mm"
+        f.setLocalizedDateFormatFromTemplate("yMMMdHm")
         return f.string(from: date)
     }
 }

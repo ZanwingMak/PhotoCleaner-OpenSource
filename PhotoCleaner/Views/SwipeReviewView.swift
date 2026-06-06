@@ -301,16 +301,13 @@ struct SwipeReviewView: View {
     private var metaLine: some View {
         Group {
             if let asset = vm.currentAsset {
-                let df = DateFormatter(); let _ = (df.dateFormat = "yyyy年M月d日")
-                let tf = DateFormatter(); let _ = (tf.dateFormat = "HH:mm")
                 let date = asset.creationDate ?? Date()
-
                 HStack(spacing: 8) {
                     Text("\(vm.currentIndex + 1) / \(vm.assets.count)")
                     Text("·")
-                    Text(df.string(from: date))
+                    Text(formatMetaDate(date))
                     Text("·")
-                    Text(tf.string(from: date))
+                    Text(formatMetaTime(date))
                 }
                 .font(.system(size: 12, weight: .medium))
                 .foregroundStyle(.white.opacity(0.55))
@@ -318,6 +315,21 @@ struct SwipeReviewView: View {
                 Color.clear.frame(height: 14)
             }
         }
+    }
+
+    /// 元数据日期本地化（按当前语言）
+    private func formatMetaDate(_ date: Date) -> String {
+        let f = DateFormatter()
+        f.locale = Locale(identifier: lm.effective.localeIdentifier)
+        f.setLocalizedDateFormatFromTemplate("yMMMd")
+        return f.string(from: date)
+    }
+
+    private func formatMetaTime(_ date: Date) -> String {
+        let f = DateFormatter()
+        f.locale = Locale(identifier: lm.effective.localeIdentifier)
+        f.setLocalizedDateFormatFromTemplate("Hm")
+        return f.string(from: date)
     }
 
     // MARK: - 卡片区域

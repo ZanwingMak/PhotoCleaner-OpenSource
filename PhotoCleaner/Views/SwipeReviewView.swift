@@ -9,6 +9,7 @@ import Photos
 /// 顶部胶囊点击后弹出的分类选择 sheet
 struct CategoryPickerSheet: View {
     @Environment(\.dismiss) private var dismiss
+    @EnvironmentObject private var lm: LanguageManager
     let currentId: String
     let onPick: (PhotoCategory) -> Void
 
@@ -18,17 +19,17 @@ struct CategoryPickerSheet: View {
                 AppPalette.bgPrimary.ignoresSafeArea()
                 ScrollView {
                     VStack(spacing: 16) {
-                        section("快速合集") {
+                        section(lm.t("快速合集")) {
                             ForEach(PhotoCategory.quickPicks) { cat in
                                 row(cat)
                             }
                         }
-                        section("智能分类") {
+                        section(lm.t("智能分类")) {
                             ForEach(PhotoCategory.InferredKind.allCases, id: \.self) { kind in
                                 row(.inferred(kind))
                             }
                         }
-                        section("系统相册") {
+                        section(lm.t("系统相册")) {
                             row(.allPhotos)
                             row(.smartAlbum(.smartAlbumFavorites, title: "收藏",
                                             symbol: "heart.fill", tint: .red))
@@ -44,11 +45,11 @@ struct CategoryPickerSheet: View {
                 }
             }
             .preferredColorScheme(.dark)
-            .navigationTitle("切换分类")
+            .navigationTitle(lm.t("切换分类"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button("关闭") { dismiss() }.tint(AppPalette.brand)
+                    Button(lm.t("关闭")) { dismiss() }.tint(AppPalette.brand)
                 }
             }
         }
@@ -83,7 +84,7 @@ struct CategoryPickerSheet: View {
                         .font(.system(size: 14, weight: .bold))
                         .foregroundStyle(cat.tint)
                 }
-                Text(cat.title)
+                Text(lm.t(cat.title))
                     .font(.system(size: 15, weight: .medium))
                     .foregroundStyle(AppPalette.textPrimary)
                 Spacer()
@@ -109,6 +110,7 @@ struct CategoryPickerSheet: View {
 struct SwipeReviewView: View {
     let category: PhotoCategory
     @EnvironmentObject private var library: PhotoLibraryService
+    @EnvironmentObject private var lm: LanguageManager
     @StateObject private var vm: SwipeReviewViewModel
     @Environment(\.dismiss) private var dismiss
 
@@ -242,7 +244,7 @@ struct SwipeReviewView: View {
                 showCategoryPicker = true
             } label: {
                 HStack(spacing: 6) {
-                    Text(currentCategory.title)
+                    Text(lm.t(currentCategory.title))
                         .font(.system(size: 15, weight: .semibold))
                         .foregroundStyle(.white)
                     Image(systemName: "chevron.down")
@@ -381,9 +383,11 @@ struct SwipeReviewView: View {
 
     // MARK: - Coverflow 参数
 
-    /// 拖拽水平进度：-1 (完全左滑) → 0 (静止) → +1 (完全右滑)
+    /// 拖拽水平进度（直观映射）：
+    ///   progress < 0  = 左滑   = 下一张 next 从**右侧**推过来
+    ///   progress > 0  = 右滑   = 前一张 prev 从**左侧**推过来
     private var swipeProgress: CGFloat {
-        let p = -dragOffset.width / 360.0
+        let p = dragOffset.width / 360.0
         return max(-1, min(1, p))
     }
 
@@ -410,36 +414,40 @@ struct SwipeReviewView: View {
         return 1 - abs(swipeProgress) * 0.12
     }
 
-    /// 当前卡 Y 轴旋转：朝手指反方向倾斜（左滑时正面朝右，看起来要飞走）
+    /// 当前卡 Y 轴旋转：朝手指反方向翻开（左滑→右倾 +35°，让 next 露出）
     private var currentRotationY: Double {
         guard exitDirection == .none else { return 0 }
-        return Double(swipeProgress * 35)
+        return Double(-swipeProgress * 35)
     }
 
-    /// 前一张 X 偏移：静止时在左外 -0.55w，progress 到 +1 时回到中心 0
+    // 显现速度系数：拖动 1/5 进度（约 72pt）就完全不透明
+    private static let opacityBoost: Double = 5
+
+    /// 前一张 X 偏移：静止 -0.55w（左外），右滑到 +1 时移到 0（中心）
     private func prevOffsetX(in size: CGSize) -> CGFloat {
         let restX = -size.width * 0.55
+        // progress 0 → restX；progress +1 → 0；公式 restX * (1 - max(0, progress))
         return restX * (1 - max(0, swipeProgress))
     }
 
-    /// 前一张缩放：0.82（静止）→ 1.0（到中心）
     private var prevScale: CGFloat {
         0.82 + max(0, swipeProgress) * 0.18
     }
 
-    /// 前一张 Y 轴旋转：+45 度（左侧倾斜面朝右）→ 0
+    /// 前一张静止 +45° 倾斜 → progress +1 时翻正
     private var prevRotationY: Double {
         Double(45 - max(0, swipeProgress) * 45)
     }
 
-    /// 前一张不透明度：静止时 0 → 拖向右时渐显到 1
+    /// 前一张不透明度：右滑（progress > 0）时快速显现
     private var prevOpacity: Double {
-        Double(max(0, swipeProgress))
+        min(1.0, max(0, Double(swipeProgress)) * Self.opacityBoost)
     }
 
-    /// 下一张（镜像，参考前一张）
+    /// 下一张 X 偏移：静止 +0.55w（右外），左滑到 -1 时到 0（中心）
     private func nextOffsetX(in size: CGSize) -> CGFloat {
         let restX = size.width * 0.55
+        // progress 0 → restX；progress -1 → 0；公式 restX * (1 - max(0, -progress))
         return restX * (1 - max(0, -swipeProgress))
     }
 
@@ -447,12 +455,14 @@ struct SwipeReviewView: View {
         0.82 + max(0, -swipeProgress) * 0.18
     }
 
+    /// 下一张静止 -45° 倾斜（从右侧侧倾）→ progress -1 时翻正
     private var nextRotationY: Double {
         Double(-45 + max(0, -swipeProgress) * 45)
     }
 
+    /// 下一张不透明度：左滑（progress < 0）时快速显现
     private var nextOpacity: Double {
-        Double(max(0, -swipeProgress))
+        min(1.0, max(0, Double(-swipeProgress)) * Self.opacityBoost)
     }
 
     private var currentCardOffset: CGSize {
@@ -518,10 +528,11 @@ struct SwipeReviewView: View {
 
             // markDelete 触发 toast
             if action == .markDelete {
+                let template = lm.t("已加入待删除 · %d")
                 withAnimation(.spring(response: 0.4, dampingFraction: 0.7)) {
                     toast = ToastInfo(
                         symbol: "trash.fill",
-                        text: "已加入待删除 · \(vm.pendingDeletion.count)",
+                        text: String(format: template, vm.pendingDeletion.count),
                         tint: .red
                     )
                 }
@@ -535,7 +546,7 @@ struct SwipeReviewView: View {
         ZStack {
             // 左滑 → 下一张：右侧出现小箭头玻璃片
             if dragOffset.width < -30 && dragOffset.height > -60 {
-                arrowChip(symbol: "arrow.left", label: "下一张", tint: .white)
+                arrowChip(symbol: "arrow.left", label: lm.t("下一张"), tint: .white)
                     .opacity(min(1, abs(dragOffset.width) / 100))
                     .scaleEffect(0.9 + min(0.2, abs(dragOffset.width) / 500))
                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -543,7 +554,7 @@ struct SwipeReviewView: View {
             }
             // 右滑 → 前一张：左侧出现小箭头玻璃片
             if dragOffset.width > 30 && dragOffset.height > -60 {
-                arrowChip(symbol: "arrow.right", label: "前一张", tint: .white)
+                arrowChip(symbol: "arrow.right", label: lm.t("前一张"), tint: .white)
                     .opacity(min(1, abs(dragOffset.width) / 100))
                     .scaleEffect(0.9 + min(0.2, abs(dragOffset.width) / 500))
                     .frame(maxWidth: .infinity, alignment: .trailing)
@@ -551,7 +562,7 @@ struct SwipeReviewView: View {
             }
             // 上滑 → 加入待删除：屏幕顶部红色玻璃片
             if dragOffset.height < -30 {
-                arrowChip(symbol: "trash.fill", label: "加入待删除", tint: .red)
+                arrowChip(symbol: "trash.fill", label: lm.t("加入待删除"), tint: .red)
                     .opacity(min(1, abs(dragOffset.height) / 130))
                     .scaleEffect(0.9 + min(0.2, abs(dragOffset.height) / 600))
                     .frame(maxHeight: .infinity, alignment: .top)
@@ -596,7 +607,7 @@ struct SwipeReviewView: View {
     private var bottomBar: some View {
         HStack {
             // 左下：信息按钮（弹元数据 sheet）
-            actionButton(symbol: "info.circle", title: "信息", color: .white,
+            actionButton(symbol: "info.circle", title: lm.t("信息"), color: .white,
                          disabled: vm.currentAsset == nil) {
                 UIImpactFeedbackGenerator(style: .light).impactOccurred()
                 showMetadata = true
@@ -604,7 +615,7 @@ struct SwipeReviewView: View {
 
             Spacer()
 
-            actionButton(symbol: "arrow.uturn.backward", title: "撤销", color: .white,
+            actionButton(symbol: "arrow.uturn.backward", title: lm.t("撤销"), color: .white,
                          disabled: vm.deleteHistory.isEmpty) {
                 UIImpactFeedbackGenerator(style: .soft).impactOccurred()
                 vm.undoLastDelete()
@@ -612,7 +623,7 @@ struct SwipeReviewView: View {
 
             Spacer()
 
-            actionButton(symbol: "arrow.down", title: "保留", color: .white,
+            actionButton(symbol: "arrow.down", title: lm.t("保留"), color: .white,
                          disabled: !vm.hasMore) {
                 if vm.canGoNext {
                     trigger(.next, direction: .left)
@@ -623,7 +634,7 @@ struct SwipeReviewView: View {
 
             Spacer()
 
-            actionButton(symbol: "xmark", title: "删除", color: .red,
+            actionButton(symbol: "xmark", title: lm.t("删除"), color: .red,
                          disabled: !vm.hasMore) {
                 trigger(.markDelete, direction: .up)
             }
@@ -661,16 +672,16 @@ struct SwipeReviewView: View {
             Image(systemName: "tray")
                 .font(.system(size: 56))
                 .foregroundStyle(.white.opacity(0.4))
-            Text("这个分类没有照片")
+            Text(lm.t("这个分类没有照片"))
                 .font(.title3.weight(.semibold))
                 .foregroundStyle(.white)
-            Text("换一个分类试试")
+            Text(lm.t("换一个分类试试"))
                 .font(.callout)
                 .foregroundStyle(.white.opacity(0.55))
             Button {
                 dismiss()
             } label: {
-                Text("返回")
+                Text(lm.t("返回"))
                     .font(.system(size: 15, weight: .semibold))
                     .padding(.horizontal, 22).padding(.vertical, 11)
                     .background(Capsule().fill(Color.white.opacity(0.12)))
@@ -688,19 +699,19 @@ struct SwipeReviewView: View {
             Image(systemName: "checkmark.seal.fill")
                 .font(.system(size: 64))
                 .foregroundStyle(.green)
-            Text("已审核完成")
+            Text(lm.t("已审核完成"))
                 .font(.title2.weight(.bold))
                 .foregroundStyle(.white)
             if vm.pendingDeletion.isEmpty {
-                Text("没有标记任何照片待删除。")
+                Text(lm.t("没有标记任何照片待删除。"))
                     .foregroundStyle(.white.opacity(0.6))
             } else {
-                Text("已标记 \(vm.pendingDeletion.count) 张待删除")
+                Text(String(format: lm.t("已标记 %d 张待删除"), vm.pendingDeletion.count))
                     .foregroundStyle(.white.opacity(0.6))
                 Button {
                     showPendingSheet = true
                 } label: {
-                    Text("查看待删除列表")
+                    Text(lm.t("查看待删除列表"))
                         .font(.system(size: 16, weight: .semibold))
                         .padding(.horizontal, 24).padding(.vertical, 12)
                         .background(Capsule().fill(Color.red.opacity(0.85)))

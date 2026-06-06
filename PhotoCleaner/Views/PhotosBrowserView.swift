@@ -34,6 +34,7 @@ enum PhotosFilter: String, CaseIterable, Identifiable {
 
 struct PhotosBrowserView: View {
     @EnvironmentObject private var library: PhotoLibraryService
+    @EnvironmentObject private var lm: LanguageManager
     @Environment(\.dismiss) private var dismiss
 
     @State private var allAssets: [PHAsset] = []
@@ -93,7 +94,7 @@ struct PhotosBrowserView: View {
                 }
             }
             .preferredColorScheme(.dark)
-            .navigationTitle("照片 · \(filteredAssets.count)")
+            .navigationTitle("\(lm.t("照片")) · \(filteredAssets.count)")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
@@ -143,7 +144,7 @@ struct PhotosBrowserView: View {
                         HStack(spacing: 6) {
                             Image(systemName: f.symbol)
                                 .font(.system(size: 12, weight: .bold))
-                            Text(f.title)
+                            Text(lm.t(f.title))
                                 .font(.system(size: 14, weight: .semibold))
                         }
                         .foregroundStyle(filter == f ? .white : AppPalette.textSecondary)
@@ -169,17 +170,17 @@ struct PhotosBrowserView: View {
         Button {
             previewAsset = asset
         } label: {
-            Label("查看大图", systemImage: "rectangle.expand.vertical")
+            Label(lm.t("查看大图"), systemImage: "rectangle.expand.vertical")
         }
         Button {
             metadataAsset = asset
         } label: {
-            Label("照片信息", systemImage: "info.circle")
+            Label(lm.t("照片信息"), systemImage: "info.circle")
         }
         Button {
             openInPhotosApp()
         } label: {
-            Label("在 照片 App 中打开", systemImage: "arrow.up.right.square")
+            Label(lm.t("在 照片 App 中打开"), systemImage: "arrow.up.right.square")
         }
     }
 
@@ -197,10 +198,10 @@ struct PhotosBrowserView: View {
             Image(systemName: "photo.on.rectangle.angled")
                 .font(.system(size: 56))
                 .foregroundStyle(AppPalette.textTertiary)
-            Text("没有符合的照片")
+            Text(lm.t("没有符合的照片"))
                 .font(.system(size: 17, weight: .semibold))
                 .foregroundStyle(AppPalette.textPrimary)
-            Text("换个筛选条件试试")
+            Text(lm.t("换个筛选条件试试"))
                 .font(.system(size: 13))
                 .foregroundStyle(AppPalette.textSecondary)
         }

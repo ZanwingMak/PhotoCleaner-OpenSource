@@ -43,6 +43,7 @@ struct RootView: View {
 /// 首次启动：解释为什么需要权限，再请求
 struct PermissionView: View {
     @EnvironmentObject private var library: PhotoLibraryService
+    @EnvironmentObject private var lm: LanguageManager
 
     var body: some View {
         ZStack {
@@ -68,9 +69,9 @@ struct PermissionView: View {
                     )
 
                 VStack(spacing: 12) {
-                    Text("整理你的照片库")
+                    Text(lm.t("整理你的照片库"))
                         .font(.system(size: 32, weight: .bold, design: .rounded))
-                    Text("快速滑动审核每张照片，腾出存储空间。\n所有删除操作都需要你手动确认。")
+                    Text(lm.t("快速滑动审核每张照片，腾出存储空间。\n所有删除操作都需要你手动确认。"))
                         .font(.system(size: 16))
                         .foregroundStyle(.secondary)
                         .multilineTextAlignment(.center)
@@ -82,7 +83,7 @@ struct PermissionView: View {
                 Button {
                     Task { await library.requestAuthorization() }
                 } label: {
-                    Text("允许访问照片")
+                    Text(lm.t("允许访问照片"))
                         .font(.system(size: 17, weight: .semibold))
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 16)
@@ -104,14 +105,16 @@ struct PermissionView: View {
 
 /// 用户拒绝授权时的引导
 struct PermissionDeniedView: View {
+    @EnvironmentObject private var lm: LanguageManager
+
     var body: some View {
         VStack(spacing: 20) {
             Image(systemName: "lock.fill")
                 .font(.system(size: 56))
                 .foregroundStyle(.secondary)
-            Text("无法访问照片")
+            Text(lm.t("无法访问照片"))
                 .font(.title2.weight(.semibold))
-            Text("请在「设置 → 隐私与安全性 → 照片」中允许 PhotoCleaner 访问。")
+            Text(lm.t("请在「设置 → 隐私与安全性 → 照片」中允许 PhotoCleaner 访问。"))
                 .font(.callout)
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
@@ -122,7 +125,7 @@ struct PermissionDeniedView: View {
                     UIApplication.shared.open(url)
                 }
             } label: {
-                Text("打开设置")
+                Text(lm.t("打开设置"))
                     .padding(.horizontal, 24).padding(.vertical, 12)
                     .background(Capsule().fill(.tint.opacity(0.15)))
             }

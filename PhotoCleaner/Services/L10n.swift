@@ -157,6 +157,71 @@ enum L10n {
         "位置": [.en: "Location", .ja: "位置情報", .ko: "위치"],
         "时长": [.en: "Duration", .ja: "長さ", .ko: "재생시간"],
         "已收藏 ❤︎": [.en: "Favorited ❤︎", .ja: "お気に入り ❤︎", .ko: "즐겨찾기 ❤︎"],
-        "未知": [.en: "Unknown", .ja: "不明", .ko: "알 수 없음"]
+        "未知": [.en: "Unknown", .ja: "不明", .ko: "알 수 없음"],
+
+        // 元数据补充
+        "全景照片": [.en: "Panorama", .ja: "パノラマ", .ko: "파노라마"],
+        "HDR 照片": [.en: "HDR Photo", .ja: "HDR写真", .ko: "HDR 사진"],
+
+        "将把 %d 张照片移入系统「最近删除」相册，30 天内可恢复。": [
+            .en: "%d photos will move to the system Recently Deleted album, recoverable within 30 days.",
+            .ja: "%d 枚を「最近削除した項目」に移動します。30 日以内に復元可能です。",
+            .ko: "%d 장의 사진을 시스템 「최근 삭제됨」으로 이동, 30일 내 복원 가능."
+        ],
+        "删除 %d 张": [.en: "Delete %d", .ja: "%d 枚を削除", .ko: "%d 장 삭제"],
+
+        // 横向 quick pick 提示
+        "首页统计副标": [.en: "Based on %d photos", .ja: "%d 枚から推定", .ko: "%d 장 기준 추정"],
+        "基于 %d 张照片估算": [.en: "Based on %d photos", .ja: "%d 枚から推定", .ko: "%d 장 기준 추정"],
+
+        // RootView 权限
+        "需要访问您的照片以便整理与释放存储空间。所有操作都需您手动确认。": [
+            .en: "We need photo library access to help you tidy up. All deletions stay manual.",
+            .ja: "整理と空き容量確保のため写真ライブラリへのアクセスが必要です。削除は全て手動確認です。",
+            .ko: "정리와 저장 공간 확보를 위해 사진 라이브러리 접근이 필요합니다. 모든 작업은 수동 확인입니다."
+        ],
+        "请在「设置 → 隐私与安全性 → 照片」中允许 PhotoCleaner 访问。": [
+            .en: "Allow PhotoCleaner access via Settings → Privacy → Photos.",
+            .ja: "「設定 → プライバシーとセキュリティ → 写真」で PhotoCleaner を許可してください。",
+            .ko: "설정 → 개인정보 보호 및 보안 → 사진 에서 PhotoCleaner 접근을 허용하세요."
+        ],
+
+        // 加载中
+        "加载中…": [.en: "Loading…", .ja: "読み込み中…", .ko: "로딩 중…"],
+        "扫描中…": [.en: "Scanning…", .ja: "スキャン中…", .ko: "스캔 중…"],
+        "正在扫描照片库…": [.en: "Scanning photo library…", .ja: "ライブラリをスキャン中…", .ko: "라이브러리 스캔 중…"],
+
+        // 滑动审核完成
+        "已标记 %d 张待删除": [.en: "%d marked for deletion", .ja: "%d 枚を削除予定", .ko: "%d 장 삭제 대기"],
+
+        // toast 文本（带数量的复合文案）
+        "已加入待删除 · %d": [
+            .en: "Marked for delete · %d",
+            .ja: "削除へ追加 · %d",
+            .ko: "삭제 대기에 추가 · %d"
+        ],
+        "扫描完成 · %d 张": [
+            .en: "Scan complete · %d",
+            .ja: "スキャン完了 · %d 枚",
+            .ko: "스캔 완료 · %d 장"
+        ],
+        "「%@」功能开发中": [
+            .en: "“%@” coming soon",
+            .ja: "「%@」開発中",
+            .ko: "「%@」 개발 중"
+        ],
+        "设置面板开发中": [.en: "Settings panel coming soon", .ja: "設定パネルは開発中", .ko: "설정 패널 개발 중"],
+
+        // 首页 hero/section
+        "潜在可释放副标": [.en: "Potential space to free up", .ja: "空けられる容量", .ko: "확보 가능한 용량"],
+
+        // 错误/状态文案
+        "返回首页": [.en: "Back Home", .ja: "ホームへ", .ko: "홈으로"],
+
+        // 多选
+        "全选": [.en: "Select All", .ja: "全選択", .ko: "전체 선택"],
+        "全不选": [.en: "Deselect All", .ja: "全解除", .ko: "전체 해제"],
+        "选择": [.en: "Select", .ja: "選択", .ko: "선택"],
+        "已选 %d 张": [.en: "%d Selected", .ja: "%d 枚選択", .ko: "%d 장 선택됨"]
     ]
 }

@@ -1,6 +1,6 @@
 //
 //  PendingDeletionView.swift
-//  待删除列表：网格预览 + 单击移除 + 批量确认删除
+//  待删除列表：多选网格 + 全选切换 + 批量删除选中项
 //
 
 import SwiftUI
@@ -9,8 +9,12 @@ import Photos
 struct PendingDeletionView: View {
     @ObservedObject var vm: SwipeReviewViewModel
     @EnvironmentObject private var library: PhotoLibraryService
+    @EnvironmentObject private var lm: LanguageManager
     @Environment(\.dismiss) private var dismiss
 
+    /// 选中的 localIdentifier 集合（默认进入时全选）
+    @State private var selectedIds = Set<String>()
+    @State private var hasInitialized = false
     @State private var showConfirm = false
     @State private var isDeleting = false
 
@@ -18,10 +22,21 @@ struct PendingDeletionView: View {
         GridItem(.adaptive(minimum: 100, maximum: 140), spacing: 8)
     ]
 
+    /// 当前选中的资产
+    private var selectedAssets: [PHAsset] {
+        vm.pendingDeletion.filter { selectedIds.contains($0.localIdentifier) }
+    }
+
+    /// 是否全选
+    private var isAllSelected: Bool {
+        !vm.pendingDeletion.isEmpty &&
+            selectedIds.count == vm.pendingDeletion.count
+    }
+
     var body: some View {
         NavigationStack {
             ZStack {
-                Color(.systemBackground).ignoresSafeArea()
+                AppPalette.bgPrimary.ignoresSafeArea()
 
                 if vm.pendingDeletion.isEmpty {
                     emptyState
@@ -29,13 +44,11 @@ struct PendingDeletionView: View {
                     ScrollView {
                         LazyVGrid(columns: columns, spacing: 8) {
                             ForEach(vm.pendingDeletion, id: \.localIdentifier) { asset in
-                                PendingThumbnail(asset: asset) {
-                                    // 点击移除
-                                    if let idx = vm.pendingDeletion.firstIndex(where: { $0.localIdentifier == asset.localIdentifier }) {
-                                        let g = UIImpactFeedbackGenerator(style: .soft); g.impactOccurred()
-                                        _ = withAnimation { vm.pendingDeletion.remove(at: idx) }
-                                    }
-                                }
+                                PendingThumbnail(
+                                    asset: asset,
+                                    isSelected: selectedIds.contains(asset.localIdentifier),
+                                    onTap: { toggle(asset) }
+                                )
                             }
                         }
                         .padding(12)
@@ -43,7 +56,6 @@ struct PendingDeletionView: View {
                     }
                 }
 
-                // 底部固定操作栏
                 if !vm.pendingDeletion.isEmpty {
                     VStack {
                         Spacer()
@@ -51,48 +63,101 @@ struct PendingDeletionView: View {
                     }
                 }
             }
-            .navigationTitle("待删除 (\(vm.pendingDeletion.count))")
+            .preferredColorScheme(.dark)
+            .navigationTitle("\(lm.t("待删除")) (\(vm.pendingDeletion.count))")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
-                    Button("关闭") { dismiss() }
+                    Button(lm.t("关闭")) { dismiss() }
+                        .tint(AppPalette.brand)
+                }
+                if !vm.pendingDeletion.isEmpty {
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Button {
+                            UIImpactFeedbackGenerator(style: .soft).impactOccurred()
+                            toggleAll()
+                        } label: {
+                            Text(isAllSelected ? lm.t("全不选") : lm.t("全选"))
+                                .font(.system(size: 15, weight: .semibold))
+                                .foregroundStyle(AppPalette.brand)
+                        }
+                    }
                 }
             }
-            .alert("确认删除", isPresented: $showConfirm) {
-                Button("取消", role: .cancel) {}
-                Button("删除 \(vm.pendingDeletion.count) 张", role: .destructive) {
+            .alert(lm.t("确认删除"), isPresented: $showConfirm) {
+                Button(lm.t("取消"), role: .cancel) {}
+                Button(String(format: lm.t("删除 %d 张"), selectedAssets.count),
+                       role: .destructive) {
                     Task { await performDelete() }
                 }
             } message: {
-                Text("将把 \(vm.pendingDeletion.count) 张照片移入系统「最近删除」相册，30 天内可恢复。")
+                Text(String(format: lm.t("将把 %d 张照片移入系统「最近删除」相册，30 天内可恢复。"),
+                            selectedAssets.count))
+            }
+            .onAppear {
+                if !hasInitialized {
+                    // 默认全选
+                    selectedIds = Set(vm.pendingDeletion.map { $0.localIdentifier })
+                    hasInitialized = true
+                }
             }
         }
     }
 
-    /// 空状态
+    // MARK: - 多选交互
+
+    /// 单击切换选中
+    private func toggle(_ asset: PHAsset) {
+        UIImpactFeedbackGenerator(style: .soft).impactOccurred()
+        let id = asset.localIdentifier
+        withAnimation(.spring(response: 0.25, dampingFraction: 0.7)) {
+            if selectedIds.contains(id) {
+                selectedIds.remove(id)
+            } else {
+                selectedIds.insert(id)
+            }
+        }
+    }
+
+    /// 全选 / 全不选
+    private func toggleAll() {
+        withAnimation(.easeInOut(duration: 0.2)) {
+            if isAllSelected {
+                selectedIds.removeAll()
+            } else {
+                selectedIds = Set(vm.pendingDeletion.map { $0.localIdentifier })
+            }
+        }
+    }
+
+    // MARK: - 空状态
+
     private var emptyState: some View {
         VStack(spacing: 16) {
             Image(systemName: "tray")
                 .font(.system(size: 56))
-                .foregroundStyle(.secondary)
-            Text("暂无待删除照片")
+                .foregroundStyle(AppPalette.textTertiary)
+            Text(lm.t("暂无待删除照片"))
                 .font(.title3.weight(.semibold))
-            Text("上滑照片可加入此列表")
+                .foregroundStyle(AppPalette.textPrimary)
+            Text(lm.t("上滑照片可加入此列表"))
                 .font(.callout)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(AppPalette.textSecondary)
         }
     }
 
-    /// 底部确认条
+    // MARK: - 底部条
+
     private var confirmBar: some View {
         HStack(spacing: 12) {
-            // 总大小估算
+            // 已选数 + 可释放
             VStack(alignment: .leading, spacing: 2) {
-                Text("可释放")
+                Text("\(lm.t("可释放")) · \(selectedAssets.count)")
                     .font(.system(size: 11))
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(AppPalette.textSecondary)
                 Text(totalSizeString)
                     .font(.system(size: 17, weight: .bold, design: .rounded))
+                    .foregroundStyle(AppPalette.textPrimary)
             }
 
             Spacer()
@@ -106,20 +171,22 @@ struct PendingDeletionView: View {
                     } else {
                         Image(systemName: "trash.fill")
                     }
-                    Text(isDeleting ? "删除中…" : "确认删除")
+                    Text(isDeleting ? lm.t("删除中…") : lm.t("确认删除"))
                         .font(.system(size: 16, weight: .semibold))
                 }
                 .foregroundStyle(.white)
                 .padding(.horizontal, 22).padding(.vertical, 14)
                 .background {
                     if #available(iOS 26.0, *) {
-                        Capsule().fill(.clear).glassEffect(.regular.tint(.red.opacity(0.55)).interactive(), in: .capsule)
+                        Capsule().fill(.clear)
+                            .glassEffect(.regular.tint(.red.opacity(0.55)).interactive(), in: .capsule)
                     } else {
                         Capsule().fill(Color.red)
                     }
                 }
             }
-            .disabled(isDeleting)
+            .disabled(isDeleting || selectedAssets.isEmpty)
+            .opacity(selectedAssets.isEmpty ? 0.4 : 1)
         }
         .padding(16)
         .background {
@@ -134,72 +201,95 @@ struct PendingDeletionView: View {
         .padding(.bottom, 12)
     }
 
-    /// 计算所有待删除资产的总大小
+    /// 当前选中资产的累计大小
     private var totalSizeString: String {
-        let total = vm.pendingDeletion.reduce(Int64(0)) { sum, asset in
+        let total = selectedAssets.reduce(Int64(0)) { sum, asset in
             sum + PhotoClassifier.estimatedSize(of: asset)
         }
         return ByteCountFormatter.string(fromByteCount: total, countStyle: .file)
     }
 
-    /// 执行删除（系统会弹原生确认框）
+    /// 只删除选中项；未选中的留在 pendingDeletion
     private func performDelete() async {
+        let toDelete = selectedAssets
+        guard !toDelete.isEmpty else { return }
         isDeleting = true
-        let assets = vm.pendingDeletion
-        let success = await library.deleteAssets(assets)
+        let success = await library.deleteAssets(toDelete)
         isDeleting = false
         if success {
-            vm.clearAfterDelete()
-            // 删除后刷新分类计数
+            let deletedIds = Set(toDelete.map { $0.localIdentifier })
+            vm.pendingDeletion.removeAll { deletedIds.contains($0.localIdentifier) }
+            vm.assets.removeAll { deletedIds.contains($0.localIdentifier) }
+            vm.deleteHistory.removeAll { deletedIds.contains($0.asset.localIdentifier) }
+            vm.currentIndex = min(vm.currentIndex, max(0, vm.assets.count - 1))
+            selectedIds.removeAll()
             await library.refreshCategoryCounts()
             dismiss()
         }
     }
 }
 
-/// 单张待删除缩略图
+// MARK: - 多选缩略图
+
 struct PendingThumbnail: View {
     let asset: PHAsset
-    let onRemove: () -> Void
+    let isSelected: Bool
+    let onTap: () -> Void
     @EnvironmentObject private var library: PhotoLibraryService
 
     @State private var image: UIImage?
     @State private var requestID: PHImageRequestID?
 
     var body: some View {
-        // 用 padding 让 ZStack 整体有空间容纳 × 按钮在角落，按钮不被 grid cell 边界裁切
-        ZStack {
-            // 缩略图
-            ZStack {
-                Color(.systemGray6)
-                if let image {
-                    Image(uiImage: image)
-                        .resizable()
-                        .scaledToFill()
-                }
-            }
-            .frame(height: 110)
-            .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
-            .padding(6) // 给 × 留位置
-
-            // 移除按钮：右上角，落在 padding 区域内
-            VStack {
-                HStack {
-                    Spacer()
-                    Button(action: onRemove) {
-                        Image(systemName: "xmark.circle.fill")
-                            .font(.system(size: 22))
-                            .foregroundStyle(.white, .black.opacity(0.65))
-                            .background(Circle().fill(.white).padding(4))
-                            .contentShape(Circle())
+        Button {
+            onTap()
+        } label: {
+            ZStack(alignment: .topTrailing) {
+                ZStack {
+                    Color(red: 0.13, green: 0.12, blue: 0.11)
+                    if let image {
+                        Image(uiImage: image)
+                            .resizable()
+                            .scaledToFill()
                     }
-                    .buttonStyle(.plain)
                 }
-                Spacer()
+                .frame(height: 110)
+                .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+                // 选中蒙层
+                .overlay {
+                    if isSelected {
+                        RoundedRectangle(cornerRadius: 14, style: .continuous)
+                            .strokeBorder(AppPalette.brand, lineWidth: 3)
+                    }
+                }
+                .overlay(alignment: .topLeading) {
+                    if isSelected {
+                        RoundedRectangle(cornerRadius: 14, style: .continuous)
+                            .fill(AppPalette.brand.opacity(0.18))
+                    }
+                }
+
+                // 右上角勾选指示器
+                Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
+                    .font(.system(size: 22, weight: .bold))
+                    .foregroundStyle(
+                        isSelected ? AppPalette.brand : Color.white.opacity(0.85),
+                        isSelected ? Color.white : Color.black.opacity(0.4)
+                    )
+                    .padding(6)
+                    .background(
+                        Circle()
+                            .fill(isSelected ? Color.white : Color.black.opacity(0.25))
+                            .frame(width: 26, height: 26)
+                    )
+                    .padding(6)
             }
+            .contentShape(Rectangle())
         }
+        .buttonStyle(.plain)
         .onAppear {
-            requestID = library.loadImage(for: asset, targetSize: CGSize(width: 280, height: 280)) { img in
+            requestID = library.loadImage(for: asset,
+                                           targetSize: CGSize(width: 280, height: 280)) { img in
                 image = img
             }
         }

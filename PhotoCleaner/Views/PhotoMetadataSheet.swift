@@ -11,6 +11,7 @@ struct PhotoMetadataSheet: View {
     let asset: PHAsset
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject private var library: PhotoLibraryService
+    @EnvironmentObject private var lm: LanguageManager
 
     @State private var image: UIImage?
     @State private var reqID: PHImageRequestID?
@@ -35,11 +36,11 @@ struct PhotoMetadataSheet: View {
                 }
             }
             .preferredColorScheme(.dark)
-            .navigationTitle("照片详情")
+            .navigationTitle(lm.t("照片详情"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button("关闭") { dismiss() }
+                    Button(lm.t("关闭")) { dismiss() }
                         .tint(AppPalette.brand)
                 }
             }
@@ -73,30 +74,30 @@ struct PhotoMetadataSheet: View {
 
     private var metadataCard: some View {
         VStack(spacing: 0) {
-            row("文件名", fileName)
+            row(lm.t("文件名"), fileName)
             divider
-            row("尺寸", "\(asset.pixelWidth) × \(asset.pixelHeight) px")
+            row(lm.t("尺寸"), "\(asset.pixelWidth) × \(asset.pixelHeight) px")
             divider
-            row("大小", ByteCountFormatter.string(fromByteCount: totalSize, countStyle: .file))
+            row(lm.t("大小"), ByteCountFormatter.string(fromByteCount: totalSize, countStyle: .file))
             divider
-            row("类型", mediaTypeText)
+            row(lm.t("类型"), mediaTypeText)
             divider
-            row("创建", format(asset.creationDate))
+            row(lm.t("创建"), format(asset.creationDate))
             divider
-            row("修改", format(asset.modificationDate))
+            row(lm.t("修改"), format(asset.modificationDate))
             if let loc = asset.location {
                 divider
-                row("位置", String(format: "%.5f, %.5f",
+                row(lm.t("位置"), String(format: "%.5f, %.5f",
                                    loc.coordinate.latitude,
                                    loc.coordinate.longitude))
             }
             if asset.mediaType == .video {
                 divider
-                row("时长", formatDuration(asset.duration))
+                row(lm.t("时长"), formatDuration(asset.duration))
             }
             if asset.isFavorite {
                 divider
-                row("收藏", "已收藏 ❤︎")
+                row(lm.t("收藏"), lm.t("已收藏 ❤︎"))
             }
         }
         .background(
@@ -140,7 +141,7 @@ struct PhotoMetadataSheet: View {
                 openInPhotosApp()
             } label: {
                 actionButtonLabel(symbol: "arrow.up.right.square.fill",
-                                   text: "在 照片 App 中打开",
+                                   text: lm.t("在 照片 App 中打开"),
                                    tint: AppPalette.brand)
             }
             .buttonStyle(.plain)
@@ -149,7 +150,7 @@ struct PhotoMetadataSheet: View {
                 share()
             } label: {
                 actionButtonLabel(symbol: "square.and.arrow.up",
-                                   text: "分享",
+                                   text: lm.t("分享"),
                                    tint: .white)
             }
             .buttonStyle(.plain)
@@ -201,12 +202,12 @@ struct PhotoMetadataSheet: View {
     // MARK: - 辅助
 
     private var mediaTypeText: String {
-        if asset.mediaType == .video { return "视频" }
-        if asset.mediaSubtypes.contains(.photoLive) { return "实况照片" }
-        if asset.mediaSubtypes.contains(.photoScreenshot) { return "截图" }
-        if asset.mediaSubtypes.contains(.photoPanorama) { return "全景照片" }
-        if asset.mediaSubtypes.contains(.photoHDR) { return "HDR 照片" }
-        return "照片"
+        if asset.mediaType == .video { return lm.t("视频") }
+        if asset.mediaSubtypes.contains(.photoLive) { return lm.t("实况照片") }
+        if asset.mediaSubtypes.contains(.photoScreenshot) { return lm.t("截图") }
+        if asset.mediaSubtypes.contains(.photoPanorama) { return lm.t("全景照片") }
+        if asset.mediaSubtypes.contains(.photoHDR) { return lm.t("HDR 照片") }
+        return lm.t("照片")
     }
 
     private func format(_ date: Date?) -> String {

@@ -5,6 +5,16 @@
 
 ---
 
+## [0.8.1] - 2026-06-06
+
+### 修复
+- **滑动审核页移除底层卡叠图**：之前用 `scale(0.93) + offset(y:18)` 露出底层卡顶部边缘营造堆叠感，
+  仍能看到后面那张照片的内容；现在彻底移除 underlying card，每次只显示当前一张
+  - 切换时用 `.transition(.opacity + .scale(0.95))` + `.animation(.easeInOut(0.22))` 做 fade 过渡
+  - 删除未使用的 `underlyingAsset` / `previewNextAsset` / `previewPrevAsset` 计算属性
+
+---
+
 ## [0.8.0] - 2026-06-06
 
 ### 新增

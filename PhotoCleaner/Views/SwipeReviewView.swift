@@ -322,15 +322,7 @@ struct SwipeReviewView: View {
 
     private func cardArea(in size: CGSize) -> some View {
         ZStack {
-            if let underlying = underlyingAsset {
-                PhotoCardView(asset: underlying)
-                    // 不再用 opacity 让背景图透出（会显得脏）
-                    // 改用 scale + offset 露出顶部一条边缘做堆叠感
-                    .scaleEffect(0.93)
-                    .offset(y: 18)
-                    .allowsHitTesting(false)
-            }
-
+            // 只显示当前卡，不再做堆叠预览（避免透出后面的图片）
             if let asset = vm.currentAsset {
                 PhotoCardView(asset: asset)
                     .id(asset.localIdentifier)
@@ -339,33 +331,13 @@ struct SwipeReviewView: View {
                     .gesture(dragGesture(in: size))
                     .animation(.spring(response: 0.35, dampingFraction: 0.75), value: dragOffset)
                     .animation(.spring(response: 0.35, dampingFraction: 0.75), value: exitDirection)
+                    .transition(.opacity.combined(with: .scale(scale: 0.95)))
             }
         }
+        // 切换照片时让 transition 生效
+        .animation(.easeInOut(duration: 0.22), value: vm.currentIndex)
         .padding(.horizontal, 16)
         .padding(.vertical, 8)
-    }
-
-    /// 底层卡：手指向左拖（h<0）想看下一张；向右拖（h>0）想看前一张
-    private var underlyingAsset: PHAsset? {
-        if dragOffset.width < -20, let next = previewNextAsset {
-            return next
-        }
-        if dragOffset.width > 20, let prev = previewPrevAsset {
-            return prev
-        }
-        return previewNextAsset
-    }
-
-    private var previewNextAsset: PHAsset? {
-        let i = vm.currentIndex + 1
-        guard i < vm.assets.count else { return nil }
-        return vm.assets[i]
-    }
-
-    private var previewPrevAsset: PHAsset? {
-        let i = vm.currentIndex - 1
-        guard i >= 0 else { return nil }
-        return vm.assets[i]
     }
 
     private var currentCardOffset: CGSize {

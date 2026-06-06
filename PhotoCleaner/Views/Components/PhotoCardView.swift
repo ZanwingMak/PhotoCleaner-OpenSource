@@ -26,10 +26,14 @@ struct PhotoCardView: View {
     var body: some View {
         GeometryReader { geo in
             ZStack {
-                // 纯色背景（不再用模糊放大同图）
-                Color(red: 0.06, green: 0.055, blue: 0.05)
+                // 仅在加载中显示深色底，加载完后透明（让堆叠下层照片可见）
+                if image == nil && livePhoto == nil {
+                    Color(red: 0.06, green: 0.055, blue: 0.05)
+                    ProgressView()
+                        .progressViewStyle(.circular)
+                        .tint(.white)
+                }
 
-                // 主图：Live Photo 用 PHLivePhotoView，否则用 UIImage
                 if isLivePhoto, let livePhoto {
                     LivePhotoView(livePhoto: livePhoto)
                         .frame(width: geo.size.width, height: geo.size.height)
@@ -39,10 +43,6 @@ struct PhotoCardView: View {
                         .scaledToFit()
                         .frame(width: geo.size.width, height: geo.size.height)
                         .transition(.opacity)
-                } else {
-                    ProgressView()
-                        .progressViewStyle(.circular)
-                        .tint(.white)
                 }
 
                 // 元信息浮层

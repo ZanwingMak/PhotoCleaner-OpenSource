@@ -5,6 +5,31 @@
 
 ---
 
+## [0.9.2] - 2026-06-06
+
+### 新增
+- **滑动审核 Coverflow 3D 动画**（仿 swiper.js Effect Coverflow）：
+  - 静止时只显示当前卡，纯净不叠
+  - 拖动开始时**前一张从左侧 / 下一张从右侧** 3D 倾斜跟随手指过来
+  - 三轴变换同步进行：
+    - **rotation3DEffect(axis: Y, perspective: 0.8)** — 左右卡 ±45° 倾斜，朝中心翻正
+    - **scale 0.82 → 1.0** — 进入中心时放大到正常
+    - **offset 0.55w → 0** — 从屏幕外 X 位置回到中心
+    - **opacity 0 → 1** — 静止隐藏，拖动渐显
+  - 当前卡同步反向旋转 ±35° + 缩小 12%，强化"翻页"立体感
+  - `swipeProgress` 计算属性把 dragOffset 归一化到 -1 ~ +1，三张卡所有参数都由它驱动
+- 上滑（删除）时自动隐藏左右 coverflow 卡，让当前卡向上飞出，无杂乱
+
+### 修复（接 v0.9.1）
+- `PhotoCardView` 加载完照片后**不再绘制不透明背景** —— 静态深色 `Color` 仅在 loading 中显示
+  让堆叠层之间相互可见，coverflow 动画立体感更清晰
+
+### 清理
+- 移除已不再使用的 `underlyingAsset` / `underlyingScale` / `underlyingOpacity` / `underlyingOffset` /
+  `rotationAngle` 等 v0.9.0/v0.9.1 的过渡实现
+
+---
+
 ## [0.9.1] - 2026-06-06
 
 ### 新增

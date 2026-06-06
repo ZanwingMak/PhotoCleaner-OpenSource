@@ -322,26 +322,56 @@ struct SwipeReviewView: View {
 
     private func cardArea(in size: CGSize) -> some View {
         ZStack {
-            // 堆叠预览：仅在拖拽中或离场时显示，根据方向选对应的前/后一张
-            // 静止时不显示，避免常驻叠图干扰
-            if let underlying = underlyingAsset {
-                PhotoCardView(asset: underlying)
-                    .scaleEffect(underlyingScale)
-                    .opacity(underlyingOpacity)
+            // Coverflow：前一张从左侧 3D 倾斜跟过来，下一张从右侧 3D 倾斜跟过来
+            // 上滑（删除）时隐藏左右堆叠卡，让当前卡向上飞出
+
+            if let prev = prevAsset, !isVerticalDrag {
+                PhotoCardView(asset: prev)
+                    .scaleEffect(prevScale)
+                    .offset(x: prevOffsetX(in: size))
+                    .rotation3DEffect(
+                        .degrees(prevRotationY),
+                        axis: (x: 0, y: 1, z: 0),
+                        anchor: .center,
+                        perspective: 0.8
+                    )
+                    .opacity(prevOpacity)
                     .allowsHitTesting(false)
-                    .transition(.opacity)
+                    .zIndex(1)
             }
 
-            // 当前卡
+            if let next = nextAsset, !isVerticalDrag {
+                PhotoCardView(asset: next)
+                    .scaleEffect(nextScale)
+                    .offset(x: nextOffsetX(in: size))
+                    .rotation3DEffect(
+                        .degrees(nextRotationY),
+                        axis: (x: 0, y: 1, z: 0),
+                        anchor: .center,
+                        perspective: 0.8
+                    )
+                    .opacity(nextOpacity)
+                    .allowsHitTesting(false)
+                    .zIndex(1)
+            }
+
+            // 当前卡：横向拖时缩放 + 3D 倾斜；上滑/离场用 currentCardOffset
             if let asset = vm.currentAsset {
                 PhotoCardView(asset: asset)
                     .id(asset.localIdentifier)
+                    .scaleEffect(currentScale)
                     .offset(currentCardOffset)
-                    .rotationEffect(.degrees(rotationAngle))
+                    .rotation3DEffect(
+                        .degrees(currentRotationY),
+                        axis: (x: 0, y: 1, z: 0),
+                        anchor: .center,
+                        perspective: 0.8
+                    )
                     .gesture(dragGesture(in: size))
-                    .animation(.spring(response: 0.35, dampingFraction: 0.75), value: dragOffset)
-                    .animation(.spring(response: 0.35, dampingFraction: 0.75), value: exitDirection)
-                    .transition(.opacity.combined(with: .scale(scale: 0.95)))
+                    .animation(.spring(response: 0.4, dampingFraction: 0.78), value: dragOffset)
+                    .animation(.spring(response: 0.4, dampingFraction: 0.78), value: exitDirection)
+                    .transition(.opacity.combined(with: .scale(scale: 0.92)))
+                    .zIndex(10)
             }
         }
         .animation(.easeInOut(duration: 0.22), value: vm.currentIndex)
@@ -349,38 +379,80 @@ struct SwipeReviewView: View {
         .padding(.vertical, 8)
     }
 
-    /// 拖拽方向对应的底层卡：左滑/上滑 → 下一张；右滑 → 前一张
-    /// 静止时返回 nil，避免常驻叠图
-    private var underlyingAsset: PHAsset? {
-        // 只有正在拖拽或离场动画中才显示
-        let isInteracting = dragOffset != .zero || exitDirection != .none
-        guard isInteracting else { return nil }
+    // MARK: - Coverflow 参数
 
-        // 左滑（h<0）或上滑（v<0）→ 下一张
-        if dragOffset.width < -30 || dragOffset.height < -30 || exitDirection == .left || exitDirection == .up {
-            let i = vm.currentIndex + 1
-            guard i < vm.assets.count else { return nil }
-            return vm.assets[i]
-        }
-        // 右滑（h>0）→ 前一张
-        if dragOffset.width > 30 || exitDirection == .right {
-            let i = vm.currentIndex - 1
-            guard i >= 0 else { return nil }
-            return vm.assets[i]
-        }
-        return nil
+    /// 拖拽水平进度：-1 (完全左滑) → 0 (静止) → +1 (完全右滑)
+    private var swipeProgress: CGFloat {
+        let p = -dragOffset.width / 360.0
+        return max(-1, min(1, p))
     }
 
-    /// 底层卡缩放：拖得越远越接近正常大小
-    private var underlyingScale: CGFloat {
-        let dist = max(abs(dragOffset.width), abs(dragOffset.height))
-        return 0.88 + min(0.12, dist / 800)
+    /// 是否主要在做垂直拖（上滑删除场景，隐藏左右 coverflow 卡）
+    private var isVerticalDrag: Bool {
+        abs(dragOffset.height) > abs(dragOffset.width) && dragOffset.height < -20
     }
 
-    /// 底层卡不透明度：拖得越远越实
-    private var underlyingOpacity: Double {
-        let dist = max(abs(dragOffset.width), abs(dragOffset.height))
-        return min(1.0, 0.4 + Double(dist) / 280)
+    private var prevAsset: PHAsset? {
+        let i = vm.currentIndex - 1
+        guard i >= 0 else { return nil }
+        return vm.assets[i]
+    }
+
+    private var nextAsset: PHAsset? {
+        let i = vm.currentIndex + 1
+        guard i < vm.assets.count else { return nil }
+        return vm.assets[i]
+    }
+
+    /// 当前卡缩放：拖远稍微缩小（让位给新卡）
+    private var currentScale: CGFloat {
+        guard exitDirection == .none else { return 1 }
+        return 1 - abs(swipeProgress) * 0.12
+    }
+
+    /// 当前卡 Y 轴旋转：朝手指反方向倾斜（左滑时正面朝右，看起来要飞走）
+    private var currentRotationY: Double {
+        guard exitDirection == .none else { return 0 }
+        return Double(swipeProgress * 35)
+    }
+
+    /// 前一张 X 偏移：静止时在左外 -0.55w，progress 到 +1 时回到中心 0
+    private func prevOffsetX(in size: CGSize) -> CGFloat {
+        let restX = -size.width * 0.55
+        return restX * (1 - max(0, swipeProgress))
+    }
+
+    /// 前一张缩放：0.82（静止）→ 1.0（到中心）
+    private var prevScale: CGFloat {
+        0.82 + max(0, swipeProgress) * 0.18
+    }
+
+    /// 前一张 Y 轴旋转：+45 度（左侧倾斜面朝右）→ 0
+    private var prevRotationY: Double {
+        Double(45 - max(0, swipeProgress) * 45)
+    }
+
+    /// 前一张不透明度：静止时 0 → 拖向右时渐显到 1
+    private var prevOpacity: Double {
+        Double(max(0, swipeProgress))
+    }
+
+    /// 下一张（镜像，参考前一张）
+    private func nextOffsetX(in size: CGSize) -> CGFloat {
+        let restX = size.width * 0.55
+        return restX * (1 - max(0, -swipeProgress))
+    }
+
+    private var nextScale: CGFloat {
+        0.82 + max(0, -swipeProgress) * 0.18
+    }
+
+    private var nextRotationY: Double {
+        Double(-45 + max(0, -swipeProgress) * 45)
+    }
+
+    private var nextOpacity: Double {
+        Double(max(0, -swipeProgress))
     }
 
     private var currentCardOffset: CGSize {
@@ -390,11 +462,6 @@ struct SwipeReviewView: View {
         case .up:    return CGSize(width: dragOffset.width * 0.2, height: -1200)
         case .none:  return dragOffset
         }
-    }
-
-    private var rotationAngle: Double {
-        guard exitDirection == .none else { return 0 }
-        return Double(dragOffset.width / 28)
     }
 
     // MARK: - 拖拽手势（iOS 标准方向）

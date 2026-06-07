@@ -236,40 +236,39 @@ struct SwipeReviewView: View {
             .presentationDetents([.medium, .large])
             .presentationDragIndicator(.visible)
         }
-        .confirmationDialog(
-            String(format: lm.t("有 %d 张待删除"), vm.pendingDeletion.count),
+        .customDialog(
             isPresented: Binding(
                 get: { pendingExitConfirm != nil },
                 set: { if !$0 { pendingExitConfirm = nil } }
             ),
-            titleVisibility: .visible
-        ) {
-            Button(lm.t("查看待删除列表")) {
-                showPendingSheet = true
-                pendingExitConfirm = nil
-            }
-            Button(lm.t("放弃并退出"), role: .destructive) {
-                let action = pendingExitConfirm
-                vm.pendingDeletion.removeAll()
-                vm.deleteHistory.removeAll()
-                pendingExitConfirm = nil
-                switch action {
-                case .dismiss?:
-                    dismiss()
-                case .switchCategory(let cat)?:
-                    switchCategory(to: cat)
-                case nil: break
+            title: String(format: lm.t("有 %d 张待删除"), vm.pendingDeletion.count),
+            message: lm.t("有待删除的照片未处理。继续退出会清空当前选择。"),
+            actions: [
+                DialogAction(title: lm.t("查看待删除列表"), role: .primary) {
+                    showPendingSheet = true
+                    pendingExitConfirm = nil
+                },
+                DialogAction(title: lm.t("继续审核"), role: .normal) {
+                    pendingExitConfirm = nil
+                },
+                DialogAction(title: lm.t("放弃并退出"), role: .destructive) {
+                    let action = pendingExitConfirm
+                    vm.pendingDeletion.removeAll()
+                    vm.deleteHistory.removeAll()
+                    pendingExitConfirm = nil
+                    switch action {
+                    case .dismiss?:
+                        dismiss()
+                    case .switchCategory(let cat)?:
+                        switchCategory(to: cat)
+                    case nil: break
+                    }
+                },
+                DialogAction(title: lm.t("点错了"), role: .cancel) {
+                    pendingExitConfirm = nil
                 }
-            }
-            Button(lm.t("继续审核")) {
-                pendingExitConfirm = nil
-            }
-            Button(lm.t("点错了"), role: .cancel) {
-                pendingExitConfirm = nil
-            }
-        } message: {
-            Text(lm.t("有待删除的照片未处理。继续退出会清空当前选择。"))
-        }
+            ]
+        )
         .task {
             await loadAssets(for: currentCategory)
         }

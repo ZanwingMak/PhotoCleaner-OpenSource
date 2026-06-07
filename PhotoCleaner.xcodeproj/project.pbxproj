@@ -30,6 +30,7 @@
 		BF000000000000000000A015 /* LanguageManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0000000000000000000A015 /* LanguageManager.swift */; };
 		BF000000000000000000A016 /* L10n.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0000000000000000000A016 /* L10n.swift */; };
 		BF000000000000000000A017 /* LivePhotoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0000000000000000000A017 /* LivePhotoView.swift */; };
+		BF000000000000000000A018 /* CustomDialog.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0000000000000000000A018 /* CustomDialog.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -57,6 +58,7 @@
 		F0000000000000000000A015 /* LanguageManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LanguageManager.swift; sourceTree = "<group>"; };
 		F0000000000000000000A016 /* L10n.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = L10n.swift; sourceTree = "<group>"; };
 		F0000000000000000000A017 /* LivePhotoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LivePhotoView.swift; sourceTree = "<group>"; };
+		F0000000000000000000A018 /* CustomDialog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomDialog.swift; sourceTree = "<group>"; };
 		F0000000000000000000B001 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		F0000000000000000000B002 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -156,6 +158,7 @@
 				F0000000000000000000A00E /* RingProgress.swift */,
 				F0000000000000000000A00F /* AppPalette.swift */,
 				F0000000000000000000A017 /* LivePhotoView.swift */,
+				F0000000000000000000A018 /* CustomDialog.swift */,
 			);
 			path = Components;
 			sourceTree = "<group>";
@@ -252,6 +255,7 @@
 				BF000000000000000000A015 /* LanguageManager.swift in Sources */,
 				BF000000000000000000A016 /* L10n.swift in Sources */,
 				BF000000000000000000A017 /* LivePhotoView.swift in Sources */,
+				BF000000000000000000A018 /* CustomDialog.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

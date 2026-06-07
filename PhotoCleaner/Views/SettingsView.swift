@@ -99,7 +99,7 @@ struct SettingsView: View {
                     .font(.system(size: 15, weight: .medium))
                     .foregroundStyle(AppPalette.textPrimary(for: theme))
                 Spacer()
-                Text(lm.current.title)
+                Text(lm.t(lm.current.title))
                     .font(.system(size: 13, weight: .medium))
                     .foregroundStyle(AppPalette.textSecondary(for: theme))
             }
@@ -113,7 +113,7 @@ struct SettingsView: View {
                             lm.set(lang)
                         } label: {
                             let isSelected = lm.current == lang
-                            Text(lang.title)
+                            Text(lm.t(lang.title))
                                 .font(.system(size: 13, weight: isSelected ? .bold : .medium))
                                 .foregroundStyle(isSelected ? .white : AppPalette.textSecondary(for: theme))
                                 .padding(.horizontal, 14)

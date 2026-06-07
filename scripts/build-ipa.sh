@@ -51,6 +51,7 @@ SWIFT_FILES=(
   "$SRC_DIR/Views/Components/RingProgress.swift"
   "$SRC_DIR/Views/Components/AppPalette.swift"
   "$SRC_DIR/Views/Components/LivePhotoView.swift"
+  "$SRC_DIR/Views/Components/CustomDialog.swift"
 )
 
 SDK_PATH="$(xcrun --sdk "$SDK_NAME" --show-sdk-path)"

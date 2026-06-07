@@ -5,6 +5,28 @@
 
 ---
 
+## [1.1.1] - 2026-06-08
+
+### 新增
+- **`CustomDialog`** 自定义弹窗组件：替代 SwiftUI 系统 `confirmationDialog`
+  - 宽度可控（max 360pt，比系统 alert 宽 33%）
+  - 按钮颜色不受 app `.tint(brand)` 染色影响：
+    - 主操作（查看待删除列表）：system blue (#007AFF)
+    - 继续审核：system blue 普通
+    - 放弃并退出：system red (#FF3B30) destructive
+    - 点错了：system blue cancel 加粗
+  - 半透明遮罩（点击关闭）+ 中心卡片（白底深字 / 深底白字 主题自适应）+ 阴影 + 缩放转场
+  - `.customDialog(isPresented:title:message:actions:)` View 修饰器调用
+
+### 修复
+- **「跟随系统」语言选项未翻译**：SettingsView 内 `Text(lm.current.title)` 和 `Text(lang.title)` 都没用 `lm.t()` 包装
+  - 现在每个 lang.title 都走 L10n 字典翻译，英文显示 "System"，日语「システム」，韩语「시스템」
+
+### 变更
+- 「有 N 张待删除」弹窗换用 `customDialog`，宽度更宽 + 颜色更清晰
+
+---
+
 ## [1.1.0] - 2026-06-08
 
 第二个稳定版本，主题系统重做，bug 全面修复。

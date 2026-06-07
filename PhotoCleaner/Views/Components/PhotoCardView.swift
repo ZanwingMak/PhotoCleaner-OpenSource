@@ -9,6 +9,23 @@ import Photos
 import PhotosUI
 import UIKit
 
+/// 全局缩略图缓存：view 重建时立即取，不闪 Loading
+enum ThumbnailCache {
+    static let shared: NSCache<NSString, UIImage> = {
+        let c = NSCache<NSString, UIImage>()
+        c.countLimit = 300
+        return c
+    }()
+
+    static func get(_ id: String) -> UIImage? {
+        shared.object(forKey: id as NSString)
+    }
+
+    static func set(_ id: String, _ image: UIImage) {
+        shared.setObject(image, forKey: id as NSString)
+    }
+}
+
 struct PhotoCardView: View {
     let asset: PHAsset
     @EnvironmentObject private var library: PhotoLibraryService
@@ -17,6 +34,12 @@ struct PhotoCardView: View {
     @State private var livePhoto: PHLivePhoto?
     @State private var imageRequestID: PHImageRequestID?
     @State private var liveRequestID: PHImageRequestID?
+
+    /// init 时立即从缓存取 image，避免重建 view 时闪 Loading
+    init(asset: PHAsset) {
+        self.asset = asset
+        _image = State(initialValue: ThumbnailCache.get(asset.localIdentifier))
+    }
 
     /// 该资产是否为 Live Photo
     private var isLivePhoto: Bool {
@@ -49,39 +72,30 @@ struct PhotoCardView: View {
                 // 避免卡片飞出时元数据胶囊跟随抖动
             }
             .clipShape(RoundedRectangle(cornerRadius: 32, style: .continuous))
-            .overlay {
-                RoundedRectangle(cornerRadius: 32, style: .continuous)
-                    .strokeBorder(.white.opacity(0.10), lineWidth: 1)
-            }
-            .shadow(color: .black.opacity(0.35), radius: 24, x: 0, y: 12)
+            // 已去掉边框 strokeBorder 和外阴影 shadow（防止深色背景的"画框感"）
             .onAppear { load(targetSize: geo.size) }
             .onDisappear { cancelLoad() }
         }
     }
 
-    /// 异步加载：Live Photo 走 requestLivePhoto；其它走普通图片
+    /// 异步加载：先用缓存，缺时才请求；Live Photo 额外加载
     private func load(targetSize: CGSize) {
         let scale = UIScreen.main.scale
         let target = CGSize(width: targetSize.width * scale,
                              height: targetSize.height * scale)
 
-        if isLivePhoto {
-            // 先加载静态预览图，再加载 Live Photo
+        // 静态图：已有 cache 就不重新加载，避免切换时闪
+        if image == nil {
             imageRequestID = library.loadImage(for: asset, targetSize: target) { img in
-                withAnimation(.easeOut(duration: 0.25)) {
-                    self.image = img
-                }
+                guard let img else { return }
+                ThumbnailCache.set(asset.localIdentifier, img)
+                self.image = img // 静默赋值，无 withAnimation 避免闪烁
             }
+        }
+
+        if isLivePhoto, livePhoto == nil {
             liveRequestID = library.loadLivePhoto(for: asset, targetSize: target) { live in
-                withAnimation(.easeOut(duration: 0.25)) {
-                    self.livePhoto = live
-                }
-            }
-        } else {
-            imageRequestID = library.loadImage(for: asset, targetSize: target) { img in
-                withAnimation(.easeOut(duration: 0.25)) {
-                    self.image = img
-                }
+                self.livePhoto = live
             }
         }
     }

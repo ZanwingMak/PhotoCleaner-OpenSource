@@ -22,6 +22,9 @@ struct CategoryListView: View {
     @State private var showSettings = false
     @State private var showPhotosBrowser = false
 
+    /// 刷新按钮持续旋转角度
+    @State private var refreshSpinAngle: Double = 0
+
     var body: some View {
         NavigationStack {
             ZStack(alignment: .bottom) {
@@ -167,7 +170,7 @@ struct CategoryListView: View {
                     .foregroundStyle(AppPalette.textPrimary)
             }
             Spacer()
-            // 刷新按钮
+            // 刷新按钮：isLoading 时图标持续 spring 累加旋转，结束保留当前角度
             Button {
                 UIImpactFeedbackGenerator(style: .soft).impactOccurred()
                 Task { await library.refreshCategoryCounts() }
@@ -181,13 +184,16 @@ struct CategoryListView: View {
                             .overlay(Circle().strokeBorder(.white.opacity(0.06), lineWidth: 1))
                     )
                     .contentShape(Rectangle())
-                    .rotationEffect(.degrees(library.isLoading ? 360 : 0))
-                    .animation(library.isLoading ?
-                                .linear(duration: 0.9).repeatForever(autoreverses: false) :
-                                .default, value: library.isLoading)
+                    .rotationEffect(.degrees(refreshSpinAngle))
+                    .animation(.linear(duration: 0.6), value: refreshSpinAngle)
             }
             .buttonStyle(.plain)
             .disabled(library.isLoading)
+            .onReceive(Timer.publish(every: 0.6, on: .main, in: .common).autoconnect()) { _ in
+                if library.isLoading {
+                    refreshSpinAngle += 360
+                }
+            }
             // 设置入口
             Button {
                 UIImpactFeedbackGenerator(style: .soft).impactOccurred()

@@ -240,61 +240,64 @@ struct PendingThumbnail: View {
     @State private var requestID: PHImageRequestID?
 
     var body: some View {
-        Button {
-            onTap()
-        } label: {
-            ZStack(alignment: .topTrailing) {
-                ZStack {
-                    Color(red: 0.13, green: 0.12, blue: 0.11)
-                    if let image {
-                        Image(uiImage: image)
-                            .resizable()
-                            .scaledToFill()
-                    }
-                }
-                .aspectRatio(1, contentMode: .fit)
-                .clipped()
-                .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
-                // 选中蒙层
-                .overlay {
-                    if isSelected {
-                        RoundedRectangle(cornerRadius: 14, style: .continuous)
-                            .strokeBorder(AppPalette.brand, lineWidth: 3)
-                    }
-                }
-                .overlay(alignment: .topLeading) {
-                    if isSelected {
-                        RoundedRectangle(cornerRadius: 14, style: .continuous)
-                            .fill(AppPalette.brand.opacity(0.18))
-                    }
-                }
+        // 用 Color.clear + aspectRatio 1:1 占据正方形空间，
+        // 然后 GeometryReader 内强制 image / overlay 用 cell 实际宽度，避免溢出重叠
+        Color.clear
+            .aspectRatio(1, contentMode: .fit)
+            .overlay {
+                GeometryReader { geo in
+                    let side = min(geo.size.width, geo.size.height)
+                    Button {
+                        onTap()
+                    } label: {
+                        ZStack(alignment: .topTrailing) {
+                            // 缩略图层
+                            ZStack {
+                                Color(red: 0.13, green: 0.12, blue: 0.11)
+                                if let image {
+                                    Image(uiImage: image)
+                                        .resizable()
+                                        .scaledToFill()
+                                        .frame(width: side, height: side)
+                                }
+                            }
+                            .frame(width: side, height: side)
+                            .clipped()
+                            .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+                            .overlay {
+                                if isSelected {
+                                    RoundedRectangle(cornerRadius: 14, style: .continuous)
+                                        .fill(AppPalette.brand.opacity(0.18))
+                                        .overlay(
+                                            RoundedRectangle(cornerRadius: 14, style: .continuous)
+                                                .strokeBorder(AppPalette.brand, lineWidth: 3)
+                                        )
+                                }
+                            }
 
-                // 右上角勾选指示器
-                Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
-                    .font(.system(size: 22, weight: .bold))
-                    .foregroundStyle(
-                        isSelected ? AppPalette.brand : Color.white.opacity(0.85),
-                        isSelected ? Color.white : Color.black.opacity(0.4)
-                    )
-                    .padding(6)
-                    .background(
-                        Circle()
-                            .fill(isSelected ? Color.white : Color.black.opacity(0.25))
-                            .frame(width: 26, height: 26)
-                    )
-                    .padding(6)
+                            // 右上角勾选
+                            Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
+                                .font(.system(size: 20, weight: .bold))
+                                .foregroundStyle(
+                                    isSelected ? AppPalette.brand : Color.white.opacity(0.9),
+                                    isSelected ? Color.white : Color.black.opacity(0.45)
+                                )
+                                .padding(6)
+                        }
+                        .frame(width: side, height: side)
+                        .contentShape(Rectangle())
+                    }
+                    .buttonStyle(.plain)
+                }
             }
-            .contentShape(Rectangle())
-        }
-        .buttonStyle(.plain)
-        .onAppear {
-            requestID = library.loadImage(for: asset,
-                                           targetSize: CGSize(width: 280, height: 280)) { img in
-                image = img
+            .onAppear {
+                requestID = library.loadImage(for: asset,
+                                               targetSize: CGSize(width: 280, height: 280)) { img in
+                    image = img
+                }
             }
-        }
-        .onDisappear {
-            if let id = requestID { library.cancelImageRequest(id) }
-        }
+            .onDisappear {
+                if let id = requestID { library.cancelImageRequest(id) }
+            }
     }
 }

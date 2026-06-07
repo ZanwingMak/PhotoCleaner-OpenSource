@@ -5,6 +5,20 @@
 
 ---
 
+## [1.0.1] - 2026-06-07
+
+### 修复
+- **滑动切换照片时闪烁** — 新增全局 `ThumbnailCache` (NSCache 限 300 项)
+  - `PhotoCardView.init(asset:)` 立即从缓存取 image 作为 @State 初始值
+  - `load` 时若 image 已非 nil 跳过请求；不再 withAnimation 赋值（静默）
+- **待删除缩略图重叠** — 改用 `Color.clear + aspectRatio(1) + GeometryReader` 强制每个 cell 严格 side×side
+  - image 显式 `.frame(width: side, height: side)` + `.clipped()` 不再溢出
+- **刷新按钮无持续动画** — 改用 Timer 每 0.6s 累加 360° 旋转，配 `.animation(.linear(duration:0.6))`
+  - 加载结束时角度保留在最后位置，自然停下不回弹
+- **每张图的边框 + 外阴影** — `PhotoCardView` 去掉 `.strokeBorder` 和 `.shadow`，照片不再有"画框感"
+
+---
+
 ## [1.0.0] - 2026-06-07
 
 第一个正式版本。

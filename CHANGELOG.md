@@ -5,6 +5,38 @@
 
 ---
 
+## [1.0.0] - 2026-06-07
+
+第一个正式版本。
+
+### 新增
+- **抽卡牌动画**：滑动审核页改用 2D 变换（rotateZ + scale + offset）替代 3D rotation，60fps 流畅
+  - 当前卡：跟手指走 + rotateZ ±15°（按手指偏移 / 24）+ 轻微缩小
+  - prev/next：从 ±0.5w 滑到中心，scale 0.88→1，rotation ±8°→0°
+  - 锚点 `.bottom` 让倾斜以底边为轴，更像真实抽卡
+- **退出 / 切换分类确认弹窗**：当 `pendingDeletion` 非空时
+  - 点 X 关闭 / 切换分类不会立刻退出
+  - 弹三选项 alert：「查看待删除列表 / 继续审核 / 放弃并退出」
+- **首页刷新按钮**：右上角加 `arrow.clockwise` 按钮，加载时图标旋转动画
+- **首页下拉刷新**：unsortedScroll / albumsScroll 都加 `.refreshable` 修饰器，原生 Safari 风手势
+- **GPL v3 LICENSE**：仓库根目录加完整 GNU GPL v3 文本
+
+### 修复
+- **双重切换动画**：trigger 重构为「spring 推进 dragOffset 到屏外 + 静默切换 vm.currentIndex」
+  - 用 `Transaction.disablesAnimations = true` 包住 vm.handle，避免 SwiftUI 切换 id 时再触发一次动画
+  - 移除 `exitDirection` 状态变量，单 dragOffset 驱动一切
+- **元数据胶囊抖动**：把 PhotoCardView 内部的元数据胶囊移到 SwipeReviewView 固定层
+  - `.transaction { $0.animation = nil }` 显式禁用滑动期间的动画
+  - 改用半透明深底 (`Color.black.opacity(0.55)`) + 白字 + 白色描边，浅色/深色主题都清晰
+- **待删除列表缩略图重叠**：grid 从 `.adaptive(minimum:100, maximum:140)` 改为固定 3 列 `.flexible()`
+  - 缩略图加 `.aspectRatio(1, contentMode: .fit) + .clipped()`，每张严格 1:1
+
+### 文档
+- 4 个 README（中/英/日/韩）license badge 从 MIT 改为 GPL-3.0
+- CHANGELOG 完整记录 0.1.0 → 1.0.0 每个版本
+
+---
+
 ## [0.9.5] - 2026-06-07
 
 ### 修复

@@ -10,6 +10,33 @@ enum L10n {
         // 通用
         "PhotoCleaner": [.zh: "PhotoCleaner", .en: "PhotoCleaner", .ja: "PhotoCleaner", .ko: "PhotoCleaner"],
         "整理你的照片库，腾出存储空间": [.en: "Tidy your photo library, free up space", .ja: "写真ライブラリを整理して空き容量を確保", .ko: "사진 라이브러리 정리, 저장 공간 확보"],
+
+        // 退出确认
+        "有 %d 张待删除": [
+            .en: "%d Pending Delete",
+            .ja: "削除予定 %d 枚",
+            .ko: "삭제 대기 %d 장"
+        ],
+        "有待删除的照片未处理。继续退出会清空当前选择。": [
+            .en: "You have unprocessed photos pending delete. Exiting will discard them.",
+            .ja: "未処理の削除予定があります。退出すると選択がクリアされます。",
+            .ko: "처리되지 않은 삭제 대기 사진이 있습니다. 종료하면 선택이 사라집니다."
+        ],
+        "继续审核": [
+            .en: "Keep Reviewing",
+            .ja: "続けて確認",
+            .ko: "계속 검토"
+        ],
+        "放弃并退出": [
+            .en: "Discard & Exit",
+            .ja: "破棄して退出",
+            .ko: "버리고 나가기"
+        ],
+        "刷新": [
+            .en: "Refresh",
+            .ja: "更新",
+            .ko: "새로고침"
+        ],
         "关闭": [.en: "Close", .ja: "閉じる", .ko: "닫기"],
         "取消": [.en: "Cancel", .ja: "キャンセル", .ko: "취소"],
         "确认": [.en: "Confirm", .ja: "確認", .ko: "확인"],

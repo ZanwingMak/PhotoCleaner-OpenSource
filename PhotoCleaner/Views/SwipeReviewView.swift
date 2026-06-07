@@ -115,13 +115,28 @@ struct SwipeReviewView: View {
     @Environment(\.dismiss) private var dismiss
 
     @State private var dragOffset: CGSize = .zero
-    @State private var exitDirection: ExitDirection = .none
     @State private var showPendingSheet = false
     @State private var toast: ToastInfo?
     @State private var hasLoaded = false
     @State private var showCategoryPicker = false
     @State private var showMetadata = false
     @State private var currentCategory: PhotoCategory
+
+    /// 退出/切换时待处理的目标：dismiss 或切换到某分类
+    @State private var pendingExitConfirm: PendingExitAction? = nil
+
+    enum PendingExitAction: Equatable {
+        case dismiss
+        case switchCategory(PhotoCategory)
+
+        static func == (lhs: PendingExitAction, rhs: PendingExitAction) -> Bool {
+            switch (lhs, rhs) {
+            case (.dismiss, .dismiss): return true
+            case let (.switchCategory(a), .switchCategory(b)): return a.id == b.id
+            default: return false
+            }
+        }
+    }
 
     enum ExitDirection { case none, left, right, up }
 
@@ -166,6 +181,21 @@ struct SwipeReviewView: View {
             }
             .zIndex(10)
 
+            // 元数据胶囊（固定层，不随卡片动画飞）
+            VStack(spacing: 0) {
+                Spacer()
+                HStack {
+                    metaPillFixed
+                        .transaction { $0.animation = nil } // 切换 asset 时不带动画
+                        .id(vm.currentAsset?.localIdentifier ?? "none")
+                    Spacer()
+                }
+                .padding(.horizontal, 32)
+                .padding(.bottom, 110) // 在底部按钮之上
+            }
+            .zIndex(9)
+            .allowsHitTesting(false)
+
             // 底部 overlay
             VStack(spacing: 0) {
                 Spacer()
@@ -191,10 +221,46 @@ struct SwipeReviewView: View {
         }
         .sheet(isPresented: $showCategoryPicker) {
             CategoryPickerSheet(currentId: currentCategory.id) { newCategory in
-                switchCategory(to: newCategory)
+                // 切分类前检查待删除
+                if vm.pendingDeletion.isEmpty {
+                    switchCategory(to: newCategory)
+                } else {
+                    showCategoryPicker = false
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                        pendingExitConfirm = .switchCategory(newCategory)
+                    }
+                }
             }
             .presentationDetents([.medium, .large])
             .presentationDragIndicator(.visible)
+        }
+        .alert(String(format: lm.t("有 %d 张待删除"), vm.pendingDeletion.count),
+               isPresented: Binding(
+                get: { pendingExitConfirm != nil },
+                set: { if !$0 { pendingExitConfirm = nil } }
+               )) {
+            Button(lm.t("查看待删除列表")) {
+                showPendingSheet = true
+                pendingExitConfirm = nil
+            }
+            Button(lm.t("继续审核"), role: .cancel) {
+                pendingExitConfirm = nil
+            }
+            Button(lm.t("放弃并退出"), role: .destructive) {
+                let action = pendingExitConfirm
+                vm.pendingDeletion.removeAll()
+                vm.deleteHistory.removeAll()
+                pendingExitConfirm = nil
+                switch action {
+                case .dismiss?:
+                    dismiss()
+                case .switchCategory(let cat)?:
+                    switchCategory(to: cat)
+                case nil: break
+                }
+            }
+        } message: {
+            Text(lm.t("有待删除的照片未处理。继续退出会清空当前选择。"))
         }
         .task {
             await loadAssets(for: currentCategory)
@@ -226,7 +292,11 @@ struct SwipeReviewView: View {
             // X 关闭：明确 contentShape 确保整个 frame 可点
             Button {
                 UIImpactFeedbackGenerator(style: .light).impactOccurred()
-                dismiss()
+                if vm.pendingDeletion.isEmpty {
+                    dismiss()
+                } else {
+                    pendingExitConfirm = .dismiss
+                }
             } label: {
                 Image(systemName: "xmark")
                     .font(.system(size: 18, weight: .semibold))
@@ -317,6 +387,46 @@ struct SwipeReviewView: View {
         }
     }
 
+    /// 固定层的元数据胶囊：不随卡片飞，深底白字保证浅/暗主题都清晰
+    @ViewBuilder
+    private var metaPillFixed: some View {
+        if let asset = vm.currentAsset {
+            let sizeStr = ByteCountFormatter.string(
+                fromByteCount: PhotoClassifier.estimatedSize(of: asset),
+                countStyle: .file)
+            let dim = "\(asset.pixelWidth)×\(asset.pixelHeight)"
+            let isLive = asset.mediaSubtypes.contains(.photoLive)
+            let typeIcon: String = {
+                if asset.mediaType == .video { return "video.fill" }
+                if isLive { return "livephoto" }
+                return "photo.fill"
+            }()
+
+            HStack(spacing: 6) {
+                Image(systemName: typeIcon)
+                    .font(.system(size: 11, weight: .bold))
+                if isLive {
+                    Text("LIVE")
+                        .font(.system(size: 10, weight: .heavy, design: .rounded))
+                        .padding(.horizontal, 4).padding(.vertical, 1)
+                        .background(Capsule().fill(.white.opacity(0.22)))
+                }
+                Text(dim)
+                    .font(.system(size: 12, weight: .medium))
+                Text("·").font(.system(size: 12)).opacity(0.6)
+                Text(sizeStr)
+                    .font(.system(size: 12, weight: .medium))
+            }
+            .foregroundStyle(.white)
+            .padding(.horizontal, 12)
+            .padding(.vertical, 7)
+            .background(
+                Capsule().fill(Color.black.opacity(0.55))
+                    .overlay(Capsule().strokeBorder(.white.opacity(0.12), lineWidth: 1))
+            )
+        }
+    }
+
     /// 元数据日期本地化（按当前语言）
     private func formatMetaDate(_ date: Date) -> String {
         let f = DateFormatter()
@@ -339,55 +449,41 @@ struct SwipeReviewView: View {
             // Coverflow：前一张从左侧 3D 倾斜跟过来，下一张从右侧 3D 倾斜跟过来
             // 上滑（删除）时隐藏左右堆叠卡，让当前卡向上飞出
 
-            if let prev = prevAsset, !isVerticalDrag {
+            // 抽卡牌动画：纯 2D 变换（rotateZ + scale + offset），60fps 流畅
+            // prev 在左侧倾斜堆叠，next 在右侧倾斜堆叠，静止 opacity 0
+            // 共享 asset.localIdentifier 作 id，让 SwiftUI 在切换时识别 next→current 是同一 view，自动 morph
+
+            if let prev = prevAsset {
                 PhotoCardView(asset: prev)
-                    .id("prev-\(prev.localIdentifier)") // 切换索引时强制重建，避免复用旧 image
                     .scaleEffect(prevScale)
                     .offset(x: prevOffsetX(in: size))
-                    .rotation3DEffect(
-                        .degrees(prevRotationY),
-                        axis: (x: 0, y: 1, z: 0),
-                        anchor: .center,
-                        perspective: 0.8
-                    )
-                    .opacity(prevOpacity)
+                    .rotationEffect(.degrees(prevRotationZ), anchor: .bottom)
+                    .opacity(isVerticalDrag ? 0 : prevOpacity)
                     .allowsHitTesting(false)
                     .zIndex(1)
+                    .id(prev.localIdentifier)
             }
 
-            if let next = nextAsset, !isVerticalDrag {
+            if let next = nextAsset {
                 PhotoCardView(asset: next)
-                    .id("next-\(next.localIdentifier)")
                     .scaleEffect(nextScale)
                     .offset(x: nextOffsetX(in: size))
-                    .rotation3DEffect(
-                        .degrees(nextRotationY),
-                        axis: (x: 0, y: 1, z: 0),
-                        anchor: .center,
-                        perspective: 0.8
-                    )
-                    .opacity(nextOpacity)
+                    .rotationEffect(.degrees(nextRotationZ), anchor: .bottom)
+                    .opacity(isVerticalDrag ? 0 : nextOpacity)
                     .allowsHitTesting(false)
                     .zIndex(1)
+                    .id(next.localIdentifier)
             }
 
-            // 当前卡：横向拖时缩放 + 3D 倾斜；上滑/离场用 currentCardOffset
             if let asset = vm.currentAsset {
                 PhotoCardView(asset: asset)
-                    .id(asset.localIdentifier)
                     .scaleEffect(currentScale)
                     .offset(currentCardOffset)
-                    .rotation3DEffect(
-                        .degrees(currentRotationY),
-                        axis: (x: 0, y: 1, z: 0),
-                        anchor: .center,
-                        perspective: 0.8
-                    )
+                    .rotationEffect(.degrees(currentRotationZ), anchor: .bottom)
                     .gesture(dragGesture(in: size))
                     .animation(.spring(response: 0.4, dampingFraction: 0.78), value: dragOffset)
-                    .animation(.spring(response: 0.4, dampingFraction: 0.78), value: exitDirection)
-                    .transition(.opacity.combined(with: .scale(scale: 0.92)))
                     .zIndex(10)
+                    .id(asset.localIdentifier)
             }
         }
         .animation(.easeInOut(duration: 0.22), value: vm.currentIndex)
@@ -424,68 +520,60 @@ struct SwipeReviewView: View {
 
     /// 当前卡缩放：拖远稍微缩小（让位给新卡）
     private var currentScale: CGFloat {
-        guard exitDirection == .none else { return 1 }
-        return 1 - abs(swipeProgress) * 0.12
+        return 1 - abs(swipeProgress) * 0.05
     }
 
-    /// 当前卡 Y 轴旋转：朝手指反方向翻开（左滑→右倾 +35°，让 next 露出）
-    private var currentRotationY: Double {
-        guard exitDirection == .none else { return 0 }
-        return Double(-swipeProgress * 35)
+    /// 当前卡 Z 轴旋转（抽卡牌感）：左滑朝右倾，右滑朝左倾，仿真实抽出
+    private var currentRotationZ: Double {
+        // dragOffset.width 直接驱动，比 swipeProgress 更跟手
+        return Double(dragOffset.width / 24)
     }
 
     // 显现速度系数：拖动 1/5 进度（约 72pt）就完全不透明
     private static let opacityBoost: Double = 5
 
-    /// 前一张 X 偏移：静止 -0.55w（左外），右滑到 +1 时移到 0（中心）
+    /// 前一张 X 偏移：静止 -0.5w（左外），右滑到 +1 时到中心
     private func prevOffsetX(in size: CGSize) -> CGFloat {
-        let restX = -size.width * 0.55
-        // progress 0 → restX；progress +1 → 0；公式 restX * (1 - max(0, progress))
+        let restX = -size.width * 0.5
         return restX * (1 - max(0, swipeProgress))
     }
 
     private var prevScale: CGFloat {
-        0.82 + max(0, swipeProgress) * 0.18
+        0.88 + max(0, swipeProgress) * 0.12
     }
 
-    /// 前一张静止 +45° 倾斜 → progress +1 时翻正
-    private var prevRotationY: Double {
-        Double(45 - max(0, swipeProgress) * 45)
+    /// 前一张 Z 轴静止 -8° 倾斜，到中心时 0°
+    private var prevRotationZ: Double {
+        Double(-8 + max(0, swipeProgress) * 8)
     }
 
-    /// 前一张不透明度：右滑（progress > 0）时快速显现
     private var prevOpacity: Double {
         min(1.0, max(0, Double(swipeProgress)) * Self.opacityBoost)
     }
 
-    /// 下一张 X 偏移：静止 +0.55w（右外），左滑到 -1 时到 0（中心）
+    /// 下一张 X 偏移：静止 +0.5w（右外）→ 中心
     private func nextOffsetX(in size: CGSize) -> CGFloat {
-        let restX = size.width * 0.55
-        // progress 0 → restX；progress -1 → 0；公式 restX * (1 - max(0, -progress))
+        let restX = size.width * 0.5
         return restX * (1 - max(0, -swipeProgress))
     }
 
     private var nextScale: CGFloat {
-        0.82 + max(0, -swipeProgress) * 0.18
+        0.88 + max(0, -swipeProgress) * 0.12
     }
 
-    /// 下一张静止 -45° 倾斜（从右侧侧倾）→ progress -1 时翻正
-    private var nextRotationY: Double {
-        Double(-45 + max(0, -swipeProgress) * 45)
+    /// 下一张 Z 轴静止 +8° 倾斜，到中心时 0°
+    private var nextRotationZ: Double {
+        Double(8 - max(0, -swipeProgress) * 8)
     }
 
-    /// 下一张不透明度：左滑（progress < 0）时快速显现
     private var nextOpacity: Double {
         min(1.0, max(0, Double(-swipeProgress)) * Self.opacityBoost)
     }
 
+    /// 当前卡 offset = dragOffset 自身，trigger 通过 animate dragOffset 推到屏外
+    /// 不再用 exitDirection 单独控制
     private var currentCardOffset: CGSize {
-        switch exitDirection {
-        case .left:  return CGSize(width: -800, height: dragOffset.height * 0.3)
-        case .right: return CGSize(width: 800, height: dragOffset.height * 0.3)
-        case .up:    return CGSize(width: dragOffset.width * 0.2, height: -1200)
-        case .none:  return dragOffset
-        }
+        return dragOffset
     }
 
     // MARK: - 拖拽手势（iOS 标准方向）
@@ -528,17 +616,33 @@ struct SwipeReviewView: View {
             }
     }
 
-    /// 触发动作 + toast
+    /// 触发动作：spring 推进 dragOffset → coverflow 自然完成 → 静默切换数据
+    /// 不再用 exitDirection 触发双重动画
     private func trigger(_ action: SwipeAction, direction: ExitDirection) {
         let style: UIImpactFeedbackGenerator.FeedbackStyle = (action == .markDelete) ? .heavy : .light
         UIImpactFeedbackGenerator(style: style).impactOccurred()
 
-        exitDirection = direction
+        // 推进 dragOffset 到屏幕外，coverflow 各卡跟随到目标位置
+        let target: CGSize
+        switch direction {
+        case .left:  target = CGSize(width: -800, height: 0)
+        case .right: target = CGSize(width: 800, height: 0)
+        case .up:    target = CGSize(width: 0, height: -1200)
+        case .none:  return
+        }
 
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.28) {
-            vm.handle(action)
-            dragOffset = .zero
-            exitDirection = .none
+        withAnimation(.spring(response: 0.42, dampingFraction: 0.78)) {
+            dragOffset = target
+        }
+
+        // 动画完成后静默切换数据 + reset dragOffset（无回弹动画）
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.36) {
+            var t = Transaction()
+            t.disablesAnimations = true
+            withTransaction(t) {
+                vm.handle(action)
+                dragOffset = .zero
+            }
 
             // markDelete 触发 toast
             if action == .markDelete {

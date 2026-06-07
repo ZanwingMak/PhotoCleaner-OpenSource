@@ -45,15 +45,8 @@ struct PhotoCardView: View {
                         .transition(.opacity)
                 }
 
-                // 元信息浮层
-                VStack {
-                    Spacer()
-                    HStack {
-                        metaPill
-                        Spacer()
-                    }
-                    .padding(16)
-                }
+                // 元信息浮层由外层 SwipeReviewView 渲染，不再画在卡内
+                // 避免卡片飞出时元数据胶囊跟随抖动
             }
             .clipShape(RoundedRectangle(cornerRadius: 32, style: .continuous))
             .overlay {
@@ -64,50 +57,6 @@ struct PhotoCardView: View {
             .onAppear { load(targetSize: geo.size) }
             .onDisappear { cancelLoad() }
         }
-    }
-
-    /// 元数据小药丸：尺寸 + 文件大小 + 类型角标
-    private var metaPill: some View {
-        let sizeStr = ByteCountFormatter.string(
-            fromByteCount: PhotoClassifier.estimatedSize(of: asset),
-            countStyle: .file)
-        let dim = "\(asset.pixelWidth)×\(asset.pixelHeight)"
-
-        return HStack(spacing: 6) {
-            // 类型 icon
-            Image(systemName: typeSymbol)
-                .font(.system(size: 11, weight: .bold))
-            // LIVE 角标
-            if isLivePhoto {
-                Text("LIVE")
-                    .font(.system(size: 10, weight: .heavy, design: .rounded))
-                    .padding(.horizontal, 4).padding(.vertical, 1)
-                    .background(Capsule().fill(.white.opacity(0.2)))
-            }
-            Text(dim)
-                .font(.system(size: 12, weight: .medium))
-            Text("·")
-                .font(.system(size: 12))
-                .opacity(0.6)
-            Text(sizeStr)
-                .font(.system(size: 12, weight: .medium))
-        }
-        .foregroundStyle(.white)
-        .padding(.horizontal, 12)
-        .padding(.vertical, 7)
-        .background {
-            if #available(iOS 26.0, *) {
-                Capsule().fill(.clear).glassEffect(.regular, in: .capsule)
-            } else {
-                Capsule().fill(.ultraThinMaterial)
-            }
-        }
-    }
-
-    private var typeSymbol: String {
-        if asset.mediaType == .video { return "video.fill" }
-        if isLivePhoto { return "livephoto" }
-        return "photo.fill"
     }
 
     /// 异步加载：Live Photo 走 requestLivePhoto；其它走普通图片

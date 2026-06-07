@@ -18,9 +18,8 @@ struct PendingDeletionView: View {
     @State private var showConfirm = false
     @State private var isDeleting = false
 
-    private let columns = [
-        GridItem(.adaptive(minimum: 100, maximum: 140), spacing: 8)
-    ]
+    // 固定 3 列，每个 cell 1:1 正方形，避免自适应导致缩略图大小不一/横向拉伸重叠
+    private let columns = Array(repeating: GridItem(.flexible(), spacing: 8), count: 3)
 
     /// 当前选中的资产
     private var selectedAssets: [PHAsset] {
@@ -253,7 +252,8 @@ struct PendingThumbnail: View {
                             .scaledToFill()
                     }
                 }
-                .frame(height: 110)
+                .aspectRatio(1, contentMode: .fit)
+                .clipped()
                 .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
                 // 选中蒙层
                 .overlay {

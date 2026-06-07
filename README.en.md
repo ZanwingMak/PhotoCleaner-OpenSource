@@ -6,7 +6,7 @@
 
 ![iOS](https://img.shields.io/badge/iOS-17%2B-black?logo=apple)
 ![Swift](https://img.shields.io/badge/Swift-5-orange?logo=swift)
-![License](https://img.shields.io/badge/license-MIT-blue)
+![License](https://img.shields.io/badge/license-GPL--3.0-blue)
 
 ## Features
 
@@ -71,4 +71,4 @@ Open the project in Xcode, set Signing → Team to your free Apple ID, ⌘R to y
 
 ## License
 
-MIT
+GPL-3.0-only

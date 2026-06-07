@@ -112,6 +112,9 @@ struct CategoryListView: View {
             .padding(.horizontal, 20)
             .padding(.top, 4)
         }
+        .refreshable { // 下拉刷新（Safari 风）
+            await library.refreshCategoryCounts()
+        }
     }
 
     // MARK: - 「相簿」滚动页（保留极简列表）
@@ -133,6 +136,9 @@ struct CategoryListView: View {
             }
             .padding(.horizontal, 20)
             .padding(.top, 8)
+        }
+        .refreshable {
+            await library.refreshCategoryCounts()
         }
     }
 
@@ -161,6 +167,27 @@ struct CategoryListView: View {
                     .foregroundStyle(AppPalette.textPrimary)
             }
             Spacer()
+            // 刷新按钮
+            Button {
+                UIImpactFeedbackGenerator(style: .soft).impactOccurred()
+                Task { await library.refreshCategoryCounts() }
+            } label: {
+                Image(systemName: "arrow.clockwise")
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundStyle(AppPalette.textPrimary)
+                    .frame(width: 40, height: 40)
+                    .background(
+                        Circle().fill(Color.white.opacity(0.06))
+                            .overlay(Circle().strokeBorder(.white.opacity(0.06), lineWidth: 1))
+                    )
+                    .contentShape(Rectangle())
+                    .rotationEffect(.degrees(library.isLoading ? 360 : 0))
+                    .animation(library.isLoading ?
+                                .linear(duration: 0.9).repeatForever(autoreverses: false) :
+                                .default, value: library.isLoading)
+            }
+            .buttonStyle(.plain)
+            .disabled(library.isLoading)
             // 设置入口
             Button {
                 UIImpactFeedbackGenerator(style: .soft).impactOccurred()

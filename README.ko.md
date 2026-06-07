@@ -6,7 +6,7 @@
 
 ![iOS](https://img.shields.io/badge/iOS-17%2B-black?logo=apple)
 ![Swift](https://img.shields.io/badge/Swift-5-orange?logo=swift)
-![License](https://img.shields.io/badge/license-MIT-blue)
+![License](https://img.shields.io/badge/license-GPL--3.0-blue)
 
 ## 기능
 
@@ -71,4 +71,4 @@ Xcode 에서 프로젝트 열고 Signing → Team 에 무료 Apple ID 선택, �
 
 ## 라이선스
 
-MIT
+GPL-3.0-only

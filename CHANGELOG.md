@@ -5,6 +5,31 @@
 
 ---
 
+## [1.1.0] - 2026-06-08
+
+第二个稳定版本，主题系统重做，bug 全面修复。
+
+### 修复
+- **「有 N 张待删除」弹窗** 加回「点错了」cancel 选项
+  - 三个动作：查看待删除列表 / 继续审核 / 放弃并退出
+  - 加一个 cancel 选项「点错了」让误触能取消
+- **焦糖暖 / 冷色调主题不全局生效**：CategoryListView 的 backgroundLayer / heroStorageCard / BentoCard 全部改用 `AppPalette.xxx(for: themeManager.current)`
+  - 焦糖暖：深褐色背景 + 暖橙强调
+  - 冷色调：深蓝灰背景 + 暖橙强调
+- **底部 tab bar 关闭 sheet 后高亮回到「整理」**：之前点 photos / more 时强制设 `tabBarItem = .more / .photos` 然后 0.4s 后强制回 `.organize` 覆盖了原 segmented 状态
+  - 现在点 photos / more 只触发 sheet，**不改变 tabBarItem**
+  - 关闭 sheet 后高亮保持在原 tab（整理 / 相簿）
+
+### 新增
+- `BentoCard` 加 `@EnvironmentObject themeManager` 注入，所有分类卡跟随主题
+- L10n 字典新增「点错了」key（中英日韩四语）
+
+### 默认值确认
+- 默认主题：**深色**（`AppStorage("app_theme") default = .dark.rawValue`）
+- 默认语言：**跟随系统**
+
+---
+
 ## [1.0.3] - 2026-06-08
 
 ### 修复

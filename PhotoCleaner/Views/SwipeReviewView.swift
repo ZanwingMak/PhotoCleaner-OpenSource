@@ -261,7 +261,10 @@ struct SwipeReviewView: View {
                 case nil: break
                 }
             }
-            Button(lm.t("继续审核"), role: .cancel) {
+            Button(lm.t("继续审核")) {
+                pendingExitConfirm = nil
+            }
+            Button(lm.t("点错了"), role: .cancel) {
                 pendingExitConfirm = nil
             }
         } message: {

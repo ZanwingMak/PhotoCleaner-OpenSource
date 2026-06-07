@@ -15,6 +15,7 @@ private enum TopTab: String, CaseIterable {
 struct CategoryListView: View {
     @EnvironmentObject private var library: PhotoLibraryService
     @EnvironmentObject private var lm: LanguageManager
+    @EnvironmentObject private var themeManager: ThemeManager
     @State private var topTab: TopTab = .unsorted
     @State private var tabBarItem: TabBarItem = .organize
     @State private var toast: ToastInfo?
@@ -80,7 +81,7 @@ struct CategoryListView: View {
 
     private var backgroundLayer: some View {
         ZStack {
-            AppPalette.bgPrimary.ignoresSafeArea()
+            AppPalette.bgPrimary(for: themeManager.current).ignoresSafeArea()
             // 右上角暖光
             RadialGradient(
                 colors: [AppPalette.brand.opacity(0.22), .clear],
@@ -260,9 +261,9 @@ struct CategoryListView: View {
 
     private var heroStorageCard: some View {
         ZStack {
-            // 卡片背景：暖色玻璃
+            // 卡片背景：跟随主题
             RoundedRectangle(cornerRadius: 28, style: .continuous)
-                .fill(AppPalette.bgCardElevated)
+                .fill(AppPalette.bgCardElevated(for: themeManager.current))
                 .overlay {
                     RoundedRectangle(cornerRadius: 28, style: .continuous)
                         .fill(AppPalette.brandGradient.opacity(0.08))
@@ -495,19 +496,11 @@ struct CategoryListView: View {
                 topTab = .albums
             }
         case .photos:
-            // 短暂高亮，弹出全库网格 sheet
-            tabBarItem = .photos
+            // 点击照片只弹 sheet，不改变 tabBarItem（关闭后 sheet 应回到原 tab 高亮）
             showPhotosBrowser = true
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
-                withAnimation { tabBarItem = .organize }
-            }
         case .more:
-            // 短暂高亮，弹出设置 sheet
-            tabBarItem = .more
+            // 同上，弹 sheet 不动 tabBarItem
             showSettings = true
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
-                withAnimation { tabBarItem = .organize }
-            }
         }
     }
 }
@@ -616,6 +609,7 @@ private struct QuickPickCard: View {
 
 private struct BentoCard: View {
     @EnvironmentObject private var lm: LanguageManager
+    @EnvironmentObject private var themeManager: ThemeManager
     let category: PhotoCategory
     let count: Int?
     let height: CGFloat
@@ -624,7 +618,7 @@ private struct BentoCard: View {
     var body: some View {
         ZStack(alignment: .topLeading) {
             RoundedRectangle(cornerRadius: 20, style: .continuous)
-                .fill(AppPalette.bgCard)
+                .fill(AppPalette.bgCard(for: themeManager.current))
                 .overlay {
                     RoundedRectangle(cornerRadius: 20, style: .continuous)
                         .strokeBorder(.primary.opacity(0.05), lineWidth: 1)

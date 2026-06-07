@@ -35,6 +35,7 @@ enum PhotosFilter: String, CaseIterable, Identifiable {
 struct PhotosBrowserView: View {
     @EnvironmentObject private var library: PhotoLibraryService
     @EnvironmentObject private var lm: LanguageManager
+    @EnvironmentObject private var themeManager: ThemeManager
     @Environment(\.dismiss) private var dismiss
 
     @State private var allAssets: [PHAsset] = []
@@ -94,6 +95,7 @@ struct PhotosBrowserView: View {
                 }
             }
             
+            .preferredColorScheme(themeManager.current.colorScheme)
             .navigationTitle("\(lm.t("照片")) · \(filteredAssets.count)")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {

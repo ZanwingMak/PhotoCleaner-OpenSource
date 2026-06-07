@@ -12,6 +12,7 @@ struct PhotoMetadataSheet: View {
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject private var library: PhotoLibraryService
     @EnvironmentObject private var lm: LanguageManager
+    @EnvironmentObject private var themeManager: ThemeManager
 
     @State private var image: UIImage?
     @State private var reqID: PHImageRequestID?
@@ -35,7 +36,7 @@ struct PhotoMetadataSheet: View {
                     .padding(.top, 8)
                 }
             }
-            
+            .preferredColorScheme(themeManager.current.colorScheme)
             .navigationTitle(lm.t("照片详情"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {

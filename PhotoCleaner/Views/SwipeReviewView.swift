@@ -10,6 +10,7 @@ import Photos
 struct CategoryPickerSheet: View {
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject private var lm: LanguageManager
+    @EnvironmentObject private var themeManager: ThemeManager
     let currentId: String
     let onPick: (PhotoCategory) -> Void
 
@@ -44,7 +45,7 @@ struct CategoryPickerSheet: View {
                     .padding(.top, 8)
                 }
             }
-            
+            .preferredColorScheme(themeManager.current.colorScheme)
             .navigationTitle(lm.t("切换分类"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -148,6 +149,7 @@ struct SwipeReviewView: View {
 
     var body: some View {
         ZStack {
+            // 图片浏览页固定深色（看图行业标准），confirmationDialog 不受主题影响仍清晰
             Color.black.ignoresSafeArea()
 
             // 中间内容层：卡片或状态视图，给 toolbar 留出 inset
@@ -206,7 +208,7 @@ struct SwipeReviewView: View {
             .zIndex(10)
         }
         .toast($toast)
-        .preferredColorScheme(.dark)
+        // 跟随全局主题，不再强制 dark
         .navigationBarBackButtonHidden(true)
         .toolbar(.hidden, for: .navigationBar)
         .sheet(isPresented: $showPendingSheet) {
@@ -234,16 +236,16 @@ struct SwipeReviewView: View {
             .presentationDetents([.medium, .large])
             .presentationDragIndicator(.visible)
         }
-        .alert(String(format: lm.t("有 %d 张待删除"), vm.pendingDeletion.count),
-               isPresented: Binding(
+        .confirmationDialog(
+            String(format: lm.t("有 %d 张待删除"), vm.pendingDeletion.count),
+            isPresented: Binding(
                 get: { pendingExitConfirm != nil },
                 set: { if !$0 { pendingExitConfirm = nil } }
-               )) {
+            ),
+            titleVisibility: .visible
+        ) {
             Button(lm.t("查看待删除列表")) {
                 showPendingSheet = true
-                pendingExitConfirm = nil
-            }
-            Button(lm.t("继续审核"), role: .cancel) {
                 pendingExitConfirm = nil
             }
             Button(lm.t("放弃并退出"), role: .destructive) {
@@ -258,6 +260,9 @@ struct SwipeReviewView: View {
                     switchCategory(to: cat)
                 case nil: break
                 }
+            }
+            Button(lm.t("继续审核"), role: .cancel) {
+                pendingExitConfirm = nil
             }
         } message: {
             Text(lm.t("有待删除的照片未处理。继续退出会清空当前选择。"))

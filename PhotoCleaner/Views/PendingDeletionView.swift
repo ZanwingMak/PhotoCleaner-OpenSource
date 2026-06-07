@@ -10,6 +10,7 @@ struct PendingDeletionView: View {
     @ObservedObject var vm: SwipeReviewViewModel
     @EnvironmentObject private var library: PhotoLibraryService
     @EnvironmentObject private var lm: LanguageManager
+    @EnvironmentObject private var themeManager: ThemeManager
     @Environment(\.dismiss) private var dismiss
 
     /// 选中的 localIdentifier 集合（默认进入时全选）
@@ -63,6 +64,7 @@ struct PendingDeletionView: View {
                 }
             }
             
+            .preferredColorScheme(themeManager.current.colorScheme)
             .navigationTitle("\(lm.t("待删除")) (\(vm.pendingDeletion.count))")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {

@@ -75,6 +75,7 @@ struct SettingsView: View {
                 }
             }
             .toast($toast)
+            .preferredColorScheme(themeManager.current.colorScheme) // sheet 主题不继承父，显式声明
             .navigationTitle(lm.t("设置"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {

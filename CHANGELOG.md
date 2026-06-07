@@ -5,6 +5,25 @@
 
 ---
 
+## [1.0.3] - 2026-06-08
+
+### 修复
+- **「有 N 张待删除」弹窗 1/3 选项颜色看不清** — Alert 改用 `confirmationDialog` (action sheet 风格)
+  - iOS 系统对比度高，三个选项（查看待删除列表 / 放弃并退出 / 继续审核）都鲜亮
+  - 顺序优化：主操作放最上面，destructive 用红色，cancel 放底部
+- **设置 / 待删除 / 照片浏览 / 元数据 / 分类切换 sheet 不响应主题切换** — 显式声明 `.preferredColorScheme(themeManager.current.colorScheme)` 在每个 sheet view
+  - iOS Sheet 不自动继承 parent 的 preferredColorScheme，必须每个 sheet 单独设
+  - 5 个 sheet 全部加 `@EnvironmentObject themeManager`
+- **浅色主题下底部 FloatingTabBar 看不清** — 未选中态文字色用 `Color.secondary`（系统自动适配）
+  - 浅色：灰色 60%
+  - 深色：白色 60%
+  - 选中态保留白色（彩色 brand 渐变 bg 上）
+  - 边框 / 高光 / 阴影都改用 `Color.primary.opacity(...)` 浅色下也可见
+- **深色文字看不清** — `Color.white.opacity(装饰)` 全面替换为 `Color.primary.opacity(...)`
+  - 自动跟 ColorScheme：light 下变浅灰，dark 下变浅白
+
+---
+
 ## [1.0.2] - 2026-06-07
 
 ### 修复

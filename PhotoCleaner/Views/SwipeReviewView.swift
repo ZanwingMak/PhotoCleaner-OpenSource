@@ -44,7 +44,7 @@ struct CategoryPickerSheet: View {
                     .padding(.top, 8)
                 }
             }
-            .preferredColorScheme(.dark)
+            
             .navigationTitle(lm.t("切换分类"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {

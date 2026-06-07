@@ -1,12 +1,12 @@
 //
 //  ToastView.swift
 //  顶部浮现的小玻璃药丸提示，2 秒自动消失
+//  根据 ColorScheme 自动切换深底白字 / 白底黑字
 //
 
 import SwiftUI
 import Combine
 
-/// Toast 数据
 struct ToastInfo: Equatable {
     let symbol: String
     let text: String
@@ -14,9 +14,17 @@ struct ToastInfo: Equatable {
     let id: UUID = UUID()
 }
 
-/// 顶部浮现的玻璃药丸 toast
 struct ToastView: View {
     let info: ToastInfo
+    @Environment(\.colorScheme) private var scheme
+
+    private var bg: Color {
+        scheme == .light ? Color.white.opacity(0.95) : Color.black.opacity(0.75)
+    }
+
+    private var textColor: Color {
+        scheme == .light ? Color.black : Color.white
+    }
 
     var body: some View {
         HStack(spacing: 8) {
@@ -25,19 +33,21 @@ struct ToastView: View {
                 .foregroundStyle(info.tint)
             Text(info.text)
                 .font(.system(size: 15, weight: .semibold))
-                .foregroundStyle(.white)
+                .foregroundStyle(textColor)
         }
         .padding(.horizontal, 18)
         .padding(.vertical, 12)
         .background {
-            if #available(iOS 26.0, *) {
-                Capsule().fill(.clear).glassEffect(.regular, in: .capsule)
-            } else {
-                Capsule().fill(.ultraThinMaterial)
-                    .overlay(Capsule().strokeBorder(.white.opacity(0.15), lineWidth: 1))
-            }
+            Capsule().fill(bg)
+                .overlay(
+                    Capsule().strokeBorder(
+                        scheme == .light ? Color.black.opacity(0.08) : Color.white.opacity(0.12),
+                        lineWidth: 1
+                    )
+                )
         }
-        .shadow(color: .black.opacity(0.3), radius: 20, x: 0, y: 8)
+        .shadow(color: .black.opacity(scheme == .light ? 0.18 : 0.4),
+                radius: 18, x: 0, y: 6)
         .transition(.asymmetric(
             insertion: .move(edge: .top).combined(with: .opacity),
             removal: .opacity
@@ -45,7 +55,7 @@ struct ToastView: View {
     }
 }
 
-/// Toast 容器修饰器：附在任意 View 上即可弹 toast
+/// Toast 容器修饰器
 struct ToastModifier: ViewModifier {
     @Binding var toast: ToastInfo?
     @State private var workItem: DispatchWorkItem?
@@ -56,7 +66,7 @@ struct ToastModifier: ViewModifier {
                 if let toast {
                     ToastView(info: toast)
                         .padding(.top, 8)
-                        .id(toast.id) // 不同 id 触发动画
+                        .id(toast.id)
                 }
             }
             .onChange(of: toast) { _, newValue in
@@ -72,7 +82,6 @@ struct ToastModifier: ViewModifier {
 }
 
 extension View {
-    /// 给视图挂上 toast 能力
     func toast(_ binding: Binding<ToastInfo?>) -> some View {
         modifier(ToastModifier(toast: binding))
     }

@@ -62,7 +62,7 @@ struct PendingDeletionView: View {
                     }
                 }
             }
-            .preferredColorScheme(.dark)
+            
             .navigationTitle("\(lm.t("待删除")) (\(vm.pendingDeletion.count))")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {

@@ -35,7 +35,7 @@ struct PhotoMetadataSheet: View {
                     .padding(.top, 8)
                 }
             }
-            .preferredColorScheme(.dark)
+            
             .navigationTitle(lm.t("照片详情"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -105,7 +105,7 @@ struct PhotoMetadataSheet: View {
                 .fill(AppPalette.bgCard)
                 .overlay(
                     RoundedRectangle(cornerRadius: 16, style: .continuous)
-                        .strokeBorder(.white.opacity(0.04), lineWidth: 1)
+                        .strokeBorder(.primary.opacity(0.04), lineWidth: 1)
                 )
         )
     }
@@ -128,7 +128,7 @@ struct PhotoMetadataSheet: View {
 
     private var divider: some View {
         Rectangle()
-            .fill(Color.white.opacity(0.05))
+            .fill(Color.primary.opacity(0.05))
             .frame(height: 1)
             .padding(.leading, 70)
     }

@@ -5,6 +5,24 @@
 
 ---
 
+## [1.0.2] - 2026-06-07
+
+### 修复
+- **主题切换不全局生效** — AppPalette 静态属性改用 `UIColor` `dynamicProvider`，自动跟随 ColorScheme（light / dark）切换
+  - bgPrimary / bgCard / bgCardElevated / textPrimary / textSecondary / textTertiary 全部双色
+  - 视图层去掉强制 `.preferredColorScheme(.dark)`（首页 / 设置 / 待删除 / 照片浏览 / 元数据 5 个视图），改为跟随 RootView 全局 `themeManager.current.colorScheme` 设置
+  - 图片浏览类（SwipeReviewView / PhotoDetailView）保留 dark
+- **浅色模式文字看不清** — 所有装饰用的 `Color.white.opacity(0.05~0.12)` 替换为 `Color.primary.opacity(...)`
+  - AlbumRow 分隔线 / 段控制未选中态 / 按钮背景 / 描边
+  - 浅色下变浅灰，深色下变浅白，两边都清晰可见
+- **「有 N 张待删除」alert 看不清** — 跟随主题动态色，去掉强制 dark 后系统 alert 自动适配
+- **Toast 提示浅色看不清** — `ToastView` 改用 `@Environment(\.colorScheme)`
+  - light: 白底（0.95 opacity） + 黑字 + 黑色描边
+  - dark: 深底（0.75 opacity） + 白字 + 白色描边
+- **首页刷新按钮点击无即时反馈** — 点击瞬间立即用 `easeOut 0.6s` 转 360°；isLoading 期间 Timer 继续累加
+
+---
+
 ## [1.0.1] - 2026-06-07
 
 ### 修复

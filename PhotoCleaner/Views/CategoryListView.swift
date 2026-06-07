@@ -57,7 +57,7 @@ struct CategoryListView: View {
                 .padding(.bottom, 8)
             }
             .toast($toast)
-            .preferredColorScheme(.dark)
+            
             .toolbar(.hidden, for: .navigationBar)
             .navigationDestination(for: PhotoCategory.self) { category in
                 SwipeReviewView(category: category)
@@ -131,7 +131,7 @@ struct CategoryListView: View {
                     }
                     .buttonStyle(.plain)
                     Rectangle()
-                        .fill(Color.white.opacity(0.05))
+                        .fill(Color.primary.opacity(0.05))
                         .frame(height: 1)
                 }
 
@@ -170,9 +170,13 @@ struct CategoryListView: View {
                     .foregroundStyle(AppPalette.textPrimary)
             }
             Spacer()
-            // 刷新按钮：isLoading 时图标持续 spring 累加旋转，结束保留当前角度
+            // 刷新按钮：点击立即转一圈，isLoading 期间继续累加
             Button {
                 UIImpactFeedbackGenerator(style: .soft).impactOccurred()
+                // 点击瞬间立刻先转 360°，给即时反馈
+                withAnimation(.easeOut(duration: 0.6)) {
+                    refreshSpinAngle += 360
+                }
                 Task { await library.refreshCategoryCounts() }
             } label: {
                 Image(systemName: "arrow.clockwise")
@@ -180,8 +184,8 @@ struct CategoryListView: View {
                     .foregroundStyle(AppPalette.textPrimary)
                     .frame(width: 40, height: 40)
                     .background(
-                        Circle().fill(Color.white.opacity(0.06))
-                            .overlay(Circle().strokeBorder(.white.opacity(0.06), lineWidth: 1))
+                        Circle().fill(Color.primary.opacity(0.06))
+                            .overlay(Circle().strokeBorder(.primary.opacity(0.06), lineWidth: 1))
                     )
                     .contentShape(Rectangle())
                     .rotationEffect(.degrees(refreshSpinAngle))
@@ -204,8 +208,8 @@ struct CategoryListView: View {
                     .foregroundStyle(AppPalette.textPrimary)
                     .frame(width: 40, height: 40)
                     .background(
-                        Circle().fill(Color.white.opacity(0.06))
-                            .overlay(Circle().strokeBorder(.white.opacity(0.06), lineWidth: 1))
+                        Circle().fill(Color.primary.opacity(0.06))
+                            .overlay(Circle().strokeBorder(.primary.opacity(0.06), lineWidth: 1))
                     )
                     .contentShape(Rectangle())
             }
@@ -265,7 +269,7 @@ struct CategoryListView: View {
                 }
                 .overlay {
                     RoundedRectangle(cornerRadius: 28, style: .continuous)
-                        .strokeBorder(.white.opacity(0.06), lineWidth: 1)
+                        .strokeBorder(.primary.opacity(0.06), lineWidth: 1)
                 }
 
             HStack(alignment: .center, spacing: 20) {
@@ -623,7 +627,7 @@ private struct BentoCard: View {
                 .fill(AppPalette.bgCard)
                 .overlay {
                     RoundedRectangle(cornerRadius: 20, style: .continuous)
-                        .strokeBorder(.white.opacity(0.05), lineWidth: 1)
+                        .strokeBorder(.primary.opacity(0.05), lineWidth: 1)
                 }
 
             // 右下角大装饰图标
@@ -692,7 +696,7 @@ private struct TimelineRow: View {
 
                 if !isLast {
                     Rectangle()
-                        .fill(Color.white.opacity(0.08))
+                        .fill(Color.primary.opacity(0.08))
                         .frame(width: 1.5)
                         .frame(minHeight: 32)
                 }
@@ -713,7 +717,7 @@ private struct TimelineRow: View {
             // 数量条
             GeometryReader { geo in
                 ZStack(alignment: .leading) {
-                    Capsule().fill(Color.white.opacity(0.05))
+                    Capsule().fill(Color.primary.opacity(0.05))
                         .frame(height: 8)
 
                     Capsule().fill(tint.opacity(0.85))

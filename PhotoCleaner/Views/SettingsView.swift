@@ -121,7 +121,7 @@ struct SettingsView: View {
                                     if isSelected {
                                         Capsule().fill(AppPalette.brandGradient)
                                     } else {
-                                        Capsule().fill(Color.white.opacity(0.08))
+                                        Capsule().fill(Color.primary.opacity(0.08))
                                     }
                                 }
                         }
@@ -269,7 +269,7 @@ struct SettingsView: View {
                     .overlay {
                         RoundedRectangle(cornerRadius: 14, style: .continuous)
                             .strokeBorder(
-                                isSelected ? AppPalette.brand : Color.white.opacity(0.08),
+                                isSelected ? AppPalette.brand : Color.primary.opacity(0.08),
                                 lineWidth: isSelected ? 2.5 : 1
                             )
                     }
@@ -304,7 +304,7 @@ struct SettingsView: View {
                     .fill(AppPalette.bgCard(for: theme))
                     .overlay(
                         RoundedRectangle(cornerRadius: 16, style: .continuous)
-                            .strokeBorder(.white.opacity(0.04), lineWidth: 1)
+                            .strokeBorder(.primary.opacity(0.04), lineWidth: 1)
                     )
             )
         }
@@ -312,7 +312,7 @@ struct SettingsView: View {
 
     private var divider: some View {
         Rectangle()
-            .fill(Color.white.opacity(0.05))
+            .fill(Color.primary.opacity(0.05))
             .frame(height: 1)
             .padding(.leading, 50)
     }

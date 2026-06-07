@@ -93,7 +93,7 @@ struct PhotosBrowserView: View {
                     }
                 }
             }
-            .preferredColorScheme(.dark)
+            
             .navigationTitle("\(lm.t("照片")) · \(filteredAssets.count)")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -154,7 +154,7 @@ struct PhotosBrowserView: View {
                             if filter == f {
                                 Capsule().fill(AppPalette.brandGradient)
                             } else {
-                                Capsule().fill(Color.white.opacity(0.08))
+                                Capsule().fill(Color.primary.opacity(0.08))
                             }
                         }
                     }

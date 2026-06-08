@@ -114,6 +114,9 @@ with open('$APP_DIR/Info.plist', 'wb') as f:
     plistlib.dump(main, f, fmt=plistlib.FMT_BINARY)
 "
 
+echo "==> 拷贝本地化资源"
+find "$SRC_DIR" -maxdepth 1 -type d -name "*.lproj" -exec cp -R {} "$APP_DIR/" \;
+
 echo "==> 5/6 打包 Payload/ → .ipa"
 PAYLOAD_DIR="$BUILD_DIR/Payload"
 mkdir -p "$PAYLOAD_DIR"

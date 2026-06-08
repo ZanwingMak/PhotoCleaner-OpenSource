@@ -5,6 +5,14 @@
 
 ---
 
+## [1.1.9] - 2026-06-08
+
+### 修复
+- **照片权限弹窗支持本地化**：`NSPhotoLibraryUsageDescription` 和 `NSPhotoLibraryAddUsageDescription` 新增英文、简体中文、日文、韩文本地化文案
+- **未签名 IPA 补齐本地化资源**：自定义打包脚本会同步拷贝 `.lproj` 目录，确保 GitHub Release 中的 IPA 也包含权限弹窗本地化
+
+---
+
 ## [1.1.8] - 2026-06-08
 
 ### 新增

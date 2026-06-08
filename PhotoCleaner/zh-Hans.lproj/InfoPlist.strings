@@ -1,0 +1,2 @@
+"NSPhotoLibraryUsageDescription" = "需要访问您的照片，以便整理照片库并释放存储空间。所有删除操作都需要您手动确认。";
+"NSPhotoLibraryAddUsageDescription" = "仅在需要将照片保存回您的照片库时使用添加权限。";

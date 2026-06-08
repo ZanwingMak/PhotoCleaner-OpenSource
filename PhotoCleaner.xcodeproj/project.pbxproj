@@ -33,6 +33,7 @@
 		BF000000000000000000A018 /* CustomDialog.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0000000000000000000A018 /* CustomDialog.swift */; };
 		BF000000000000000000A019 /* UpdateChecker.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0000000000000000000A019 /* UpdateChecker.swift */; };
 		BF000000000000000000B001 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = F0000000000000000000B001 /* Assets.xcassets */; };
+		BF000000000000000000D001 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = VG000000000000000000D001 /* InfoPlist.strings */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -64,6 +65,10 @@
 		F0000000000000000000A019 /* UpdateChecker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdateChecker.swift; sourceTree = "<group>"; };
 		F0000000000000000000B001 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		F0000000000000000000B002 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		F0000000000000000000D001 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		F0000000000000000000D002 /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/InfoPlist.strings"; sourceTree = "<group>"; };
+		F0000000000000000000D003 /* ja */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ja; path = ja.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		F0000000000000000000D004 /* ko */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ko; path = ko.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -94,6 +99,7 @@
 				G000000000000000000000006 /* ViewModels */,
 				G000000000000000000000007 /* Views */,
 				F0000000000000000000B001 /* Assets.xcassets */,
+				VG000000000000000000D001 /* InfoPlist.strings */,
 				F0000000000000000000B002 /* Info.plist */,
 			);
 			path = PhotoCleaner;
@@ -210,6 +216,8 @@
 				en,
 				Base,
 				"zh-Hans",
+				ja,
+				ko,
 			);
 			mainGroup = G000000000000000000000001;
 			productRefGroup = G000000000000000000000003 /* Products */;
@@ -227,10 +235,25 @@
 			buildActionMask = 2147483647;
 			files = (
 				BF000000000000000000B001 /* Assets.xcassets in Resources */,
+				BF000000000000000000D001 /* InfoPlist.strings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXVariantGroup section */
+		VG000000000000000000D001 /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				F0000000000000000000D001 /* en */,
+				F0000000000000000000D002 /* zh-Hans */,
+				F0000000000000000000D003 /* ja */,
+				F0000000000000000000D004 /* ko */,
+			);
+			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
 
 /* Begin PBXSourcesBuildPhase section */
 		P000000000000000000000001 /* Sources */ = {
@@ -388,7 +411,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 8;
+				CURRENT_PROJECT_VERSION = 9;
 				DEVELOPMENT_ASSET_PATHS = "";
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = NO;
@@ -401,7 +424,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.1.8;
+				MARKETING_VERSION = 1.1.9;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.maizhenying.PhotoCleaner";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -415,7 +438,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 8;
+				CURRENT_PROJECT_VERSION = 9;
 				DEVELOPMENT_ASSET_PATHS = "";
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = NO;
@@ -428,7 +451,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.1.8;
+				MARKETING_VERSION = 1.1.9;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.maizhenying.PhotoCleaner";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;

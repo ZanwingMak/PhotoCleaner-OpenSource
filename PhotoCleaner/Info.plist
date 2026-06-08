@@ -17,9 +17,9 @@
 	<key>CFBundlePackageType</key>
 	<string>$(PRODUCT_BUNDLE_PACKAGE_TYPE)</string>
 	<key>CFBundleShortVersionString</key>
-	<string>1.1.8</string>
+	<string>1.1.9</string>
 	<key>CFBundleVersion</key>
-	<string>8</string>
+	<string>9</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>UILaunchScreen</key>
@@ -41,8 +41,8 @@
 		<false/>
 	</dict>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>需要访问您的照片以便整理与释放存储空间。所有操作都需您手动确认。</string>
+	<string>Photo Cleaner needs access to your photos to organize your library and free up storage. All deletions require your confirmation.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
-	<string>用于管理您的照片库。</string>
+	<string>Photo Cleaner uses add-only access only when saving photos back to your library.</string>
 </dict>
 </plist>

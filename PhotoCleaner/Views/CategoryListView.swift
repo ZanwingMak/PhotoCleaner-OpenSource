@@ -19,10 +19,10 @@ struct CategoryListView: View {
     @State private var topTab: TopTab = .unsorted
     @State private var tabBarItem: TabBarItem = .organize
     @State private var toast: ToastInfo?
-    @State private var reviewedCount: Int = 0   // 本次会话已审核数
     @State private var showSettings = false
     @State private var showPhotosBrowser = false
     @State private var showSuggestionList = false
+    @State private var visibleMonthCount = 24
 
     /// 刷新按钮持续旋转角度
     @State private var refreshSpinAngle: Double = 0
@@ -317,7 +317,7 @@ struct CategoryListView: View {
                     }
 
                     // 副标
-                    Text(String(format: lm.t("基于 %d 张照片估算"), totalCount))
+                    Text(String(format: lm.t("基于 %d 张照片估算"), suggestedCleanupCount))
                         .font(.system(size: 12, weight: .medium))
                         .foregroundStyle(AppPalette.textTertiary)
                 }
@@ -328,7 +328,7 @@ struct CategoryListView: View {
                 ZStack {
                     RingProgress(value: progressValue, lineWidth: 8)
                     VStack(spacing: 0) {
-                        Text("\(Int(progressValue * 100))")
+                        Text("\(progressPercent)")
                             .font(.system(size: 26, weight: .bold, design: .rounded))
                             .foregroundStyle(AppPalette.textPrimary)
                         Text("%")
@@ -344,9 +344,9 @@ struct CategoryListView: View {
         .frame(minHeight: 140)
     }
 
-    /// 估算可释放空间：按全库平均 1.5MB/张 估
+    /// 估算可释放空间：按建议清理照片平均 1.5MB/张估算
     private var estimatedReleaseSize: String {
-        let bytes = Double(totalCount) * 1_500_000.0
+        let bytes = Double(suggestedCleanupCount) * 1_500_000.0
         if bytes >= 1_073_741_824 {
             return String(format: "%.1f", bytes / 1_073_741_824)
         }
@@ -354,7 +354,7 @@ struct CategoryListView: View {
     }
 
     private var estimatedReleaseUnit: String {
-        let bytes = Double(totalCount) * 1_500_000.0
+        let bytes = Double(suggestedCleanupCount) * 1_500_000.0
         return bytes >= 1_073_741_824 ? "GB" : "MB"
     }
 
@@ -362,10 +362,22 @@ struct CategoryListView: View {
         library.categoryCounts[PhotoCategory.allPhotos.id] ?? 0
     }
 
-    /// 进度：已审核 / 总数（演示版基于 reviewedCount）
+    private var suggestedCleanupCount: Int {
+        let raw = smartSuggestionConfigs.reduce(0) { sum, config in
+            sum + (library.categoryCounts[config.category.id] ?? 0)
+        }
+        return min(totalCount, raw)
+    }
+
+    /// 环形进度：建议清理数量 / 全库数量
     private var progressValue: Double {
-        guard totalCount > 0 else { return 0 }
-        return min(1, Double(reviewedCount) / Double(totalCount))
+        guard totalCount > 0, suggestedCleanupCount > 0 else { return 0 }
+        return max(0.01, min(1, Double(suggestedCleanupCount) / Double(totalCount)))
+    }
+
+    private var progressPercent: Int {
+        guard totalCount > 0, suggestedCleanupCount > 0 else { return 0 }
+        return max(1, min(100, Int((Double(suggestedCleanupCount) / Double(totalCount) * 100).rounded())))
     }
 
     // MARK: - 智能建议横向滚动卡（PhotoCleaner 特色，多个清理切入点）
@@ -501,10 +513,10 @@ struct CategoryListView: View {
 
     private var monthlyTimeline: some View {
         VStack(alignment: .leading, spacing: 12) {
-            sectionTitle(lm.t("时间线"), subtitle: lm.t("按月份回顾"))
+            timelineTitle
 
-            VStack(spacing: 0) {
-                ForEach(Array(library.monthBuckets.enumerated()), id: \.element.id) { idx, bucket in
+            LazyVStack(spacing: 0) {
+                ForEach(Array(displayedMonthBuckets.enumerated()), id: \.element.id) { idx, bucket in
                     let cat = PhotoCategory.month(year: bucket.year, month: bucket.month)
                     NavigationLink(value: cat) {
                         TimelineRow(
@@ -512,13 +524,70 @@ struct CategoryListView: View {
                             year: bucket.year,
                             count: bucket.count,
                             tint: cat.tint,
-                            isLast: idx == library.monthBuckets.count - 1
+                            isLast: idx == displayedMonthBuckets.count - 1 && !hasMoreMonthBuckets
                         )
                     }
                     .buttonStyle(.plain)
                 }
+
+                if hasMoreMonthBuckets {
+                    Color.clear
+                        .frame(height: 1)
+                        .onAppear {
+                            loadMoreMonthBuckets()
+                        }
+                }
             }
         }
+    }
+
+    private var timelineTitle: some View {
+        HStack(alignment: .firstTextBaseline) {
+            sectionTitle(lm.t("时间线"), subtitle: lm.t("按月份回顾"))
+
+            Spacer()
+
+            if hasMoreMonthBuckets {
+                Button {
+                    UIImpactFeedbackGenerator(style: .soft).impactOccurred()
+                    withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) {
+                        showAllMonthBuckets()
+                    }
+                } label: {
+                    HStack(spacing: 4) {
+                        Text(lm.t("显示全部"))
+                            .font(.system(size: 12, weight: .semibold))
+                        Image(systemName: "chevron.down")
+                            .font(.system(size: 10, weight: .bold))
+                    }
+                    .foregroundStyle(AppPalette.brand)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 6)
+                    .background(Capsule().fill(AppPalette.brand.opacity(0.14)))
+                    .contentShape(Capsule())
+                }
+                .buttonStyle(.plain)
+            }
+        }
+    }
+
+    private var displayedMonthBuckets: [MonthBucket] {
+        Array(library.monthBuckets.prefix(visibleMonthCount))
+    }
+
+    private var hasMoreMonthBuckets: Bool {
+        visibleMonthCount < library.monthBuckets.count
+    }
+
+    /// 滚动到底部时追加展示更早月份
+    private func loadMoreMonthBuckets() {
+        guard hasMoreMonthBuckets else { return }
+        visibleMonthCount = min(library.monthBuckets.count, visibleMonthCount + 12)
+    }
+
+    /// 一次性展开全部月份时间线
+    private func showAllMonthBuckets() {
+        visibleMonthCount = library.monthBuckets.count
     }
 
     // MARK: - 通用 section title
@@ -856,18 +925,20 @@ private struct SmartSuggestionConfig: Identifiable {
 
 /// 智能建议数据源
 private let smartSuggestionConfigs: [SmartSuggestionConfig] = [
-    .init(category: .inferred(.screenshot), label: "陈年截图", symbol: "rectangle.dashed",
+    .init(category: .inferred(.oldScreenshot), label: "陈年截图", symbol: "calendar.badge.exclamationmark",
           gradient: [Color(red: 0.25, green: 0.45, blue: 0.85), Color(red: 0.15, green: 0.30, blue: 0.55)]),
     .init(category: .inferred(.largeFile), label: "占空间大户", symbol: "externaldrive.badge.exclamationmark",
           gradient: [Color(red: 0.85, green: 0.35, blue: 0.42), Color(red: 0.55, green: 0.20, blue: 0.30)]),
-    .init(category: .inferred(.unsortedVideo), label: "视频清理", symbol: "video.fill",
+    .init(category: .smartAlbum(.smartAlbumVideos, title: "视频", symbol: "video.fill", tint: .green),
+          label: "视频清理", symbol: "video.fill",
           gradient: [Color(red: 0.40, green: 0.75, blue: 0.55), Color(red: 0.20, green: 0.50, blue: 0.40)]),
     .init(category: .smartAlbum(.smartAlbumLivePhotos, title: "实况照片", symbol: "livephoto", tint: .mint),
           label: "实况照片", symbol: "livephoto",
           gradient: [Color(red: 0.30, green: 0.65, blue: 0.75), Color(red: 0.15, green: 0.40, blue: 0.55)]),
-    .init(category: .inferred(.selfie), label: "自拍清理", symbol: "person.crop.circle",
+    .init(category: .smartAlbum(.smartAlbumSelfPortraits, title: "自拍", symbol: "person.crop.circle", tint: .pink),
+          label: "自拍清理", symbol: "person.crop.circle",
           gradient: [Color(red: 0.95, green: 0.55, blue: 0.70), Color(red: 0.60, green: 0.30, blue: 0.55)]),
-    .init(category: .inferred(.social), label: "社交媒体", symbol: "bubble.left.and.bubble.right",
+    .init(category: .inferred(.lowResolution), label: "低清图片", symbol: "photo.badge.exclamationmark",
           gradient: [Color(red: 0.65, green: 0.50, blue: 0.90), Color(red: 0.35, green: 0.25, blue: 0.65)])
 ]
 

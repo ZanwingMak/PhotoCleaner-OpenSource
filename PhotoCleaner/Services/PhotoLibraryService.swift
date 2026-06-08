@@ -76,7 +76,7 @@ final class PhotoLibraryService: ObservableObject {
 
         case .inferred(let kind):
             return filteredAssets(from: PHAsset.fetchAssets(with: options)) {
-                PhotoClassifier.matches($0, kind: kind)
+                PhotoClassifier.matchesForLibraryScan($0, kind: kind)
             }
 
         case .quickPick(let pick):
@@ -199,6 +199,9 @@ final class PhotoLibraryService: ObservableObject {
         }
         counts[PhotoCategory.inferred(.allUnsorted).id] = result.count
         counts[PhotoCategory.quickPick(.random).id] = min(result.count, 200)
+        for subtype in smartAlbumSubtypesForCounting() {
+            counts[PhotoCategory.smartAlbumId(for: subtype)] = countAssets(inSmartAlbum: subtype)
+        }
 
         result.enumerateObjects { asset, _, _ in
             autoreleasepool {
@@ -227,7 +230,32 @@ final class PhotoLibraryService: ObservableObject {
             .sorted { ($0.year, $0.month) > ($1.year, $1.month) }
 
         return PhotoLibrarySnapshot(categoryCounts: counts,
-                                    monthBuckets: Array(buckets.prefix(24)))
+                                    monthBuckets: buckets)
+    }
+
+    /// 返回首页和智能建议需要展示数量的系统智能相册
+    private nonisolated static func smartAlbumSubtypesForCounting() -> [PHAssetCollectionSubtype] {
+        [
+            .smartAlbumFavorites,
+            .smartAlbumVideos,
+            .smartAlbumLivePhotos,
+            .smartAlbumSelfPortraits,
+            .smartAlbumRecentlyAdded
+        ]
+    }
+
+    /// 读取系统智能相册数量，让首页数字与点进去后的列表保持一致
+    private nonisolated static func countAssets(inSmartAlbum subtype: PHAssetCollectionSubtype) -> Int {
+        let collections = PHAssetCollection.fetchAssetCollections(
+            with: .smartAlbum,
+            subtype: subtype,
+            options: nil
+        )
+        var count = 0
+        collections.enumerateObjects { collection, _, _ in
+            count += PHAsset.fetchAssets(in: collection, options: nil).count
+        }
+        return count
     }
 
     /// 将 PHFetchResult 转成数组，仅用于确实需要完整列表的页面

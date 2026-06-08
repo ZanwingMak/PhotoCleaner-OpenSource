@@ -46,9 +46,11 @@ enum PhotoCategory: Identifiable, Hashable {
         case allUnsorted   // 所有未整理
         case unsortedVideo // 未整理的视频
         case screenshot    // 未整理的截图
+        case oldScreenshot // 陈年截图
         case selfie        // 自拍
         case camera        // 相机原图
         case social        // 社交媒体
+        case lowResolution // 低清图片
         case landscape     // 横屏
         case portrait      // 竖屏
         case largeFile     // 大文件
@@ -58,9 +60,11 @@ enum PhotoCategory: Identifiable, Hashable {
             case .allUnsorted:   return "所有未整理"
             case .unsortedVideo: return "未整理的视频"
             case .screenshot:    return "未整理的截图"
+            case .oldScreenshot: return "陈年截图"
             case .selfie:        return "自拍"
             case .camera:        return "相机原图"
             case .social:        return "社交媒体"
+            case .lowResolution: return "低清图片"
             case .landscape:     return "横屏照片"
             case .portrait:      return "竖屏照片"
             case .largeFile:     return "大文件"
@@ -72,7 +76,7 @@ enum PhotoCategory: Identifiable, Hashable {
         switch self {
         case .allPhotos: return "all"
         case .quickPick(let p): return "quick-\(p.rawValue)"
-        case .smartAlbum(let sub, _, _, _): return "smart-\(sub.rawValue)"
+        case .smartAlbum(let sub, _, _, _): return Self.smartAlbumId(for: sub)
         case .inferred(let k): return "inferred-\(k.rawValue)"
         case .month(let y, let m): return "month-\(y)-\(m)"
         }
@@ -98,9 +102,11 @@ enum PhotoCategory: Identifiable, Hashable {
             case .allUnsorted:   return "tray.full"
             case .unsortedVideo: return "video"
             case .screenshot:    return "rectangle.dashed"
+            case .oldScreenshot: return "calendar.badge.exclamationmark"
             case .selfie:        return "person.crop.circle"
             case .camera:        return "camera.aperture"
             case .social:        return "bubble.left.and.bubble.right"
+            case .lowResolution: return "photo.badge.exclamationmark"
             case .landscape:     return "rectangle"
             case .portrait:      return "rectangle.portrait"
             case .largeFile:     return "externaldrive"
@@ -126,9 +132,11 @@ enum PhotoCategory: Identifiable, Hashable {
             case .allUnsorted:   return .gray
             case .unsortedVideo: return .gray
             case .screenshot:    return .gray
+            case .oldScreenshot: return .blue
             case .selfie:        return .pink
             case .camera:        return .orange
             case .social:        return .purple
+            case .lowResolution: return .purple
             case .landscape:     return .teal
             case .portrait:      return .indigo
             case .largeFile:     return .red
@@ -170,6 +178,11 @@ enum PhotoCategory: Identifiable, Hashable {
             .inferred(.unsortedVideo),
             .inferred(.screenshot)
         ]
+    }
+
+    /// 生成系统智能相册的稳定统计 key
+    static func smartAlbumId(for subtype: PHAssetCollectionSubtype) -> String {
+        "smart-\(subtype.rawValue)"
     }
 }
 

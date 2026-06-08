@@ -18,6 +18,8 @@ enum PhotoClassifier {
             return asset.mediaType == .video
         case .screenshot:
             return asset.mediaSubtypes.contains(.photoScreenshot)
+        case .oldScreenshot:
+            return isOldScreenshot(asset)
         case .selfie:
             return isLikelySelfie(asset)
         case .camera:
@@ -28,6 +30,8 @@ enum PhotoClassifier {
             return pixels < 2_000_000 && pixels > 0
                 && asset.mediaType == .image
                 && !asset.mediaSubtypes.contains(.photoScreenshot)
+        case .lowResolution:
+            return isLowResolutionImage(asset)
         case .landscape:
             return asset.pixelWidth > asset.pixelHeight && asset.mediaType == .image
         case .portrait:
@@ -85,6 +89,24 @@ enum PhotoClassifier {
             return asset.duration >= 30 || pixels >= 8_000_000
         }
         return asset.mediaSubtypes.contains(.photoPanorama) || pixels >= 12_000_000
+    }
+
+    /// 判断是否是 90 天以前的截图，用于让「陈年截图」入口和文案一致
+    private static func isOldScreenshot(_ asset: PHAsset) -> Bool {
+        guard asset.mediaSubtypes.contains(.photoScreenshot),
+              let date = asset.creationDate,
+              let cutoff = Calendar.current.date(byAdding: .day, value: -90, to: Date())
+        else { return false }
+        return date < cutoff
+    }
+
+    /// 判断是否是低分辨率图片，用于替代模糊的社交媒体来源推断
+    private static func isLowResolutionImage(_ asset: PHAsset) -> Bool {
+        let pixels = asset.pixelWidth * asset.pixelHeight
+        return pixels > 0
+            && pixels < 2_000_000
+            && asset.mediaType == .image
+            && !asset.mediaSubtypes.contains(.photoScreenshot)
     }
 
     /// 根据常见前摄尺寸粗略判断自拍

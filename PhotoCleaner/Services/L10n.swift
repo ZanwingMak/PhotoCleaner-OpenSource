@@ -155,6 +155,12 @@ enum L10n {
         "GitHub 仓库": [.en: "GitHub Repo", .ja: "GitHub", .ko: "GitHub"],
         "反馈问题": [.en: "Report Issue", .ja: "問題報告", .ko: "문제 신고"],
         "更新日志": [.en: "Changelog", .ja: "更新履歴", .ko: "변경 사항"],
+        "发现新版本 %@": [
+            .en: "Update available · %@",
+            .ja: "新バージョン %@ あり",
+            .ko: "새 버전 %@ 사용 가능"
+        ],
+        "查看更新": [.en: "Tap to view release", .ja: "リリースを見る", .ko: "릴리스 보기"],
 
         // 隐私
         "PhotoCleaner 在本地处理你的所有照片\n绝不上传任何数据": [

@@ -22,6 +22,7 @@ struct CategoryListView: View {
     @State private var reviewedCount: Int = 0   // 本次会话已审核数
     @State private var showSettings = false
     @State private var showPhotosBrowser = false
+    @State private var showSuggestionList = false
 
     /// 刷新按钮持续旋转角度
     @State private var refreshSpinAngle: Double = 0
@@ -68,6 +69,9 @@ struct CategoryListView: View {
             }
             .sheet(isPresented: $showPhotosBrowser) {
                 PhotosBrowserView()
+            }
+            .sheet(isPresented: $showSuggestionList) {
+                SmartSuggestionListSheet()
             }
             .task {
                 if library.categoryCounts.isEmpty {
@@ -368,7 +372,7 @@ struct CategoryListView: View {
 
     private var smartSuggestionRow: some View {
         VStack(alignment: .leading, spacing: 12) {
-            // 标题行加箭头暗示可横滑
+            // 标题行：左侧标题 + 右侧「更多」入口
             HStack(alignment: .firstTextBaseline) {
                 VStack(alignment: .leading, spacing: 2) {
                     Text(lm.t("智能建议"))
@@ -379,42 +383,36 @@ struct CategoryListView: View {
                         .foregroundStyle(AppPalette.textSecondary)
                 }
                 Spacer()
-                HStack(spacing: 4) {
-                    Text(lm.t("左右滑动"))
-                        .font(.system(size: 12, weight: .medium))
-                    Image(systemName: "chevron.right")
-                        .font(.system(size: 10, weight: .bold))
+                // 「更多」按钮：点击弹出完整列表
+                Button {
+                    UIImpactFeedbackGenerator(style: .soft).impactOccurred()
+                    showSuggestionList = true
+                } label: {
+                    HStack(spacing: 4) {
+                        Text(lm.t("更多"))
+                            .font(.system(size: 12, weight: .semibold))
+                        Image(systemName: "chevron.right")
+                            .font(.system(size: 10, weight: .bold))
+                    }
+                    .foregroundStyle(AppPalette.brand)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 6)
+                    .background(
+                        Capsule().fill(AppPalette.brand.opacity(0.14))
+                    )
+                    .contentShape(Capsule())
                 }
-                .foregroundStyle(AppPalette.brand)
+                .buttonStyle(.plain)
             }
 
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 12) {
-                    suggestionCard(for: .inferred(.screenshot),
-                                    label: "陈年截图", symbol: "rectangle.dashed",
-                                    gradient: [Color(red: 0.25, green: 0.45, blue: 0.85),
-                                               Color(red: 0.15, green: 0.30, blue: 0.55)])
-                    suggestionCard(for: .inferred(.largeFile),
-                                    label: "占空间大户", symbol: "externaldrive.badge.exclamationmark",
-                                    gradient: [Color(red: 0.85, green: 0.35, blue: 0.42),
-                                               Color(red: 0.55, green: 0.20, blue: 0.30)])
-                    suggestionCard(for: .inferred(.unsortedVideo),
-                                    label: "视频清理", symbol: "video.fill",
-                                    gradient: [Color(red: 0.40, green: 0.75, blue: 0.55),
-                                               Color(red: 0.20, green: 0.50, blue: 0.40)])
-                    suggestionCard(for: .smartAlbum(.smartAlbumLivePhotos, title: "实况照片",
-                                                    symbol: "livephoto", tint: .mint),
-                                    label: "实况照片", symbol: "livephoto",
-                                    gradient: [Color(red: 0.30, green: 0.65, blue: 0.75),
-                                               Color(red: 0.15, green: 0.40, blue: 0.55)])
-                    suggestionCard(for: .inferred(.selfie),
-                                    label: "自拍清理", symbol: "person.crop.circle",
-                                    gradient: [Color(red: 0.95, green: 0.55, blue: 0.70),
-                                               Color(red: 0.60, green: 0.30, blue: 0.55)])
-                    suggestionCard(for: .inferred(.social),
-                                    label: "社交媒体", symbol: "bubble.left.and.bubble.right",
-                                    gradient: [Color(red: 0.65, green: 0.50, blue: 0.90),
-                                               Color(red: 0.35, green: 0.25, blue: 0.65)])
+                    ForEach(smartSuggestionConfigs) { cfg in
+                        suggestionCard(for: cfg.category,
+                                        label: cfg.label,
+                                        symbol: cfg.symbol,
+                                        gradient: cfg.gradient)
+                    }
                 }
                 .padding(.horizontal, 2)
             }
@@ -841,6 +839,140 @@ private struct AlbumRow: View {
         }
         .padding(.vertical, 14)
         // 让整行（含 Spacer 区域）都参与 hit testing
+        .contentShape(Rectangle())
+    }
+}
+
+// MARK: - 智能建议数据源（首页横向卡 + 「更多」列表共用）
+
+/// 智能建议条目配置
+private struct SmartSuggestionConfig: Identifiable {
+    let category: PhotoCategory
+    let label: String
+    let symbol: String
+    let gradient: [Color]
+    var id: String { category.id }
+}
+
+/// 智能建议数据源
+private let smartSuggestionConfigs: [SmartSuggestionConfig] = [
+    .init(category: .inferred(.screenshot), label: "陈年截图", symbol: "rectangle.dashed",
+          gradient: [Color(red: 0.25, green: 0.45, blue: 0.85), Color(red: 0.15, green: 0.30, blue: 0.55)]),
+    .init(category: .inferred(.largeFile), label: "占空间大户", symbol: "externaldrive.badge.exclamationmark",
+          gradient: [Color(red: 0.85, green: 0.35, blue: 0.42), Color(red: 0.55, green: 0.20, blue: 0.30)]),
+    .init(category: .inferred(.unsortedVideo), label: "视频清理", symbol: "video.fill",
+          gradient: [Color(red: 0.40, green: 0.75, blue: 0.55), Color(red: 0.20, green: 0.50, blue: 0.40)]),
+    .init(category: .smartAlbum(.smartAlbumLivePhotos, title: "实况照片", symbol: "livephoto", tint: .mint),
+          label: "实况照片", symbol: "livephoto",
+          gradient: [Color(red: 0.30, green: 0.65, blue: 0.75), Color(red: 0.15, green: 0.40, blue: 0.55)]),
+    .init(category: .inferred(.selfie), label: "自拍清理", symbol: "person.crop.circle",
+          gradient: [Color(red: 0.95, green: 0.55, blue: 0.70), Color(red: 0.60, green: 0.30, blue: 0.55)]),
+    .init(category: .inferred(.social), label: "社交媒体", symbol: "bubble.left.and.bubble.right",
+          gradient: [Color(red: 0.65, green: 0.50, blue: 0.90), Color(red: 0.35, green: 0.25, blue: 0.65)])
+]
+
+// MARK: - 智能建议「更多」列表 sheet
+
+/// 点击首页「更多」弹出，展示全部智能建议；点击任一项推进到滑动审核
+private struct SmartSuggestionListSheet: View {
+    @Environment(\.dismiss) private var dismiss
+    @EnvironmentObject private var library: PhotoLibraryService
+    @EnvironmentObject private var lm: LanguageManager
+    @EnvironmentObject private var themeManager: ThemeManager
+
+    var body: some View {
+        NavigationStack {
+            ZStack {
+                AppPalette.bgPrimary(for: themeManager.current).ignoresSafeArea()
+
+                ScrollView(showsIndicators: false) {
+                    VStack(spacing: 12) {
+                        ForEach(smartSuggestionConfigs) { cfg in
+                            NavigationLink(value: cfg.category) {
+                                SuggestionListRow(
+                                    symbol: cfg.symbol,
+                                    label: lm.t(cfg.label),
+                                    count: library.categoryCounts[cfg.category.id] ?? 0,
+                                    gradient: LinearGradient(colors: cfg.gradient,
+                                                              startPoint: .topLeading,
+                                                              endPoint: .bottomTrailing)
+                                )
+                            }
+                            .buttonStyle(.plain)
+                        }
+                    }
+                    .padding(.horizontal, 20)
+                    .padding(.top, 12)
+                    .padding(.bottom, 40)
+                }
+            }
+            .navigationTitle(lm.t("智能建议"))
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button(lm.t("关闭")) { dismiss() }
+                        .tint(AppPalette.brand)
+                }
+            }
+            .navigationDestination(for: PhotoCategory.self) { cat in
+                SwipeReviewView(category: cat)
+            }
+        }
+    }
+}
+
+// MARK: - 智能建议「更多」列表行
+
+/// 列表形式呈现的智能建议行：渐变图标 + 标题 + 数量 + 箭头
+private struct SuggestionListRow: View {
+    @EnvironmentObject private var lm: LanguageManager
+    @EnvironmentObject private var themeManager: ThemeManager
+    let symbol: String
+    let label: String
+    let count: Int
+    let gradient: LinearGradient
+
+    var body: some View {
+        HStack(spacing: 14) {
+            ZStack {
+                RoundedRectangle(cornerRadius: 14, style: .continuous)
+                    .fill(gradient)
+                    .frame(width: 52, height: 52)
+                Image(systemName: symbol)
+                    .font(.system(size: 22, weight: .bold))
+                    .foregroundStyle(.white)
+            }
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text(label)
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundStyle(AppPalette.textPrimary)
+                HStack(alignment: .lastTextBaseline, spacing: 3) {
+                    Text("\(count)")
+                        .font(.system(size: 14, weight: .bold, design: .rounded))
+                        .foregroundStyle(AppPalette.textSecondary)
+                    Text(lm.t("张"))
+                        .font(.system(size: 12, weight: .medium))
+                        .foregroundStyle(AppPalette.textTertiary)
+                }
+            }
+
+            Spacer()
+
+            Image(systemName: "chevron.right")
+                .font(.system(size: 12, weight: .bold))
+                .foregroundStyle(AppPalette.textTertiary)
+        }
+        .padding(.horizontal, 14)
+        .padding(.vertical, 12)
+        .background(
+            RoundedRectangle(cornerRadius: 18, style: .continuous)
+                .fill(AppPalette.bgCard(for: themeManager.current))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 18, style: .continuous)
+                        .strokeBorder(.primary.opacity(0.05), lineWidth: 1)
+                )
+        )
         .contentShape(Rectangle())
     }
 }

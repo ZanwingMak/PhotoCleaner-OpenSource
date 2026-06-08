@@ -5,6 +5,34 @@
 
 ---
 
+## [1.1.5] - 2026-06-08
+
+### 新增
+- **检查 GitHub 新版本**：新增 `UpdateChecker` service，调 `api.github.com/repos/.../releases/latest`
+  - 进入「设置」时静默后台请求一次
+  - 若远端 tag 比本地 `CFBundleShortVersionString` 高（语义版本按段比较，支持 `1.1.10 > 1.1.9`），
+    在「关于」section 顶部插一行橙色高亮提示：「发现新版本 X.Y.Z · 查看更新」，点击跳 release 页
+  - 网络 / 解析 / 限流任何失败一律静默，不打扰用户
+- **首页智能建议「更多」按钮**：标题行右侧把原「左右滑动」文案换成橙色胶囊「更多 ›」按钮
+  - 点击弹出 sheet，竖向罗列全部 6 项智能建议（陈年截图 / 占空间大户 / 视频清理 / 实况照片 / 自拍清理 / 社交媒体）
+  - 每行渐变图标 + 标题 + 张数 + 箭头；自带 NavigationStack，点行直接 push 到 SwipeReviewView
+- L10n 新增「发现新版本 %@」「查看更新」中英日韩四语翻译
+
+### 修复
+- **从其他主题切换到「跟随系统」时设置背景不立即更新**（1.1.4 的修复不够彻底）
+  - 根因：`.preferredColorScheme(nil)` 不能可靠清除 sheet 内 `UIHostingController.overrideUserInterfaceStyle` 缓存；
+    之前用 `UIWindowScene.traitCollection` 取 system 模式也会被 root window 的 override 污染
+  - 方案：在 `PhotoCleanerApp` root 加一层 `RootShell`，在 `.preferredColorScheme` **之前** 用 `@Environment(\.colorScheme)` 拿到真实系统模式，
+    通过自定义 `EnvironmentKey \.systemColorScheme` 注入下游
+  - `SettingsView` 读 `\.systemColorScheme`，`.system` 主题时把它喂给 `.preferredColorScheme` 强制 override 改成明确的 `.light`/`.dark`，
+    彻底绕过缓存
+
+### 重构
+- 智能建议数据源抽取到文件级 `smartSuggestionConfigs`，首页横向卡和「更多」列表共用一份，去除复制粘贴
+- `RootShell` 私有 wrapper view 拆出 App 入口，方便后续在 root 注入系统级 environment 值
+
+---
+
 ## [1.1.4] - 2026-06-08
 
 ### 变更

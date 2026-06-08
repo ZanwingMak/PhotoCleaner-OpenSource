@@ -8,6 +8,7 @@ import Photos
 
 struct SettingsView: View {
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.systemColorScheme) private var systemScheme  // App root 注入：系统真实模式，不被任何 override 污染
     @EnvironmentObject private var library: PhotoLibraryService
     @EnvironmentObject private var themeManager: ThemeManager
     @EnvironmentObject private var lm: LanguageManager
@@ -16,6 +17,7 @@ struct SettingsView: View {
     @AppStorage("thumbnail_hq")           private var hqThumbnails = true
     @AppStorage("confirm_before_delete")  private var confirmBeforeDelete = true
 
+    @StateObject private var updateChecker = UpdateChecker()
     @State private var isScanning = false
     @State private var toast: ToastInfo?
 
@@ -55,6 +57,13 @@ struct SettingsView: View {
                         }
 
                         section(lm.t("关于")) {
+                            // 有新版时插一行醒目提示，点击跳 release 页
+                            if updateChecker.hasUpdate,
+                               let v = updateChecker.latestVersion,
+                               let url = updateChecker.releaseURL {
+                                updateAvailableRow(version: v, url: url)
+                                divider
+                            }
                             infoRow(label: lm.t("版本"), symbol: "info.circle", value: appVersion)
                             divider
                             linkRow(label: lm.t("GitHub 仓库"), symbol: "chevron.left.forwardslash.chevron.right",
@@ -75,7 +84,8 @@ struct SettingsView: View {
                 }
             }
             .toast($toast)
-            .preferredColorScheme(themeManager.current.colorScheme)
+            .task { await updateChecker.check() }
+            .preferredColorScheme(preferredSchemeForSheet)
             .navigationTitle(lm.t("设置"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -194,6 +204,13 @@ struct SettingsView: View {
     }
 
     private var theme: AppTheme { themeManager.current }
+
+    /// .system 主题在 sheet 内显式 resolve 为当前系统真实模式
+    /// 用 App root 注入的 systemScheme（@Environment(\.colorScheme) 在 .preferredColorScheme 之前读到的值）
+    /// 避免 nil 触发 UIHostingController.overrideUserInterfaceStyle 缓存导致的背景错位
+    private var preferredSchemeForSheet: ColorScheme? {
+        themeManager.current == .system ? systemScheme : themeManager.current.colorScheme
+    }
 
     /// 从 Info.plist 读取当前 build 的版本号，避免硬编码
     private var appVersion: String {
@@ -372,6 +389,30 @@ struct SettingsView: View {
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
+    }
+
+    /// 「发现新版本」提示行：仅在 UpdateChecker.hasUpdate 时插入「关于」section 顶部
+    private func updateAvailableRow(version: String, url: URL) -> some View {
+        Link(destination: url) {
+            HStack(spacing: 14) {
+                iconBubble("arrow.up.circle.fill", tint: AppPalette.brand)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(String(format: lm.t("发现新版本 %@"), version))
+                        .font(.system(size: 15, weight: .semibold))
+                        .foregroundStyle(AppPalette.brand)
+                    Text(lm.t("查看更新"))
+                        .font(.system(size: 12, weight: .medium))
+                        .foregroundStyle(AppPalette.textSecondary(for: theme))
+                }
+                Spacer()
+                Image(systemName: "arrow.up.right")
+                    .font(.system(size: 12, weight: .bold))
+                    .foregroundStyle(AppPalette.brand)
+            }
+            .padding(.horizontal, 14)
+            .padding(.vertical, 12)
+            .contentShape(Rectangle())
+        }
     }
 
     private func linkRow(label: String, symbol: String, url: String) -> some View {

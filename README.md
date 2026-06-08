@@ -1,109 +1,110 @@
 # PhotoCleaner
 
-**中文** · [English](README.en.md) · [日本語](README.ja.md) · [한국어](README.ko.md)
+**English** · [中文](README.zh.md) · [日本語](README.ja.md) · [한국어](README.ko.md)
 
-> 类 Slidebox 的 iOS 照片整理工具。SwiftUI 原生，iOS 26 液态玻璃语言。
+> Slidebox-like iOS photo organizer. Native SwiftUI with iOS 26 Liquid Glass.
 
 ![iOS](https://img.shields.io/badge/iOS-17%2B-black?logo=apple)
 ![Swift](https://img.shields.io/badge/Swift-5-orange?logo=swift)
 ![License](https://img.shields.io/badge/license-GPL--3.0-blue)
+![Version](https://img.shields.io/badge/version-1.1.5-success)
 
-## 功能
+## Features
 
-- 📷 读取系统照片库，按系统智能相册 + 元数据双重分类
-- 👉 **滑动审核**：左滑下一张 / 右滑前一张 / 上滑加入待删除
-- 🗑 **待删除列表** 批量确认 + 系统原生删除对话框
-- ⏪ 单步撤销
-- 🖼 **照片浏览器**：全屏大图、缩放、左右翻页、收藏 / 分享 / 跳转苹果照片 App
-- 📊 **照片元数据**：尺寸、大小、类型、位置、时长完整展示
-- 🌗 **5 种主题**：跟随系统 / 深色 / 浅色 / 焦糖暖 / 冷色调
-- 🌐 **4 种语言**：中文 / English / 日本語 / 한국어
-- ✨ iOS 26 液态玻璃 + AppIcon
-- 🔒 完全本地处理，零上传
+- 📷 Reads system photo library, classified by smart albums + metadata inference
+- 👉 **Swipe to review**: left = next, right = previous, up = mark delete
+- 🗑 **Pending delete list** with batch confirmation + native iOS delete dialog
+- ⏪ Single-step undo
+- 🖼 **Photo browser**: full-screen view, zoom, swipe pagination, favorite / share / open in Photos.app
+- 📊 **Metadata sheet**: dimensions, file size, type, location, duration
+- 💡 **Smart Picks**: six cleanup entry points (old screenshots / storage hogs / videos / live photos / selfies / social), horizontal cards on home + a "More" sheet for the full list
+- 🌗 **5 themes**: System / Dark / Light / Caramel / Cool
+- 🌐 **4 languages**: 中文 / English / 日本語 / 한국어
+- ⬆️ **Update check**: silently queries GitHub Releases on entering Settings; highlights a chip in the About section when a newer version is published
+- ✨ iOS 26 Liquid Glass + custom AppIcon
+- 🔒 100% on-device, zero uploads
 
-## 截图
-
-待补充（请参考 [Releases](https://github.com/ZanwingMak/PhotoCleaner/releases) 中各版本附带的演示）
-
-## 项目结构
+## Project Structure
 
 ```
 PhotoCleaner/
 ├── PhotoCleaner.xcodeproj
 ├── PhotoCleaner/
-│   ├── PhotoCleanerApp.swift          应用入口
-│   ├── Info.plist                     权限声明
-│   ├── Models/PhotoCategory.swift     分类枚举
+│   ├── PhotoCleanerApp.swift          App entry + RootShell (injects system colorScheme)
+│   ├── Info.plist                     Permission declarations
+│   ├── Models/PhotoCategory.swift     Category enum
 │   ├── Services/
-│   │   ├── PhotoLibraryService.swift  PhotosKit 封装
-│   │   ├── PhotoClassifier.swift      元数据推断
-│   │   ├── ThemeManager.swift         主题管理
-│   │   ├── LanguageManager.swift      语言管理
-│   │   └── L10n.swift                 翻译字典
+│   │   ├── PhotoLibraryService.swift  PhotosKit wrapper
+│   │   ├── PhotoClassifier.swift      Metadata inference
+│   │   ├── ThemeManager.swift         Theme persistence
+│   │   ├── LanguageManager.swift      Language persistence
+│   │   ├── L10n.swift                 Translation dictionary
+│   │   └── UpdateChecker.swift        GitHub Releases version check
 │   ├── ViewModels/
 │   └── Views/
-│       ├── RootView.swift             权限分发
-│       ├── CategoryListView.swift     首页
-│       ├── SwipeReviewView.swift      滑动审核
-│       ├── PendingDeletionView.swift  待删除列表
-│       ├── PhotosBrowserView.swift    照片浏览器
-│       ├── PhotoDetailView.swift      全屏大图
-│       ├── PhotoMetadataSheet.swift   元数据详情
-│       ├── SettingsView.swift         设置
-│       └── Components/                通用组件
+│       ├── RootView.swift             Permission routing
+│       ├── CategoryListView.swift     Home (incl. Smart Picks "More" sheet)
+│       ├── SwipeReviewView.swift      Swipe review
+│       ├── PendingDeletionView.swift  Pending delete list
+│       ├── PhotosBrowserView.swift    Photo browser
+│       ├── PhotoDetailView.swift      Full-screen viewer
+│       ├── PhotoMetadataSheet.swift   Metadata detail
+│       ├── SettingsView.swift         Settings
+│       └── Components/                Shared UI
 ├── scripts/
-│   ├── build-ipa.sh                   一键打包未签名 IPA
-│   └── generate-icon.swift            AppIcon 生成器
-├── CHANGELOG.md                       版本更新日志
-├── FEATURES.md                        功能规格
-├── TEST_PLAN.md                       测试用例
-└── README.md                          本文件
+│   ├── build-ipa.sh                   One-shot unsigned IPA build
+│   └── generate-icon.swift            AppIcon generator
+├── CHANGELOG.md                       Version history
+├── FEATURES.md                        Feature spec
+├── TEST_PLAN.md                       Test cases
+└── README.md                          You are here
 ```
 
-## 在模拟器运行
+## Run in Simulator
 
 ```bash
-# 前置：Xcode 26+，已装 iOS Simulator runtime
+# Requires Xcode 26+ and an iOS Simulator runtime
 open PhotoCleaner.xcodeproj
-# 在 Xcode 里按 ⌘R 运行
+# Press ⌘R in Xcode
 ```
 
-## 打包未签名 IPA
+## Build Unsigned IPA
 
 ```bash
 bash scripts/build-ipa.sh
-# 产物：build/PhotoCleaner-v<VERSION>.ipa
+# Output: build/PhotoCleaner-v<VERSION>.ipa
 ```
 
-## 安装到真机（无开发者账号）
+## Install on a Device (No Developer Account)
 
-未签名 IPA 不能直接安装。选一种工具用免费 Apple ID 自签后侧载，证书 7 天有效：
+The IPA is unsigned. Pick one of these to self-sign with a free Apple ID (cert valid 7 days):
 
-### 方案 A：Sideloadly（最简单）
-1. 下载 https://sideloadly.io
-2. 把 `build/PhotoCleaner-v0.8.0.ipa` 拖进去
-3. 输入免费 Apple ID 自签
-4. 在 iPhone「设置 → 通用 → VPN与设备管理」信任证书
+### Option A: Sideloadly (Easiest)
+1. Download https://sideloadly.io
+2. Drag `build/PhotoCleaner-v<VERSION>.ipa` into it
+3. Sign in with a free Apple ID
+4. On iPhone: Settings → General → VPN & Device Management → trust the certificate
 
-### 方案 B：AltStore（可自动续期）
-通过 AltServer 后台自动续期 7 天证书
+### Option B: AltStore (Auto-Renew)
+Run AltServer in the background to keep the 7-day cert refreshed automatically.
 
-### 方案 C：Xcode 直签
-用 Xcode 打开工程，Signing 选你的免费 Apple ID，⌘R 运行到真机
+### Option C: Xcode Direct Sign
+Open the project in Xcode, set Signing → Team to your free Apple ID, ⌘R to your device.
 
-## 隐私
+## Privacy
 
-- 所有处理本地完成，**零上传**
-- 仅请求 `NSPhotoLibraryUsageDescription`
-- 删除时由 iOS 系统弹原生确认对话框，应用无法绕过
+- All processing happens locally. **Zero network uploads.**
+- Only `NSPhotoLibraryUsageDescription` is requested
+- Deletion always triggers the native iOS confirmation dialog; the app cannot bypass it
+- The update check fires a single GET to `api.github.com`. It sends only the standard User-Agent and never includes any personal data.
 
-## 链接
+## Links
 
-- [更新日志 CHANGELOG.md](CHANGELOG.md)
-- [功能文档 FEATURES.md](FEATURES.md)
-- [测试用例 TEST_PLAN.md](TEST_PLAN.md)
+- [CHANGELOG](CHANGELOG.md)
+- [FEATURES](FEATURES.md)
+- [TEST PLAN](TEST_PLAN.md)
 - [Releases](https://github.com/ZanwingMak/PhotoCleaner/releases)
 
-## 许可
+## License
 
 GPL-3.0-only

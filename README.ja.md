@@ -1,12 +1,13 @@
 # PhotoCleaner
 
-[中文](README.md) · [English](README.en.md) · **日本語** · [한국어](README.ko.md)
+[English](README.md) · [中文](README.zh.md) · **日本語** · [한국어](README.ko.md)
 
 > Slidebox 風の iOS 写真整理ツール。SwiftUI ネイティブ、iOS 26 リキッドグラス。
 
 ![iOS](https://img.shields.io/badge/iOS-17%2B-black?logo=apple)
 ![Swift](https://img.shields.io/badge/Swift-5-orange?logo=swift)
 ![License](https://img.shields.io/badge/license-GPL--3.0-blue)
+![Version](https://img.shields.io/badge/version-1.1.5-success)
 
 ## 機能
 
@@ -16,14 +17,16 @@
 - ⏪ 1 ステップ取り消し
 - 🖼 **写真ブラウザ**：フルスクリーン表示、ズーム、左右ページめくり、お気に入り / 共有 / 写真 App へジャンプ
 - 📊 **メタデータ詳細**：サイズ、ファイル容量、種類、位置情報、長さ
+- 💡 **おすすめ整理**：6 種類の入口（古いスクショ / 容量の大物 / 動画 / Live Photo / 自撮り / SNS）。ホーム横カード +「もっと」シートで全項目を一覧表示
 - 🌗 **5 つのテーマ**：システム / ダーク / ライト / キャラメル / クール
 - 🌐 **4 つの言語**：中文 / English / 日本語 / 한국어
+- ⬆️ **新バージョン検出**：設定を開いたタイミングで静かに GitHub Releases を問い合わせ、新版があれば「について」セクションに目立つチップを表示
 - ✨ iOS 26 リキッドグラス + 専用 AppIcon
 - 🔒 完全に端末内処理、アップロード一切なし
 
 ## プロジェクト構造
 
-[中文 README](README.md#项目结构) を参照（同じ）。
+[English README](README.md#project-structure) を参照（同じ）。
 
 ## シミュレータで実行
 
@@ -46,7 +49,7 @@ IPA は未署名。次のいずれかで無料 Apple ID で自己署名（証明
 
 ### 方法 A：Sideloadly（最も簡単）
 1. https://sideloadly.io をダウンロード
-2. `build/PhotoCleaner-v0.8.0.ipa` をドラッグ
+2. `build/PhotoCleaner-v<VERSION>.ipa` をドラッグ
 3. 無料 Apple ID を入力
 4. iPhone：設定 → 一般 → VPN とデバイス管理 → 証明書を信頼
 
@@ -61,6 +64,7 @@ Xcode でプロジェクトを開く → Signing → Team に無料 Apple ID を
 - すべての処理は端末内。**アップロード一切なし**
 - `NSPhotoLibraryUsageDescription` のみ要求
 - 削除時は iOS のシステムダイアログ。アプリは回避できません
+- バージョン確認は `api.github.com` への単発 GET のみ。標準 User-Agent 以外の個人情報は送りません
 
 ## リンク
 

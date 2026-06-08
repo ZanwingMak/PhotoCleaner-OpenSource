@@ -118,6 +118,7 @@ struct CategoryListView: View {
         }
         .refreshable { // 下拉刷新（Safari 风）
             await library.refreshCategoryCounts()
+            showRefreshToast()
         }
     }
 
@@ -143,6 +144,20 @@ struct CategoryListView: View {
         }
         .refreshable {
             await library.refreshCategoryCounts()
+            showRefreshToast()
+        }
+    }
+
+    /// 刷新完成弹 toast
+    private func showRefreshToast() {
+        let count = library.categoryCounts[PhotoCategory.allPhotos.id] ?? 0
+        UINotificationFeedbackGenerator().notificationOccurred(.success)
+        withAnimation(.spring(response: 0.4, dampingFraction: 0.7)) {
+            toast = ToastInfo(
+                symbol: "checkmark.circle.fill",
+                text: String(format: lm.t("刷新成功 · %d 张"), count),
+                tint: AppPalette.success
+            )
         }
     }
 
@@ -171,14 +186,16 @@ struct CategoryListView: View {
                     .foregroundStyle(AppPalette.textPrimary)
             }
             Spacer()
-            // 刷新按钮：点击立即转一圈，isLoading 期间继续累加
+            // 刷新按钮：点击立即转一圈，isLoading 期间继续累加，完成弹 toast
             Button {
                 UIImpactFeedbackGenerator(style: .soft).impactOccurred()
-                // 点击瞬间立刻先转 360°，给即时反馈
                 withAnimation(.easeOut(duration: 0.6)) {
                     refreshSpinAngle += 360
                 }
-                Task { await library.refreshCategoryCounts() }
+                Task {
+                    await library.refreshCategoryCounts()
+                    showRefreshToast()
+                }
             } label: {
                 Image(systemName: "arrow.clockwise")
                     .font(.system(size: 16, weight: .semibold))

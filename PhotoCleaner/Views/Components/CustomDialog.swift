@@ -1,7 +1,7 @@
 //
 //  CustomDialog.swift
-//  自定义 alert 弹窗：手动控制宽度（max 360pt 比系统宽）和按钮颜色
-//  避免 confirmationDialog/alert 被 app .tint 染成橙色看不清
+//  自定义 alert 弹窗：手动控制宽度和按钮颜色
+//  浅色主题用纯白卡片；深色主题用液态玻璃背景
 //
 
 import SwiftUI
@@ -13,10 +13,11 @@ struct DialogAction: Identifiable {
     let action: () -> Void
 
     enum ActionRole {
-        case primary    // 主操作：蓝色
-        case destructive // 危险：红色
-        case cancel     // 取消：灰色加粗
-        case normal     // 普通：灰色
+        case primary           // 主操作：蓝色文字
+        case destructive       // 危险：红色文字
+        case cancel            // 普通 cancel：蓝色文字加粗
+        case highlightedCancel // 强调 cancel：填充背景（浅蓝底白字 / 浅深白底黑字）
+        case normal            // 普通：灰色文字
     }
 }
 
@@ -29,7 +30,7 @@ struct CustomDialog: View {
 
     var body: some View {
         ZStack {
-            // 模糊遮罩，点击关闭
+            // 半透明遮罩，点击关闭
             (scheme == .light ? Color.black.opacity(0.35) : Color.black.opacity(0.55))
                 .ignoresSafeArea()
                 .onTapGesture(perform: onDismiss)
@@ -51,25 +52,14 @@ struct CustomDialog: View {
                     .padding(.horizontal, 22)
                     .padding(.bottom, 18)
 
-                // 分隔线
                 Rectangle()
                     .fill(Color.primary.opacity(0.08))
                     .frame(height: 1)
 
-                // 按钮组（垂直排列，等宽）
+                // 按钮组
                 VStack(spacing: 0) {
                     ForEach(Array(actions.enumerated()), id: \.element.id) { idx, act in
-                        Button {
-                            act.action()
-                        } label: {
-                            Text(act.title)
-                                .font(.system(size: 16, weight: act.role == .cancel ? .semibold : .regular))
-                                .foregroundStyle(color(for: act.role))
-                                .frame(maxWidth: .infinity)
-                                .frame(height: 50)
-                                .contentShape(Rectangle())
-                        }
-                        .buttonStyle(.plain)
+                        actionButton(act)
 
                         if idx < actions.count - 1 {
                             Rectangle()
@@ -79,10 +69,7 @@ struct CustomDialog: View {
                     }
                 }
             }
-            .background(
-                RoundedRectangle(cornerRadius: 18, style: .continuous)
-                    .fill(scheme == .light ? Color.white : Color(red: 0.16, green: 0.15, blue: 0.14))
-            )
+            .background(dialogBackground)
             .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
             .overlay(
                 RoundedRectangle(cornerRadius: 18, style: .continuous)
@@ -95,21 +82,77 @@ struct CustomDialog: View {
         }
     }
 
-    /// 按钮颜色：不受 app .tint 影响
+    /// 卡片背景：浅色 = 纯白；深色 = 液态玻璃
+    @ViewBuilder
+    private var dialogBackground: some View {
+        if scheme == .light {
+            Color.white
+        } else {
+            if #available(iOS 26.0, *) {
+                Color.clear.glassEffect(.regular, in: .rect(cornerRadius: 18))
+            } else {
+                Rectangle()
+                    .fill(.ultraThinMaterial)
+                    .overlay(
+                        Rectangle().fill(Color(red: 0.16, green: 0.15, blue: 0.14).opacity(0.55))
+                    )
+            }
+        }
+    }
+
+    /// 单个按钮：highlightedCancel 用填充背景突出
+    @ViewBuilder
+    private func actionButton(_ act: DialogAction) -> some View {
+        Button {
+            act.action()
+        } label: {
+            if act.role == .highlightedCancel {
+                Text(act.title)
+                    .font(.system(size: 16, weight: .bold))
+                    .foregroundStyle(highlightedTextColor)
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 50)
+                    .background(highlightedFillColor)
+                    .contentShape(Rectangle())
+            } else {
+                Text(act.title)
+                    .font(.system(size: 16, weight: act.role == .cancel ? .semibold : .regular))
+                    .foregroundStyle(color(for: act.role))
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 50)
+                    .contentShape(Rectangle())
+            }
+        }
+        .buttonStyle(.plain)
+    }
+
+    /// 普通按钮颜色（不受 app .tint 影响）
     private func color(for role: DialogAction.ActionRole) -> Color {
         switch role {
-        case .primary:     return Color(red: 0.0, green: 0.48, blue: 1.0)  // system blue
-        case .destructive: return Color(red: 1.0, green: 0.23, blue: 0.19) // system red
-        case .cancel:      return Color(red: 0.0, green: 0.48, blue: 1.0)  // system blue 加粗
+        case .primary:     return Color(red: 0.0, green: 0.48, blue: 1.0)
+        case .destructive: return Color(red: 1.0, green: 0.23, blue: 0.19)
+        case .cancel:      return Color(red: 0.0, green: 0.48, blue: 1.0)
         case .normal:      return Color.primary.opacity(0.85)
+        case .highlightedCancel: return .white
         }
+    }
+
+    /// highlightedCancel 按钮的填充色
+    private var highlightedFillColor: Color {
+        scheme == .light
+            ? Color(red: 0.0, green: 0.48, blue: 1.0)  // 浅色：蓝底
+            : Color.white                              // 深色：白底
+    }
+
+    /// highlightedCancel 按钮的文字色
+    private var highlightedTextColor: Color {
+        scheme == .light ? .white : .black
     }
 }
 
 // MARK: - View modifier
 
 extension View {
-    /// 弹自定义 dialog；isPresented = true 时叠加显示
     func customDialog(
         isPresented: Binding<Bool>,
         title: String,

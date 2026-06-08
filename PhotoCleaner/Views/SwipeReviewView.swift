@@ -248,9 +248,6 @@ struct SwipeReviewView: View {
                     showPendingSheet = true
                     pendingExitConfirm = nil
                 },
-                DialogAction(title: lm.t("继续审核"), role: .normal) {
-                    pendingExitConfirm = nil
-                },
                 DialogAction(title: lm.t("放弃并退出"), role: .destructive) {
                     let action = pendingExitConfirm
                     vm.pendingDeletion.removeAll()
@@ -264,7 +261,7 @@ struct SwipeReviewView: View {
                     case nil: break
                     }
                 },
-                DialogAction(title: lm.t("点错了"), role: .cancel) {
+                DialogAction(title: lm.t("点错了"), role: .highlightedCancel) {
                     pendingExitConfirm = nil
                 }
             ]

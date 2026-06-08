@@ -35,6 +35,7 @@ SWIFT_FILES=(
   "$SRC_DIR/Services/ThemeManager.swift"
   "$SRC_DIR/Services/LanguageManager.swift"
   "$SRC_DIR/Services/L10n.swift"
+  "$SRC_DIR/Services/UpdateChecker.swift"
   "$SRC_DIR/ViewModels/SwipeReviewViewModel.swift"
   "$SRC_DIR/Views/RootView.swift"
   "$SRC_DIR/Views/CategoryListView.swift"

@@ -1,6 +1,10 @@
-# PhotoCleaner
+<p align="center">
+  <img src="docs/icon.png" width="128" alt="PhotoCleaner icon" />
+</p>
 
-**English** · [中文](README.zh.md) · [日本語](README.ja.md) · [한국어](README.ko.md)
+<h1 align="center">PhotoCleaner</h1>
+
+<p align="center"><b>English</b> · <a href="README.zh.md">中文</a> · <a href="README.ja.md">日本語</a> · <a href="README.ko.md">한국어</a></p>
 
 > Slidebox-like iOS photo organizer. Native SwiftUI with iOS 26 Liquid Glass.
 
@@ -23,6 +27,16 @@
 - ⬆️ **Update check**: silently queries GitHub Releases on entering Settings; highlights a chip in the About section when a newer version is published
 - ✨ iOS 26 Liquid Glass + custom AppIcon
 - 🔒 100% on-device, zero uploads
+
+## Screenshots
+
+<p align="center">
+  <img src="docs/screenshots/01-home.png" width="240" alt="Home — Smart Picks with 'More' button, Time Lens, Bento categories" />
+  <img src="docs/screenshots/02-smart-picks-sheet.png" width="240" alt="Smart Picks 'More' sheet — full list of cleanup entry points" />
+  <img src="docs/screenshots/03-settings.png" width="240" alt="Settings — five themes (System / Dark / Light / Caramel / Cool) and four languages" />
+</p>
+
+> Left → Right: home screen with the new **More** chip on Smart Picks · the **Smart Picks list sheet** opened by that chip · settings page showing five themes and four languages.
 
 ## Project Structure
 

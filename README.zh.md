@@ -1,6 +1,10 @@
-# PhotoCleaner
+<p align="center">
+  <img src="docs/icon.png" width="128" alt="PhotoCleaner 图标" />
+</p>
 
-[English](README.md) · **中文** · [日本語](README.ja.md) · [한국어](README.ko.md)
+<h1 align="center">PhotoCleaner</h1>
+
+<p align="center"><a href="README.md">English</a> · <b>中文</b> · <a href="README.ja.md">日本語</a> · <a href="README.ko.md">한국어</a></p>
 
 > 类 Slidebox 的 iOS 照片整理工具。SwiftUI 原生，iOS 26 液态玻璃语言。
 
@@ -23,6 +27,16 @@
 - ⬆️ **新版本检测**：进入设置后台静默查询 GitHub Releases，有新版直接在「关于」区高亮提示
 - ✨ iOS 26 液态玻璃 + AppIcon
 - 🔒 完全本地处理，零上传
+
+## 截图
+
+<p align="center">
+  <img src="docs/screenshots/01-home.png" width="240" alt="首页 — 智能建议「更多」按钮、时间游戏、Bento 分类" />
+  <img src="docs/screenshots/02-smart-picks-sheet.png" width="240" alt="智能建议「更多」sheet — 全部清理入口列表" />
+  <img src="docs/screenshots/03-settings.png" width="240" alt="设置 — 5 主题（跟随系统 / 深色 / 浅色 / 焦糖暖 / 冷色调）与 4 语言" />
+</p>
+
+> 从左到右：首页带新的「更多」胶囊 · 点开后弹出的「智能建议」完整列表 · 设置页展示 5 主题 + 4 语言。
 
 ## 项目结构
 

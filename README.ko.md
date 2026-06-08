@@ -1,6 +1,10 @@
-# PhotoCleaner
+<p align="center">
+  <img src="docs/icon.png" width="128" alt="PhotoCleaner 아이콘" />
+</p>
 
-[English](README.md) · [中文](README.zh.md) · [日本語](README.ja.md) · **한국어**
+<h1 align="center">PhotoCleaner</h1>
+
+<p align="center"><a href="README.md">English</a> · <a href="README.zh.md">中文</a> · <a href="README.ja.md">日本語</a> · <b>한국어</b></p>
 
 > Slidebox 스타일의 iOS 사진 정리 도구. 네이티브 SwiftUI, iOS 26 리퀴드 글래스.
 
@@ -23,6 +27,16 @@
 - ⬆️ **새 버전 감지**: 설정 진입 시 GitHub Releases 를 백그라운드에서 조용히 조회, 새 버전이 있으면 「정보」 섹션에 강조 표시
 - ✨ iOS 26 리퀴드 글래스 + 전용 AppIcon
 - 🔒 100% 기기 내 처리, 업로드 없음
+
+## 스크린샷
+
+<p align="center">
+  <img src="docs/screenshots/01-home.png" width="240" alt="홈 — 스마트 추천 「더보기」 버튼, Time Lens, Bento 카테고리" />
+  <img src="docs/screenshots/02-smart-picks-sheet.png" width="240" alt="스마트 추천 「더보기」 시트 — 전체 정리 진입점 목록" />
+  <img src="docs/screenshots/03-settings.png" width="240" alt="설정 — 5가지 테마 (시스템 / 다크 / 라이트 / 카라멜 / 쿨) 및 4개 언어" />
+</p>
+
+> 왼쪽부터 오른쪽: 새로운 「더보기」 칩이 표시된 홈 · 그 칩을 눌러 열리는 「스마트 추천」 전체 목록 · 5가지 테마와 4개 언어를 보여주는 설정.
 
 ## 프로젝트 구조
 

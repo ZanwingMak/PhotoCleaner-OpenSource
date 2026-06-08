@@ -1,6 +1,10 @@
-# PhotoCleaner
+<p align="center">
+  <img src="docs/icon.png" width="128" alt="PhotoCleaner アイコン" />
+</p>
 
-[English](README.md) · [中文](README.zh.md) · **日本語** · [한국어](README.ko.md)
+<h1 align="center">PhotoCleaner</h1>
+
+<p align="center"><a href="README.md">English</a> · <a href="README.zh.md">中文</a> · <b>日本語</b> · <a href="README.ko.md">한국어</a></p>
 
 > Slidebox 風の iOS 写真整理ツール。SwiftUI ネイティブ、iOS 26 リキッドグラス。
 
@@ -23,6 +27,16 @@
 - ⬆️ **新バージョン検出**：設定を開いたタイミングで静かに GitHub Releases を問い合わせ、新版があれば「について」セクションに目立つチップを表示
 - ✨ iOS 26 リキッドグラス + 専用 AppIcon
 - 🔒 完全に端末内処理、アップロード一切なし
+
+## スクリーンショット
+
+<p align="center">
+  <img src="docs/screenshots/01-home.png" width="240" alt="ホーム — おすすめ整理「もっと」ボタン、Time Lens、Bento カテゴリ" />
+  <img src="docs/screenshots/02-smart-picks-sheet.png" width="240" alt="おすすめ整理「もっと」シート — 全エントリー一覧" />
+  <img src="docs/screenshots/03-settings.png" width="240" alt="設定 — 5 テーマ（システム / ダーク / ライト / キャラメル / クール）と 4 言語" />
+</p>
+
+> 左から右：新しい「もっと」チップが付いたホーム · そこから開く「おすすめ整理」一覧 · 5 テーマと 4 言語を備えた設定。
 
 ## プロジェクト構造
 

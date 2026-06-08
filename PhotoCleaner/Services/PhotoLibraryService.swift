@@ -9,11 +9,17 @@ import UIKit
 import Combine
 
 /// 月份分组数据
-struct MonthBucket: Identifiable, Hashable {
+struct MonthBucket: Identifiable, Hashable, Sendable {
     let year: Int
     let month: Int
     let count: Int
     var id: String { "\(year)-\(month)" }
+}
+
+/// 首页统计快照：只保存轻量计数，避免跨线程传递 PHAsset 数组
+private struct PhotoLibrarySnapshot: Sendable {
+    let categoryCounts: [String: Int]
+    let monthBuckets: [MonthBucket]
 }
 
 @MainActor
@@ -31,8 +37,10 @@ final class PhotoLibraryService: ObservableObject {
 
     init() {
         self.authorizationStatus = PHPhotoLibrary.authorizationStatus(for: .readWrite)
+        self.imageManager.allowsCachingHighQualityImages = false
     }
 
+    /// 请求照片库授权并同步到页面状态
     func requestAuthorization() async {
         let status = await PHPhotoLibrary.requestAuthorization(for: .readWrite)
         self.authorizationStatus = status
@@ -43,6 +51,7 @@ final class PhotoLibraryService: ObservableObject {
         self.authorizationStatus = PHPhotoLibrary.authorizationStatus(for: .readWrite)
     }
 
+    /// 当前授权是否允许读取照片库
     var hasAccess: Bool {
         authorizationStatus == .authorized || authorizationStatus == .limited
     }
@@ -66,15 +75,18 @@ final class PhotoLibraryService: ObservableObject {
             return all
 
         case .inferred(let kind):
-            let all = arrayFrom(PHAsset.fetchAssets(with: options))
-            return all.filter { PhotoClassifier.matches($0, kind: kind) }
+            return filteredAssets(from: PHAsset.fetchAssets(with: options)) {
+                PhotoClassifier.matches($0, kind: kind)
+            }
 
         case .quickPick(let pick):
-            let all = arrayFrom(PHAsset.fetchAssets(with: options))
+            let result = PHAsset.fetchAssets(with: options)
             if pick == .random {
-                return Array(all.shuffled().prefix(200))
+                return randomSample(from: result, limit: 200)
             }
-            return all.filter { PhotoClassifier.matches($0, quick: pick) }
+            return filteredAssets(from: result) {
+                PhotoClassifier.matches($0, quick: pick)
+            }
 
         case .month(let y, let m):
             let cal = Calendar.current
@@ -92,46 +104,14 @@ final class PhotoLibraryService: ObservableObject {
 
     /// 刷新分类计数 + 月份分桶
     func refreshCategoryCounts() async {
+        guard hasAccess, !isLoading else { return }
+
         isLoading = true
         defer { isLoading = false }
 
-        // 1. 统计推断分类的数量（这些是首页主要展示的）
-        var counts: [String: Int] = [:]
-
-        let all = arrayFrom(PHAsset.fetchAssets(with: defaultSort()))
-        counts[PhotoCategory.allPhotos.id] = all.count
-
-        for kind in PhotoCategory.InferredKind.allCases {
-            let n = all.filter { PhotoClassifier.matches($0, kind: kind) }.count
-            counts[PhotoCategory.inferred(kind).id] = n
-        }
-
-        // 2. quickPicks 数量
-        for pick in PhotoCategory.QuickPick.allCases {
-            if pick == .random {
-                counts[PhotoCategory.quickPick(pick).id] = min(all.count, 200)
-            } else {
-                let n = all.filter { PhotoClassifier.matches($0, quick: pick) }.count
-                counts[PhotoCategory.quickPick(pick).id] = n
-            }
-        }
-
-        // 3. 按月份分桶（仅近 24 个月）
-        let cal = Calendar.current
-        var bucketMap: [String: (year: Int, month: Int, count: Int)] = [:]
-        for asset in all {
-            guard let date = asset.creationDate else { continue }
-            let y = cal.component(.year, from: date)
-            let m = cal.component(.month, from: date)
-            let key = "\(y)-\(m)"
-            bucketMap[key, default: (y, m, 0)].count += 1
-        }
-        let sorted = bucketMap.values
-            .map { MonthBucket(year: $0.year, month: $0.month, count: $0.count) }
-            .sorted { ($0.year, $0.month) > ($1.year, $1.month) }
-
-        self.categoryCounts = counts
-        self.monthBuckets = Array(sorted.prefix(24))
+        let snapshot = await Self.buildCategorySnapshot()
+        self.categoryCounts = snapshot.categoryCounts
+        self.monthBuckets = snapshot.monthBuckets
     }
 
     /// 加载缩略图
@@ -139,12 +119,14 @@ final class PhotoLibraryService: ObservableObject {
     func loadImage(
         for asset: PHAsset,
         targetSize: CGSize,
+        deliveryMode: PHImageRequestOptionsDeliveryMode = .opportunistic,
+        isNetworkAccessAllowed: Bool = true,
         completion: @escaping (UIImage?) -> Void
     ) -> PHImageRequestID {
         let options = PHImageRequestOptions()
-        options.deliveryMode = .highQualityFormat
+        options.deliveryMode = deliveryMode
         options.resizeMode = .fast
-        options.isNetworkAccessAllowed = true
+        options.isNetworkAccessAllowed = isNetworkAccessAllowed
         options.isSynchronous = false
 
         return imageManager.requestImage(
@@ -191,16 +173,102 @@ final class PhotoLibraryService: ObservableObject {
 
     // MARK: - Helpers
 
-    private func defaultSort() -> PHFetchOptions {
-        let o = PHFetchOptions()
-        o.sortDescriptors = [NSSortDescriptor(key: "creationDate", ascending: false)]
-        return o
+    /// 在后台线程构建首页统计，避免照片多时阻塞首屏渲染
+    private nonisolated static func buildCategorySnapshot() async -> PhotoLibrarySnapshot {
+        await Task.detached(priority: .utility) {
+            let options = PHFetchOptions()
+            options.sortDescriptors = [NSSortDescriptor(key: "creationDate", ascending: false)]
+            let result = PHAsset.fetchAssets(with: options)
+            return makeSnapshot(from: result)
+        }.value
     }
 
+    /// 单次枚举 PHFetchResult 生成所有首页计数，避免反复过滤全相册
+    private nonisolated static func makeSnapshot(from result: PHFetchResult<PHAsset>) -> PhotoLibrarySnapshot {
+        let now = Date()
+        let cal = Calendar.current
+        var counts: [String: Int] = [:]
+        var bucketMap: [String: (year: Int, month: Int, count: Int)] = [:]
+
+        counts[PhotoCategory.allPhotos.id] = result.count
+        for kind in PhotoCategory.InferredKind.allCases {
+            counts[PhotoCategory.inferred(kind).id] = 0
+        }
+        for pick in PhotoCategory.QuickPick.allCases {
+            counts[PhotoCategory.quickPick(pick).id] = 0
+        }
+        counts[PhotoCategory.inferred(.allUnsorted).id] = result.count
+        counts[PhotoCategory.quickPick(.random).id] = min(result.count, 200)
+
+        result.enumerateObjects { asset, _, _ in
+            autoreleasepool {
+                for kind in PhotoCategory.InferredKind.allCases where kind != .allUnsorted {
+                    if PhotoClassifier.matchesForLibraryScan(asset, kind: kind) {
+                        counts[PhotoCategory.inferred(kind).id, default: 0] += 1
+                    }
+                }
+
+                for pick in PhotoCategory.QuickPick.allCases where pick != .random {
+                    if PhotoClassifier.matches(asset, quick: pick, now: now) {
+                        counts[PhotoCategory.quickPick(pick).id, default: 0] += 1
+                    }
+                }
+
+                guard let date = asset.creationDate else { return }
+                let year = cal.component(.year, from: date)
+                let month = cal.component(.month, from: date)
+                let key = "\(year)-\(month)"
+                bucketMap[key, default: (year, month, 0)].count += 1
+            }
+        }
+
+        let buckets = bucketMap.values
+            .map { MonthBucket(year: $0.year, month: $0.month, count: $0.count) }
+            .sorted { ($0.year, $0.month) > ($1.year, $1.month) }
+
+        return PhotoLibrarySnapshot(categoryCounts: counts,
+                                    monthBuckets: Array(buckets.prefix(24)))
+    }
+
+    /// 将 PHFetchResult 转成数组，仅用于确实需要完整列表的页面
     private func arrayFrom(_ result: PHFetchResult<PHAsset>) -> [PHAsset] {
         var arr: [PHAsset] = []
         arr.reserveCapacity(result.count)
         result.enumerateObjects { obj, _, _ in arr.append(obj) }
         return arr
+    }
+
+    /// 单次枚举并只保留匹配资产，避免先构建全量数组再过滤
+    private func filteredAssets(
+        from result: PHFetchResult<PHAsset>,
+        where matches: @escaping (PHAsset) -> Bool
+    ) -> [PHAsset] {
+        var arr: [PHAsset] = []
+        result.enumerateObjects { obj, _, _ in
+            if matches(obj) {
+                arr.append(obj)
+            }
+        }
+        return arr
+    }
+
+    /// 对 PHFetchResult 做蓄水池抽样，避免随机分类全量 shuffle 占用大量内存
+    private func randomSample(from result: PHFetchResult<PHAsset>, limit: Int) -> [PHAsset] {
+        guard limit > 0 else { return [] }
+        var sample: [PHAsset] = []
+        sample.reserveCapacity(min(result.count, limit))
+
+        result.enumerateObjects { obj, idx, _ in
+            if idx < limit {
+                sample.append(obj)
+            } else {
+                let replaceIndex = Int.random(in: 0...idx)
+                if replaceIndex < limit {
+                    sample[replaceIndex] = obj
+                }
+            }
+        }
+
+        return sample
     }
 }

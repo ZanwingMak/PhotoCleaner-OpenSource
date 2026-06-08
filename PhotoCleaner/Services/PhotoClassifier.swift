@@ -58,6 +58,14 @@ enum PhotoClassifier {
         }
     }
 
+    /// 首页全库扫描使用的轻量匹配，避免启动时逐张读取资源文件大小
+    static func matchesForLibraryScan(_ asset: PHAsset, kind: PhotoCategory.InferredKind) -> Bool {
+        if kind == .largeFile {
+            return isLikelyLargeFileByMetadata(asset)
+        }
+        return matches(asset, kind: kind)
+    }
+
     /// 估算资产文件大小（字节）
     static func estimatedSize(of asset: PHAsset) -> Int64 {
         let resources = PHAssetResource.assetResources(for: asset)
@@ -70,6 +78,16 @@ enum PhotoClassifier {
         return total
     }
 
+    /// 只用元数据粗略判断大文件，避免全库统计时触发昂贵资源查询
+    private static func isLikelyLargeFileByMetadata(_ asset: PHAsset) -> Bool {
+        let pixels = Int64(asset.pixelWidth) * Int64(asset.pixelHeight)
+        if asset.mediaType == .video {
+            return asset.duration >= 30 || pixels >= 8_000_000
+        }
+        return asset.mediaSubtypes.contains(.photoPanorama) || pixels >= 12_000_000
+    }
+
+    /// 根据常见前摄尺寸粗略判断自拍
     private static func isLikelySelfie(_ asset: PHAsset) -> Bool {
         let w = asset.pixelWidth, h = asset.pixelHeight
         let frontCamSizes: [(Int, Int)] = [

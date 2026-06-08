@@ -266,7 +266,11 @@ private struct PhotoGridThumb: View {
         }
         .aspectRatio(1, contentMode: .fit)
         .onAppear {
-            reqID = library.loadImage(for: asset, targetSize: CGSize(width: 240, height: 240)) { img in
+            reqID = library.loadImage(
+                for: asset,
+                targetSize: CGSize(width: 240, height: 240),
+                isNetworkAccessAllowed: false
+            ) { img in
                 image = img
             }
         }

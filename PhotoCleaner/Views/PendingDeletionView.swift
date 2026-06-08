@@ -293,8 +293,11 @@ struct PendingThumbnail: View {
                 }
             }
             .onAppear {
-                requestID = library.loadImage(for: asset,
-                                               targetSize: CGSize(width: 280, height: 280)) { img in
+                requestID = library.loadImage(
+                    for: asset,
+                    targetSize: CGSize(width: 280, height: 280),
+                    isNetworkAccessAllowed: false
+                ) { img in
                     image = img
                 }
             }

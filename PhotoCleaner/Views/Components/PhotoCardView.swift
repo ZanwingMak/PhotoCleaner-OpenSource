@@ -1,28 +1,32 @@
 //
 //  PhotoCardView.swift
-//  单张照片卡片：检测 mediaSubtypes 自动用 LivePhotoView 或 UIImage 渲染
+//  单张照片卡片：使用静态预览图渲染，避免审核页批量加载 Live Photo 资源
 //  纯深色背景，不再有模糊放大底图
 //
 
 import SwiftUI
 import Photos
-import PhotosUI
 import UIKit
 
 /// 全局缩略图缓存：view 重建时立即取，不闪 Loading
 enum ThumbnailCache {
     static let shared: NSCache<NSString, UIImage> = {
         let c = NSCache<NSString, UIImage>()
-        c.countLimit = 300
+        c.countLimit = 80
+        c.totalCostLimit = 80 * 1024 * 1024
         return c
     }()
 
+    /// 从缓存读取指定 localIdentifier 的预览图
     static func get(_ id: String) -> UIImage? {
         shared.object(forKey: id as NSString)
     }
 
+    /// 写入预览图并按像素估算内存成本，防止连续浏览时缓存过大
     static func set(_ id: String, _ image: UIImage) {
-        shared.setObject(image, forKey: id as NSString)
+        let pixels = image.size.width * image.scale * image.size.height * image.scale
+        let cost = max(1, Int(pixels * 4))
+        shared.setObject(image, forKey: id as NSString, cost: cost)
     }
 }
 
@@ -31,9 +35,7 @@ struct PhotoCardView: View {
     @EnvironmentObject private var library: PhotoLibraryService
 
     @State private var image: UIImage?
-    @State private var livePhoto: PHLivePhoto?
     @State private var imageRequestID: PHImageRequestID?
-    @State private var liveRequestID: PHImageRequestID?
 
     /// init 时立即从缓存取 image，避免重建 view 时闪 Loading
     init(asset: PHAsset) {
@@ -41,26 +43,18 @@ struct PhotoCardView: View {
         _image = State(initialValue: ThumbnailCache.get(asset.localIdentifier))
     }
 
-    /// 该资产是否为 Live Photo
-    private var isLivePhoto: Bool {
-        asset.mediaSubtypes.contains(.photoLive)
-    }
-
     var body: some View {
         GeometryReader { geo in
             ZStack {
                 // 仅在加载中显示深色底，加载完后透明（让堆叠下层照片可见）
-                if image == nil && livePhoto == nil {
+                if image == nil {
                     Color(red: 0.06, green: 0.055, blue: 0.05)
                     ProgressView()
                         .progressViewStyle(.circular)
                         .tint(.white)
                 }
 
-                if isLivePhoto, let livePhoto {
-                    LivePhotoView(livePhoto: livePhoto)
-                        .frame(width: geo.size.width, height: geo.size.height)
-                } else if let image {
+                if let image {
                     Image(uiImage: image)
                         .resizable()
                         .scaledToFit()
@@ -78,7 +72,7 @@ struct PhotoCardView: View {
         }
     }
 
-    /// 异步加载：先用缓存，缺时才请求；Live Photo 额外加载
+    /// 异步加载静态预览：先用缓存，缺时才请求
     private func load(targetSize: CGSize) {
         let scale = UIScreen.main.scale
         let target = CGSize(width: targetSize.width * scale,
@@ -92,16 +86,10 @@ struct PhotoCardView: View {
                 self.image = img // 静默赋值，无 withAnimation 避免闪烁
             }
         }
-
-        if isLivePhoto, livePhoto == nil {
-            liveRequestID = library.loadLivePhoto(for: asset, targetSize: target) { live in
-                self.livePhoto = live
-            }
-        }
     }
 
+    /// 取消当前卡片未完成的图片请求
     private func cancelLoad() {
         if let id = imageRequestID { library.cancelImageRequest(id) }
-        if let id = liveRequestID { library.cancelImageRequest(id) }
     }
 }

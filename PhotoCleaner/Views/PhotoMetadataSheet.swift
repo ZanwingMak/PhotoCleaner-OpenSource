@@ -152,13 +152,20 @@ struct PhotoMetadataSheet: View {
             } label: {
                 actionButtonLabel(symbol: "square.and.arrow.up",
                                    text: lm.t("分享"),
-                                   tint: .white)
+                                   tint: AppPalette.textPrimary,
+                                   usesCardBackground: true)
             }
             .buttonStyle(.plain)
         }
     }
 
-    private func actionButtonLabel(symbol: String, text: String, tint: Color) -> some View {
+    /// 构建详情页底部操作按钮，按主题保证文字和背景对比度
+    private func actionButtonLabel(
+        symbol: String,
+        text: String,
+        tint: Color,
+        usesCardBackground: Bool = false
+    ) -> some View {
         HStack(spacing: 10) {
             Image(systemName: symbol)
                 .font(.system(size: 17, weight: .semibold))
@@ -170,7 +177,7 @@ struct PhotoMetadataSheet: View {
         .padding(.vertical, 16)
         .background(
             RoundedRectangle(cornerRadius: 14, style: .continuous)
-                .fill(tint == .white ? AppPalette.bgCard : tint.opacity(0.15))
+                .fill(usesCardBackground ? AppPalette.bgCard : tint.opacity(0.15))
                 .overlay(
                     RoundedRectangle(cornerRadius: 14, style: .continuous)
                         .strokeBorder(tint.opacity(0.3), lineWidth: 1)

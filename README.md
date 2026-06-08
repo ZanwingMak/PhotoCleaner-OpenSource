@@ -11,7 +11,7 @@
 ![iOS](https://img.shields.io/badge/iOS-17%2B-black?logo=apple)
 ![Swift](https://img.shields.io/badge/Swift-5-orange?logo=swift)
 ![License](https://img.shields.io/badge/license-GPL--3.0-blue)
-![Version](https://img.shields.io/badge/version-1.1.5-success)
+![Version](https://img.shields.io/badge/version-1.1.6-success)
 
 ## Features
 
@@ -31,12 +31,12 @@
 ## Screenshots
 
 <p align="center">
-  <img src="docs/screenshots/01-home.png" width="240" alt="Home — Smart Picks with 'More' button, Time Lens, Bento categories" />
-  <img src="docs/screenshots/02-smart-picks-sheet.png" width="240" alt="Smart Picks 'More' sheet — full list of cleanup entry points" />
-  <img src="docs/screenshots/03-settings.png" width="240" alt="Settings — five themes (System / Dark / Light / Caramel / Cool) and four languages" />
+  <img src="docs/screenshots/01-home.png" width="240" alt="Home — Smart Picks, Time Lens, Bento categories" />
+  <img src="docs/screenshots/02-albums.png" width="240" alt="Albums — smart albums and inferred cleanup categories" />
+  <img src="docs/screenshots/03-settings.png" width="240" alt="Settings — themes, languages, and experience toggles" />
 </p>
 
-> Left → Right: home screen with the new **More** chip on Smart Picks · the **Smart Picks list sheet** opened by that chip · settings page showing five themes and four languages.
+> Left → Right: home screen with Smart Picks and Time Lens · albums list with smart albums and cleanup categories · settings page with themes, languages, and experience toggles.
 
 ## Project Structure
 

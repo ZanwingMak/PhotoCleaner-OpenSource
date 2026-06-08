@@ -364,44 +364,66 @@ struct CategoryListView: View {
         return min(1, Double(reviewedCount) / Double(totalCount))
     }
 
-    // MARK: - 智能建议横向卡（PhotoCleaner 特色）
+    // MARK: - 智能建议横向滚动卡（PhotoCleaner 特色，多个清理切入点）
 
     private var smartSuggestionRow: some View {
         VStack(alignment: .leading, spacing: 12) {
             sectionTitle(lm.t("智能建议"), subtitle: lm.t("先清这些最划算"))
 
-            HStack(spacing: 12) {
-                NavigationLink(value: PhotoCategory.inferred(.screenshot)) {
-                    SuggestionCard(
-                        symbol: "rectangle.dashed",
-                        label: lm.t("陈年截图"),
-                        count: library.categoryCounts[PhotoCategory.inferred(.screenshot).id] ?? 0,
-                        tint: .blue,
-                        background: LinearGradient(
-                            colors: [Color(red: 0.25, green: 0.45, blue: 0.85),
-                                     Color(red: 0.15, green: 0.30, blue: 0.55)],
-                            startPoint: .topLeading, endPoint: .bottomTrailing
-                        )
-                    )
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 12) {
+                    suggestionCard(for: .inferred(.screenshot),
+                                    label: "陈年截图", symbol: "rectangle.dashed",
+                                    gradient: [Color(red: 0.25, green: 0.45, blue: 0.85),
+                                               Color(red: 0.15, green: 0.30, blue: 0.55)])
+                    suggestionCard(for: .inferred(.largeFile),
+                                    label: "占空间大户", symbol: "externaldrive.badge.exclamationmark",
+                                    gradient: [Color(red: 0.85, green: 0.35, blue: 0.42),
+                                               Color(red: 0.55, green: 0.20, blue: 0.30)])
+                    suggestionCard(for: .inferred(.unsortedVideo),
+                                    label: "视频清理", symbol: "video.fill",
+                                    gradient: [Color(red: 0.40, green: 0.75, blue: 0.55),
+                                               Color(red: 0.20, green: 0.50, blue: 0.40)])
+                    suggestionCard(for: .smartAlbum(.smartAlbumLivePhotos, title: "实况照片",
+                                                    symbol: "livephoto", tint: .mint),
+                                    label: "实况照片", symbol: "livephoto",
+                                    gradient: [Color(red: 0.30, green: 0.65, blue: 0.75),
+                                               Color(red: 0.15, green: 0.40, blue: 0.55)])
+                    suggestionCard(for: .inferred(.selfie),
+                                    label: "自拍清理", symbol: "person.crop.circle",
+                                    gradient: [Color(red: 0.95, green: 0.55, blue: 0.70),
+                                               Color(red: 0.60, green: 0.30, blue: 0.55)])
+                    suggestionCard(for: .inferred(.social),
+                                    label: "社交媒体", symbol: "bubble.left.and.bubble.right",
+                                    gradient: [Color(red: 0.65, green: 0.50, blue: 0.90),
+                                               Color(red: 0.35, green: 0.25, blue: 0.65)])
                 }
-                .buttonStyle(.plain)
-
-                NavigationLink(value: PhotoCategory.inferred(.largeFile)) {
-                    SuggestionCard(
-                        symbol: "externaldrive.badge.exclamationmark",
-                        label: lm.t("占空间大户"),
-                        count: library.categoryCounts[PhotoCategory.inferred(.largeFile).id] ?? 0,
-                        tint: AppPalette.danger,
-                        background: LinearGradient(
-                            colors: [Color(red: 0.85, green: 0.35, blue: 0.42),
-                                     Color(red: 0.55, green: 0.20, blue: 0.30)],
-                            startPoint: .topLeading, endPoint: .bottomTrailing
-                        )
-                    )
-                }
-                .buttonStyle(.plain)
+                .padding(.horizontal, 2)
             }
         }
+    }
+
+    /// 智能建议卡的工厂方法：避免重复代码
+    @ViewBuilder
+    private func suggestionCard(
+        for category: PhotoCategory,
+        label: String,
+        symbol: String,
+        gradient: [Color]
+    ) -> some View {
+        NavigationLink(value: category) {
+            SuggestionCard(
+                symbol: symbol,
+                label: lm.t(label),
+                count: library.categoryCounts[category.id] ?? 0,
+                tint: .white,
+                background: LinearGradient(colors: gradient,
+                                            startPoint: .topLeading,
+                                            endPoint: .bottomTrailing)
+            )
+            .frame(width: 170)
+        }
+        .buttonStyle(.plain)
     }
 
     // MARK: - 横向 Quick Pick

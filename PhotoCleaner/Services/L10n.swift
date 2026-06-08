@@ -72,6 +72,8 @@ enum L10n {
         "先清这些最划算": [.en: "Best value to clean first", .ja: "ここから片付けるのがお得", .ko: "여기부터 정리하면 효율적"],
         "陈年截图": [.en: "Old Screenshots", .ja: "古いスクショ", .ko: "오래된 스크린샷"],
         "占空间大户": [.en: "Storage Hogs", .ja: "容量の大物", .ko: "용량 차지"],
+        "视频清理": [.en: "Clean Videos", .ja: "動画整理", .ko: "동영상 정리"],
+        "自拍清理": [.en: "Clean Selfies", .ja: "自撮り整理", .ko: "셀카 정리"],
         "时间游戏": [.en: "Time Lens", .ja: "時間の遊び", .ko: "시간 놀이"],
         "换个角度看你的相册": [.en: "See your library differently", .ja: "別の角度から見る", .ko: "다른 각도로 보기"],
         "分类": [.en: "Categories", .ja: "カテゴリ", .ko: "분류"],

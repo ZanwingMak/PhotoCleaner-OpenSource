@@ -82,7 +82,7 @@ struct CustomDialog: View {
         }
     }
 
-    /// 卡片背景：浅色 = 纯白；深色 = 液态玻璃
+    /// 卡片背景：浅色 = 纯白；深色 = 透明液态玻璃
     @ViewBuilder
     private var dialogBackground: some View {
         if scheme == .light {
@@ -91,62 +91,39 @@ struct CustomDialog: View {
             if #available(iOS 26.0, *) {
                 Color.clear.glassEffect(.regular, in: .rect(cornerRadius: 18))
             } else {
-                Rectangle()
-                    .fill(.ultraThinMaterial)
-                    .overlay(
-                        Rectangle().fill(Color(red: 0.16, green: 0.15, blue: 0.14).opacity(0.55))
-                    )
+                // 真正透明的液态玻璃，不再叠半透明深色让玻璃感清晰
+                Rectangle().fill(.ultraThinMaterial)
             }
         }
     }
 
-    /// 单个按钮：highlightedCancel 用填充背景突出
+    /// 所有按钮都用纯文字样式，无填充背景
     @ViewBuilder
     private func actionButton(_ act: DialogAction) -> some View {
         Button {
             act.action()
         } label: {
-            if act.role == .highlightedCancel {
-                Text(act.title)
-                    .font(.system(size: 16, weight: .bold))
-                    .foregroundStyle(highlightedTextColor)
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 50)
-                    .background(highlightedFillColor)
-                    .contentShape(Rectangle())
-            } else {
-                Text(act.title)
-                    .font(.system(size: 16, weight: act.role == .cancel ? .semibold : .regular))
-                    .foregroundStyle(color(for: act.role))
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 50)
-                    .contentShape(Rectangle())
-            }
+            Text(act.title)
+                .font(.system(size: 16, weight: act.role == .cancel || act.role == .highlightedCancel ? .semibold : .regular))
+                .foregroundStyle(color(for: act.role))
+                .frame(maxWidth: .infinity)
+                .frame(height: 50)
+                .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
     }
 
-    /// 普通按钮颜色（不受 app .tint 影响）
+    /// 按钮文字颜色（不受 app .tint 影响）
+    /// highlightedCancel：浅色黑字 / 深色白字（在弹窗 bg 上高对比）
     private func color(for role: DialogAction.ActionRole) -> Color {
         switch role {
         case .primary:     return Color(red: 0.0, green: 0.48, blue: 1.0)
         case .destructive: return Color(red: 1.0, green: 0.23, blue: 0.19)
         case .cancel:      return Color(red: 0.0, green: 0.48, blue: 1.0)
         case .normal:      return Color.primary.opacity(0.85)
-        case .highlightedCancel: return .white
+        case .highlightedCancel:
+            return scheme == .light ? .black : .white
         }
-    }
-
-    /// highlightedCancel 按钮的填充色
-    private var highlightedFillColor: Color {
-        scheme == .light
-            ? Color(red: 0.0, green: 0.48, blue: 1.0)  // 浅色：蓝底
-            : Color.white                              // 深色：白底
-    }
-
-    /// highlightedCancel 按钮的文字色
-    private var highlightedTextColor: Color {
-        scheme == .light ? .white : .black
     }
 }
 

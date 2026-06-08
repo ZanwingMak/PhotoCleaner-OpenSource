@@ -368,7 +368,25 @@ struct CategoryListView: View {
 
     private var smartSuggestionRow: some View {
         VStack(alignment: .leading, spacing: 12) {
-            sectionTitle(lm.t("智能建议"), subtitle: lm.t("先清这些最划算"))
+            // 标题行加箭头暗示可横滑
+            HStack(alignment: .firstTextBaseline) {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(lm.t("智能建议"))
+                        .font(.system(size: 20, weight: .bold, design: .rounded))
+                        .foregroundStyle(AppPalette.textPrimary)
+                    Text(lm.t("先清这些最划算"))
+                        .font(.system(size: 12, weight: .medium))
+                        .foregroundStyle(AppPalette.textSecondary)
+                }
+                Spacer()
+                HStack(spacing: 4) {
+                    Text(lm.t("左右滑动"))
+                        .font(.system(size: 12, weight: .medium))
+                    Image(systemName: "chevron.right")
+                        .font(.system(size: 10, weight: .bold))
+                }
+                .foregroundStyle(AppPalette.brand)
+            }
 
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 12) {

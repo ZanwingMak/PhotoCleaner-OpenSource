@@ -18,7 +18,7 @@ enum AppTheme: String, CaseIterable, Identifiable {
     var title: String {
         switch self {
         case .system: return "跟随系统"
-        case .dark:   return "默认深色"
+        case .dark:   return "深色"
         case .light:  return "浅色"
         case .warm:   return "焦糖暖"
         case .cool:   return "冷色调"

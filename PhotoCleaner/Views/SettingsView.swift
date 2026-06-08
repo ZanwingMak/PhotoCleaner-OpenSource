@@ -75,7 +75,7 @@ struct SettingsView: View {
                 }
             }
             .toast($toast)
-            .preferredColorScheme(themeManager.current.colorScheme) // sheet 主题不继承父，显式声明
+            .preferredColorScheme(themeManager.current.colorScheme)
             .navigationTitle(lm.t("设置"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -87,6 +87,8 @@ struct SettingsView: View {
                 }
             }
         }
+        // 主题变化时让整个 NavigationStack 重建，绕过 sheet 内 traitCollection 缓存
+        .id(themeManager.current.rawValue)
     }
 
     // MARK: - 语言选择行

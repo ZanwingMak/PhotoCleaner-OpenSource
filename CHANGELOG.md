@@ -5,6 +5,23 @@
 
 ---
 
+## [1.1.4] - 2026-06-08
+
+### 变更
+- **「智能建议」加横滑提示**：标题行右侧显示「左右滑动 →」品牌色提示，让用户知道有更多建议可滑
+- **「默认深色」改名为「深色」**：ThemeManager 中 `AppTheme.dark.title` 由「默认深色」改为「深色」；L10n 字典 key 同步更新
+  - 首次启动默认主题仍为 `.dark`（深色），不变
+
+### 修复
+- **从其他主题切换到「跟随系统」时设置界面主题不立即更新**：iOS Sheet 内 traitCollection 缓存导致 `preferredColorScheme(nil)` 不实时生效
+  - 在 SettingsView NavigationStack 上加 `.id(themeManager.current.rawValue)`，主题变化时强制重建整个 view tree，traitCollection 重新计算
+  - 副作用：切换主题瞬间设置页有极轻微闪烁（可接受），无需关闭重开
+
+### 新增
+- L10n 新增「左右滑动」中英日韩翻译
+
+---
+
 ## [1.1.3] - 2026-06-08
 
 ### 变更

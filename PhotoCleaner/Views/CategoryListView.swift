@@ -12,6 +12,11 @@ private enum TopTab: String, CaseIterable {
     case albums
 }
 
+/// 首页滚动定位锚点
+private enum HomeScrollAnchor {
+    case top
+}
+
 struct CategoryListView: View {
     @EnvironmentObject private var library: PhotoLibraryService
     @EnvironmentObject private var lm: LanguageManager
@@ -22,7 +27,8 @@ struct CategoryListView: View {
     @State private var showSettings = false
     @State private var showPhotosBrowser = false
     @State private var showSuggestionList = false
-    @State private var visibleMonthCount = 24
+    @State private var showsAllMonthBuckets = false
+    @State private var scrollToTopRequest = 0
 
     /// 刷新按钮持续旋转角度
     @State private var refreshSpinAngle: Double = 0
@@ -57,6 +63,12 @@ struct CategoryListView: View {
                 }
                 .padding(.horizontal, 18)
                 .padding(.bottom, 8)
+
+                if topTab == .unsorted && showsAllMonthBuckets {
+                    backToTopButton
+                        .padding(.trailing, 22)
+                        .padding(.bottom, 94)
+                }
             }
             .toast($toast)
             
@@ -108,21 +120,31 @@ struct CategoryListView: View {
     // MARK: - 「整理」滚动页
 
     private var unsortedScroll: some View {
-        ScrollView(showsIndicators: false) {
-            VStack(alignment: .leading, spacing: 24) {
-                heroStorageCard
-                smartSuggestionRow
-                quickPickRow
-                bentoCategoryGrid
-                monthlyTimeline
-                Color.clear.frame(height: 120)
+        ScrollViewReader { proxy in
+            ScrollView(showsIndicators: false) {
+                VStack(alignment: .leading, spacing: 24) {
+                    Color.clear
+                        .frame(height: 0)
+                        .id(HomeScrollAnchor.top)
+                    heroStorageCard
+                    smartSuggestionRow
+                    quickPickRow
+                    bentoCategoryGrid
+                    monthlyTimeline
+                    Color.clear.frame(height: 120)
+                }
+                .padding(.horizontal, 20)
+                .padding(.top, 4)
             }
-            .padding(.horizontal, 20)
-            .padding(.top, 4)
-        }
-        .refreshable { // 下拉刷新（Safari 风）
-            await library.refreshCategoryCounts()
-            showRefreshToast()
+            .onChange(of: scrollToTopRequest) { _, _ in
+                withAnimation(.spring(response: 0.35, dampingFraction: 0.86)) {
+                    proxy.scrollTo(HomeScrollAnchor.top, anchor: .top)
+                }
+            }
+            .refreshable { // 下拉刷新（Safari 风）
+                await library.refreshCategoryCounts()
+                showRefreshToast()
+            }
         }
     }
 
@@ -513,7 +535,7 @@ struct CategoryListView: View {
 
     private var monthlyTimeline: some View {
         VStack(alignment: .leading, spacing: 12) {
-            timelineTitle
+            sectionTitle(lm.t("时间线"), subtitle: lm.t("按月份回顾"))
 
             LazyVStack(spacing: 0) {
                 ForEach(Array(displayedMonthBuckets.enumerated()), id: \.element.id) { idx, bucket in
@@ -531,63 +553,78 @@ struct CategoryListView: View {
                 }
 
                 if hasMoreMonthBuckets {
-                    Color.clear
-                        .frame(height: 1)
-                        .onAppear {
-                            loadMoreMonthBuckets()
+                    Button {
+                        UIImpactFeedbackGenerator(style: .soft).impactOccurred()
+                        withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) {
+                            showAllMonthBuckets()
                         }
+                    } label: {
+                        HStack(spacing: 6) {
+                            Text(lm.t("显示全部时间线"))
+                                .font(.system(size: 13, weight: .semibold))
+                            Image(systemName: "chevron.down")
+                                .font(.system(size: 11, weight: .bold))
+                        }
+                        .foregroundStyle(AppPalette.brand)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 14)
+                        .contentShape(Rectangle())
+                    }
+                    .buttonStyle(.plain)
                 }
             }
         }
     }
 
-    private var timelineTitle: some View {
-        HStack(alignment: .firstTextBaseline) {
-            sectionTitle(lm.t("时间线"), subtitle: lm.t("按月份回顾"))
-
-            Spacer()
-
-            if hasMoreMonthBuckets {
-                Button {
-                    UIImpactFeedbackGenerator(style: .soft).impactOccurred()
-                    withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) {
-                        showAllMonthBuckets()
-                    }
-                } label: {
-                    HStack(spacing: 4) {
-                        Text(lm.t("显示全部"))
-                            .font(.system(size: 12, weight: .semibold))
-                        Image(systemName: "chevron.down")
-                            .font(.system(size: 10, weight: .bold))
-                    }
-                    .foregroundStyle(AppPalette.brand)
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 6)
-                    .background(Capsule().fill(AppPalette.brand.opacity(0.14)))
-                    .contentShape(Capsule())
-                }
-                .buttonStyle(.plain)
-            }
-        }
-    }
-
+    /// 首页当前展示的月份分桶，默认只保留最近一年的月份
     private var displayedMonthBuckets: [MonthBucket] {
-        Array(library.monthBuckets.prefix(visibleMonthCount))
+        if showsAllMonthBuckets {
+            return library.monthBuckets
+        }
+        return library.monthBuckets.filter(isInRecentYear)
     }
 
+    /// 是否还有未展示的月份分桶
     private var hasMoreMonthBuckets: Bool {
-        visibleMonthCount < library.monthBuckets.count
-    }
-
-    /// 滚动到底部时追加展示更早月份
-    private func loadMoreMonthBuckets() {
-        guard hasMoreMonthBuckets else { return }
-        visibleMonthCount = min(library.monthBuckets.count, visibleMonthCount + 12)
+        !showsAllMonthBuckets && displayedMonthBuckets.count < library.monthBuckets.count
     }
 
     /// 一次性展开全部月份时间线
     private func showAllMonthBuckets() {
-        visibleMonthCount = library.monthBuckets.count
+        showsAllMonthBuckets = true
+    }
+
+    /// 判断月份分桶是否位于当前月份起算的最近 12 个月内
+    private func isInRecentYear(_ bucket: MonthBucket) -> Bool {
+        let calendar = Calendar.current
+        let now = Date()
+        let currentYear = calendar.component(.year, from: now)
+        let currentMonth = calendar.component(.month, from: now)
+        let currentIndex = currentYear * 12 + currentMonth
+        let bucketIndex = bucket.year * 12 + bucket.month
+        return bucketIndex >= currentIndex - 11 && bucketIndex <= currentIndex
+    }
+
+    /// 右下角悬浮返回顶部按钮
+    private var backToTopButton: some View {
+        VStack {
+            Spacer()
+            HStack {
+                Spacer()
+                Button {
+                    UIImpactFeedbackGenerator(style: .soft).impactOccurred()
+                    scrollToTopRequest += 1
+                } label: {
+                    Image(systemName: "arrow.up")
+                        .font(.system(size: 15, weight: .bold))
+                        .foregroundStyle(.white)
+                        .frame(width: 46, height: 46)
+                        .background(Circle().fill(AppPalette.brandGradient))
+                        .shadow(color: AppPalette.brand.opacity(0.28), radius: 12, x: 0, y: 6)
+                }
+                .buttonStyle(.plain)
+            }
+        }
     }
 
     // MARK: - 通用 section title

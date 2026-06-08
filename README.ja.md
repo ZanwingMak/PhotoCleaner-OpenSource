@@ -11,7 +11,7 @@
 ![iOS](https://img.shields.io/badge/iOS-17%2B-black?logo=apple)
 ![Swift](https://img.shields.io/badge/Swift-5-orange?logo=swift)
 ![License](https://img.shields.io/badge/license-GPL--3.0-blue)
-![Version](https://img.shields.io/badge/version-1.1.7-success)
+![Version](https://img.shields.io/badge/version-1.1.8-success)
 
 ## 機能
 
@@ -21,7 +21,7 @@
 - ⏪ 1 ステップ取り消し
 - 🖼 **写真ブラウザ**：フルスクリーン表示、ズーム、左右ページめくり、お気に入り / 共有 / 写真 App へジャンプ
 - 📊 **メタデータ詳細**：サイズ、ファイル容量、種類、位置情報、長さ
-- 💡 **おすすめ整理**：6 種類の入口（古いスクショ / 容量の大物 / 動画 / Live Photo / 自撮り / SNS）。ホーム横カード +「もっと」シートで全項目を一覧表示
+- 💡 **おすすめ整理**：6 種類の入口（古いスクショ / 容量の大物 / 動画 / Live Photo / 自撮り / 低解像度画像）。ホーム横カード +「もっと」シートで全項目を一覧表示
 - 🌗 **5 つのテーマ**：システム / ダーク / ライト / キャラメル / クール
 - 🌐 **4 つの言語**：中文 / English / 日本語 / 한국어
 - ⬆️ **新バージョン検出**：設定を開いたタイミングで静かに GitHub Releases を問い合わせ、新版があれば「について」セクションに目立つチップを表示
@@ -79,6 +79,13 @@ Xcode でプロジェクトを開く → Signing → Team に無料 Apple ID を
 - `NSPhotoLibraryUsageDescription` のみ要求
 - 削除時は iOS のシステムダイアログ。アプリは回避できません
 - バージョン確認は `api.github.com` への単発 GET のみ。標準 User-Agent 以外の個人情報は送りません
+
+## スポンサー
+
+- [PayPal](https://paypal.me/zanwing)
+- [Buy me a coffee](https://buymeacoffee.com/zanwing)
+- [Wise](https://wise.com/pay/me/zhenyingm1)
+- WeChat 投げ銭コードと Alipay QR は App の「設定 → スポンサー」で確認できます。
 
 ## リンク
 

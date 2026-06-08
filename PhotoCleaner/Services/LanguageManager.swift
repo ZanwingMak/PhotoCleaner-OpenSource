@@ -53,13 +53,33 @@ final class LanguageManager: ObservableObject {
     /// 实际使用的语言（解析 system 到具体语言）
     var effective: AppLanguage {
         if current != .system { return current }
-        let code = Locale.current.language.languageCode?.identifier ?? "zh"
-        switch code {
-        case "en": return .en
-        case "ja": return .ja
-        case "ko": return .ko
-        default:   return .zh
+        return Self.systemPreferredLanguage()
+    }
+
+    /// 解析系统首选语言，避免 Locale.current 被应用默认语言影响
+    private static func systemPreferredLanguage() -> AppLanguage {
+        let identifiers = Locale.preferredLanguages + [
+            Locale.autoupdatingCurrent.identifier,
+            Locale.current.identifier
+        ]
+        for identifier in identifiers {
+            if let language = language(from: identifier) {
+                return language
+            }
         }
+        return .zh
+    }
+
+    /// 将系统语言标识转换为应用支持的语言
+    private static func language(from identifier: String) -> AppLanguage? {
+        let normalized = identifier
+            .replacingOccurrences(of: "_", with: "-")
+            .lowercased()
+        if normalized.hasPrefix("zh") { return .zh }
+        if normalized.hasPrefix("ja") { return .ja }
+        if normalized.hasPrefix("ko") { return .ko }
+        if normalized.hasPrefix("en") { return .en }
+        return nil
     }
 
     func set(_ language: AppLanguage) {

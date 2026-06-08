@@ -11,7 +11,7 @@
 ![iOS](https://img.shields.io/badge/iOS-17%2B-black?logo=apple)
 ![Swift](https://img.shields.io/badge/Swift-5-orange?logo=swift)
 ![License](https://img.shields.io/badge/license-GPL--3.0-blue)
-![Version](https://img.shields.io/badge/version-1.1.7-success)
+![Version](https://img.shields.io/badge/version-1.1.8-success)
 
 ## 功能
 
@@ -21,7 +21,7 @@
 - ⏪ 单步撤销
 - 🖼 **照片浏览器**：全屏大图、缩放、左右翻页、收藏 / 分享 / 跳转苹果照片 App
 - 📊 **照片元数据**：尺寸、大小、类型、位置、时长完整展示
-- 💡 **智能建议**：6 个清理切入点（陈年截图 / 占空间大户 / 视频 / 实况 / 自拍 / 社交媒体），首页横向卡 +「更多」全量列表
+- 💡 **智能建议**：6 个清理切入点（陈年截图 / 占空间大户 / 视频 / 实况 / 自拍 / 低清图片），首页横向卡 +「更多」全量列表
 - 🌗 **5 种主题**：跟随系统 / 深色 / 浅色 / 焦糖暖 / 冷色调
 - 🌐 **4 种语言**：中文 / English / 日本語 / 한국어
 - ⬆️ **新版本检测**：进入设置后台静默查询 GitHub Releases，有新版直接在「关于」区高亮提示
@@ -111,6 +111,13 @@ bash scripts/build-ipa.sh
 - 仅请求 `NSPhotoLibraryUsageDescription`
 - 删除时由 iOS 系统弹原生确认对话框，应用无法绕过
 - 版本检测只对 `api.github.com` 发起一次 GET，仅传 User-Agent，不携带任何个人信息
+
+## 赞助
+
+- [PayPal](https://paypal.me/zanwing)
+- [Buy me a coffee](https://buymeacoffee.com/zanwing)
+- [Wise](https://wise.com/pay/me/zhenyingm1)
+- 微信赞赏码和支付宝二维码可在 App「设置 → 赞助支持」里查看。
 
 ## 链接
 

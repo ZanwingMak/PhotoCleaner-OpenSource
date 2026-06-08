@@ -82,6 +82,7 @@ enum L10n {
         "时间线": [.en: "Timeline", .ja: "タイムライン", .ko: "타임라인"],
         "按月份回顾": [.en: "Review by month", .ja: "月別に見る", .ko: "월별 보기"],
         "显示全部": [.en: "Show All", .ja: "すべて表示", .ko: "전체 보기"],
+        "显示全部时间线": [.en: "Show Full Timeline", .ja: "タイムラインをすべて表示", .ko: "전체 타임라인 보기"],
 
         // 快速合集
         "随机": [.en: "Random", .ja: "ランダム", .ko: "랜덤"],
@@ -157,6 +158,10 @@ enum L10n {
         "GitHub 仓库": [.en: "GitHub Repo", .ja: "GitHub", .ko: "GitHub"],
         "反馈问题": [.en: "Report Issue", .ja: "問題報告", .ko: "문제 신고"],
         "更新日志": [.en: "Changelog", .ja: "更新履歴", .ko: "변경 사항"],
+        "赞助支持": [.en: "Sponsor", .ja: "スポンサー", .ko: "후원"],
+        "扫码赞助": [.en: "Scan to sponsor", .ja: "スキャンして支援", .ko: "스캔하여 후원"],
+        "微信赞赏码": [.en: "WeChat Reward Code", .ja: "WeChat 投げ銭コード", .ko: "WeChat 후원 코드"],
+        "支付宝": [.en: "Alipay", .ja: "Alipay", .ko: "Alipay"],
         "发现新版本 %@": [
             .en: "Update available · %@",
             .ja: "新バージョン %@ あり",

@@ -11,7 +11,7 @@
 ![iOS](https://img.shields.io/badge/iOS-17%2B-black?logo=apple)
 ![Swift](https://img.shields.io/badge/Swift-5-orange?logo=swift)
 ![License](https://img.shields.io/badge/license-GPL--3.0-blue)
-![Version](https://img.shields.io/badge/version-1.1.7-success)
+![Version](https://img.shields.io/badge/version-1.1.8-success)
 
 ## Features
 
@@ -21,7 +21,7 @@
 - ⏪ Single-step undo
 - 🖼 **Photo browser**: full-screen view, zoom, swipe pagination, favorite / share / open in Photos.app
 - 📊 **Metadata sheet**: dimensions, file size, type, location, duration
-- 💡 **Smart Picks**: six cleanup entry points (old screenshots / storage hogs / videos / live photos / selfies / social), horizontal cards on home + a "More" sheet for the full list
+- 💡 **Smart Picks**: six cleanup entry points (old screenshots / storage hogs / videos / live photos / selfies / low-res images), horizontal cards on home + a "More" sheet for the full list
 - 🌗 **5 themes**: System / Dark / Light / Caramel / Cool
 - 🌐 **4 languages**: 中文 / English / 日本語 / 한국어
 - ⬆️ **Update check**: silently queries GitHub Releases on entering Settings; highlights a chip in the About section when a newer version is published
@@ -111,6 +111,13 @@ Open the project in Xcode, set Signing → Team to your free Apple ID, ⌘R to y
 - Only `NSPhotoLibraryUsageDescription` is requested
 - Deletion always triggers the native iOS confirmation dialog; the app cannot bypass it
 - The update check fires a single GET to `api.github.com`. It sends only the standard User-Agent and never includes any personal data.
+
+## Sponsor
+
+- [PayPal](https://paypal.me/zanwing)
+- [Buy me a coffee](https://buymeacoffee.com/zanwing)
+- [Wise](https://wise.com/pay/me/zhenyingm1)
+- WeChat Reward Code and Alipay QR are available in Settings → Sponsor.
 
 ## Links
 

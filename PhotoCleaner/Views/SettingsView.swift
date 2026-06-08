@@ -20,6 +20,7 @@ struct SettingsView: View {
     @StateObject private var updateChecker = UpdateChecker()
     @State private var isScanning = false
     @State private var toast: ToastInfo?
+    @State private var showSponsorList = false
 
     var body: some View {
         NavigationStack {
@@ -66,6 +67,10 @@ struct SettingsView: View {
                             }
                             infoRow(label: lm.t("版本"), symbol: "info.circle", value: appVersion)
                             divider
+                            actionRow(label: lm.t("赞助支持"), symbol: "heart.circle.fill", tint: .pink) {
+                                showSponsorList = true
+                            }
+                            divider
                             linkRow(label: lm.t("GitHub 仓库"), symbol: "chevron.left.forwardslash.chevron.right",
                                      url: "https://github.com/ZanwingMak/PhotoCleaner")
                             divider
@@ -84,6 +89,11 @@ struct SettingsView: View {
                 }
             }
             .toast($toast)
+            .sheet(isPresented: $showSponsorList) {
+                SponsorListSheet()
+                    .presentationDetents([.medium, .large])
+                    .presentationDragIndicator(.visible)
+            }
             .task { await updateChecker.check() }
             .preferredColorScheme(preferredSchemeForSheet)
             .navigationTitle(lm.t("设置"))
@@ -455,5 +465,206 @@ struct SettingsView: View {
                 .multilineTextAlignment(.center)
         }
         .padding(.vertical, 12)
+    }
+}
+
+// MARK: - 赞助方式
+
+/// 赞助方式配置：包含列表展示信息、二维码资源名和可选链接
+private struct SponsorMethod: Identifiable {
+    let id: String
+    let title: String
+    let subtitle: String
+    let symbol: String
+    let tint: Color
+    let qrAssetName: String
+    let urlString: String?
+
+    /// 可打开的赞助链接
+    var url: URL? {
+        guard let urlString else { return nil }
+        return URL(string: urlString)
+    }
+
+    static let all: [SponsorMethod] = [
+        SponsorMethod(id: "paypal",
+                      title: "PayPal",
+                      subtitle: "paypal.me/zanwing",
+                      symbol: "p.circle.fill",
+                      tint: .blue,
+                      qrAssetName: "SponsorPayPal",
+                      urlString: "https://paypal.me/zanwing"),
+        SponsorMethod(id: "bmc",
+                      title: "Buy me a coffee",
+                      subtitle: "buymeacoffee.com/zanwing",
+                      symbol: "cup.and.saucer.fill",
+                      tint: .yellow,
+                      qrAssetName: "SponsorBMC",
+                      urlString: "https://buymeacoffee.com/zanwing"),
+        SponsorMethod(id: "wise",
+                      title: "Wise",
+                      subtitle: "wise.com/pay/me/zhenyingm1",
+                      symbol: "globe.asia.australia.fill",
+                      tint: .green,
+                      qrAssetName: "SponsorWise",
+                      urlString: "https://wise.com/pay/me/zhenyingm1"),
+        SponsorMethod(id: "wechat",
+                      title: "微信赞赏码",
+                      subtitle: "扫码赞助",
+                      symbol: "qrcode",
+                      tint: .mint,
+                      qrAssetName: "SponsorWeChat",
+                      urlString: nil),
+        SponsorMethod(id: "alipay",
+                      title: "支付宝",
+                      subtitle: "扫码赞助",
+                      symbol: "qrcode.viewfinder",
+                      tint: .cyan,
+                      qrAssetName: "SponsorAlipay",
+                      urlString: nil)
+    ]
+}
+
+/// 赞助方式列表：点击某一项后弹出对应二维码
+private struct SponsorListSheet: View {
+    @Environment(\.dismiss) private var dismiss
+    @EnvironmentObject private var lm: LanguageManager
+    @EnvironmentObject private var themeManager: ThemeManager
+    @State private var selectedSponsor: SponsorMethod?
+
+    var body: some View {
+        NavigationStack {
+            ZStack {
+                AppPalette.bgPrimary(for: themeManager.current).ignoresSafeArea()
+
+                ScrollView(showsIndicators: false) {
+                    VStack(spacing: 12) {
+                        ForEach(SponsorMethod.all) { method in
+                            Button {
+                                UIImpactFeedbackGenerator(style: .soft).impactOccurred()
+                                selectedSponsor = method
+                            } label: {
+                                SponsorMethodRow(method: method)
+                            }
+                            .buttonStyle(.plain)
+                        }
+                    }
+                    .padding(.horizontal, 20)
+                    .padding(.top, 12)
+                    .padding(.bottom, 36)
+                }
+            }
+            .preferredColorScheme(themeManager.current.colorScheme)
+            .navigationTitle(lm.t("赞助支持"))
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button(lm.t("关闭")) { dismiss() }
+                        .tint(AppPalette.brand)
+                }
+            }
+            .sheet(item: $selectedSponsor) { method in
+                SponsorQRCodeSheet(method: method)
+                    .presentationDetents([.large])
+                    .presentationDragIndicator(.visible)
+            }
+        }
+    }
+}
+
+/// 赞助方式列表行
+private struct SponsorMethodRow: View {
+    @EnvironmentObject private var lm: LanguageManager
+    @EnvironmentObject private var themeManager: ThemeManager
+    let method: SponsorMethod
+
+    var body: some View {
+        HStack(spacing: 14) {
+            ZStack {
+                Circle()
+                    .fill(method.tint.opacity(0.18))
+                    .frame(width: 42, height: 42)
+                Image(systemName: method.symbol)
+                    .font(.system(size: 17, weight: .bold))
+                    .foregroundStyle(method.tint)
+            }
+
+            VStack(alignment: .leading, spacing: 3) {
+                Text(lm.t(method.title))
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundStyle(AppPalette.textPrimary(for: themeManager.current))
+                Text(lm.t(method.subtitle))
+                    .font(.system(size: 12, weight: .medium))
+                    .foregroundStyle(AppPalette.textSecondary(for: themeManager.current))
+                    .lineLimit(1)
+            }
+
+            Spacer()
+
+            Image(systemName: "chevron.right")
+                .font(.system(size: 12, weight: .bold))
+                .foregroundStyle(AppPalette.textTertiary(for: themeManager.current))
+        }
+        .padding(.horizontal, 14)
+        .padding(.vertical, 12)
+        .background(
+            RoundedRectangle(cornerRadius: 18, style: .continuous)
+                .fill(AppPalette.bgCard(for: themeManager.current))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 18, style: .continuous)
+                        .strokeBorder(.primary.opacity(0.05), lineWidth: 1)
+                )
+        )
+        .contentShape(Rectangle())
+    }
+}
+
+/// 二维码详情：展示二维码图片，并在存在链接时显示可点击链接
+private struct SponsorQRCodeSheet: View {
+    @Environment(\.dismiss) private var dismiss
+    @EnvironmentObject private var lm: LanguageManager
+    @EnvironmentObject private var themeManager: ThemeManager
+    let method: SponsorMethod
+
+    var body: some View {
+        NavigationStack {
+            ZStack {
+                AppPalette.bgPrimary(for: themeManager.current).ignoresSafeArea()
+
+                ScrollView(showsIndicators: false) {
+                    VStack(spacing: 18) {
+                        Image(method.qrAssetName)
+                            .resizable()
+                            .scaledToFit()
+                            .padding(12)
+                            .background(
+                                RoundedRectangle(cornerRadius: 22, style: .continuous)
+                                    .fill(Color.white)
+                                    .shadow(color: .black.opacity(0.08), radius: 18, x: 0, y: 10)
+                            )
+                            .padding(.horizontal, 20)
+
+                        if let url = method.url, let text = method.urlString {
+                            Link(text, destination: url)
+                                .font(.system(size: 14, weight: .semibold))
+                                .foregroundStyle(AppPalette.brand)
+                                .multilineTextAlignment(.center)
+                                .padding(.horizontal, 24)
+                        }
+                    }
+                    .padding(.top, 18)
+                    .padding(.bottom, 36)
+                }
+            }
+            .preferredColorScheme(themeManager.current.colorScheme)
+            .navigationTitle(lm.t(method.title))
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button(lm.t("关闭")) { dismiss() }
+                        .tint(AppPalette.brand)
+                }
+            }
+        }
     }
 }

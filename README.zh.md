@@ -31,12 +31,12 @@
 ## 截图
 
 <p align="center">
-  <img src="docs/screenshots/01-home.png" width="240" alt="首页 — 智能建议「更多」按钮、时间游戏、Bento 分类" />
-  <img src="docs/screenshots/02-smart-picks-sheet.png" width="240" alt="智能建议「更多」sheet — 全部清理入口列表" />
-  <img src="docs/screenshots/03-settings.png" width="240" alt="设置 — 5 主题（跟随系统 / 深色 / 浅色 / 焦糖暖 / 冷色调）与 4 语言" />
+  <img src="docs/screenshots/01-home.png" width="240" alt="首页 — 智能建议、时间游戏、Bento 分类" />
+  <img src="docs/screenshots/02-albums.png" width="240" alt="相册 — 智能相册和推断清理分类" />
+  <img src="docs/screenshots/03-settings.png" width="240" alt="设置 — 主题、语言和体验开关" />
 </p>
 
-> 从左到右：首页带新的「更多」胶囊 · 点开后弹出的「智能建议」完整列表 · 设置页展示 5 主题 + 4 语言。
+> 从左到右：首页的智能建议和时间游戏 · 相册页的智能相册与清理分类 · 设置页的主题、语言和体验开关。
 
 ## 项目结构
 

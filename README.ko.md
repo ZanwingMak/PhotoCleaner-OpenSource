@@ -31,12 +31,12 @@
 ## 스크린샷
 
 <p align="center">
-  <img src="docs/screenshots/01-home.png" width="240" alt="홈 — 스마트 추천 「더보기」 버튼, Time Lens, Bento 카테고리" />
-  <img src="docs/screenshots/02-smart-picks-sheet.png" width="240" alt="스마트 추천 「더보기」 시트 — 전체 정리 진입점 목록" />
-  <img src="docs/screenshots/03-settings.png" width="240" alt="설정 — 5가지 테마 (시스템 / 다크 / 라이트 / 카라멜 / 쿨) 및 4개 언어" />
+  <img src="docs/screenshots/01-home.png" width="240" alt="홈 — 스마트 추천, Time Lens, Bento 카테고리" />
+  <img src="docs/screenshots/02-albums.png" width="240" alt="앨범 — 스마트 앨범과 추론된 정리 카테고리" />
+  <img src="docs/screenshots/03-settings.png" width="240" alt="설정 — 테마, 언어, 경험 토글" />
 </p>
 
-> 왼쪽부터 오른쪽: 새로운 「더보기」 칩이 표시된 홈 · 그 칩을 눌러 열리는 「스마트 추천」 전체 목록 · 5가지 테마와 4개 언어를 보여주는 설정.
+> 왼쪽부터 오른쪽: 스마트 추천과 Time Lens가 있는 홈 · 스마트 앨범과 정리 카테고리가 있는 앨범 · 테마, 언어, 경험 토글이 있는 설정.
 
 ## 프로젝트 구조
 

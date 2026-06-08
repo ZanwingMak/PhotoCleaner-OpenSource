@@ -31,12 +31,12 @@
 ## スクリーンショット
 
 <p align="center">
-  <img src="docs/screenshots/01-home.png" width="240" alt="ホーム — おすすめ整理「もっと」ボタン、Time Lens、Bento カテゴリ" />
-  <img src="docs/screenshots/02-smart-picks-sheet.png" width="240" alt="おすすめ整理「もっと」シート — 全エントリー一覧" />
-  <img src="docs/screenshots/03-settings.png" width="240" alt="設定 — 5 テーマ（システム / ダーク / ライト / キャラメル / クール）と 4 言語" />
+  <img src="docs/screenshots/01-home.png" width="240" alt="ホーム — おすすめ整理、Time Lens、Bento カテゴリ" />
+  <img src="docs/screenshots/02-albums.png" width="240" alt="アルバム — スマートアルバムと推定整理カテゴリ" />
+  <img src="docs/screenshots/03-settings.png" width="240" alt="設定 — テーマ、言語、体験トグル" />
 </p>
 
-> 左から右：新しい「もっと」チップが付いたホーム · そこから開く「おすすめ整理」一覧 · 5 テーマと 4 言語を備えた設定。
+> 左から右：おすすめ整理と Time Lens を備えたホーム · スマートアルバムと整理カテゴリを備えたアルバム · テーマ、言語、体験トグルを備えた設定。
 
 ## プロジェクト構造
 

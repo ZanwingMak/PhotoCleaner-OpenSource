@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Photo Cleaner</title>
+  <meta name="description" content="A private, on-device iOS photo organizer for reviewing, cleaning, and freeing storage.">
+  <meta property="og:title" content="Photo Cleaner">
+  <meta property="og:description" content="Swipe through your library, keep what matters, and clear space with confidence.">
+  <meta property="og:image" content="./icon.png">
+  <meta name="theme-color" content="#171615">
+  <link rel="icon" href="./icon.png">
+  <link rel="stylesheet" href="./site.css">
+</head>
+<body>
+  <a class="skip-link" href="#main" data-i18n="skip">Skip to content</a>
+
+  <header class="site-header" aria-label="Primary">
+    <a class="brand" href="#top" aria-label="Photo Cleaner">
+      <img src="./icon.png" alt="" width="38" height="38">
+      <span>Photo Cleaner</span>
+    </a>
+    <nav class="nav-links" aria-label="Main navigation">
+      <a href="#features" data-i18n="navFeatures">Features</a>
+      <a href="#privacy" data-i18n="navPrivacy">Privacy</a>
+      <a href="#download" data-i18n="navDownload">Download</a>
+    </nav>
+    <div class="language-switcher" aria-label="Language">
+      <button type="button" data-lang="en">EN</button>
+      <button type="button" data-lang="zh">中文</button>
+      <button type="button" data-lang="ja">日本語</button>
+      <button type="button" data-lang="ko">한국어</button>
+    </div>
+  </header>
+
+  <main id="main">
+    <section id="top" class="hero-section">
+      <div class="hero-media" aria-hidden="true">
+        <img class="hero-shot hero-shot-main" src="./screenshots/01-home.png" alt="">
+        <img class="hero-shot hero-shot-side" src="./screenshots/02-albums.png" alt="">
+        <img class="hero-shot hero-shot-small" src="./screenshots/03-settings.png" alt="">
+      </div>
+      <div class="hero-content reveal">
+        <p class="eyebrow" data-i18n="eyebrow">Private iOS photo cleanup</p>
+        <h1 data-i18n="heroTitle">Photo Cleaner keeps your library calm.</h1>
+        <p class="hero-copy" data-i18n="heroCopy">Review photos with simple gestures, find cleanup opportunities fast, and reclaim space without sending a single image away from your device.</p>
+        <div class="hero-actions">
+          <a class="button button-primary" href="https://github.com/ZanwingMak/PhotoCleaner/releases/latest" data-i18n="primaryCta">Download latest release</a>
+          <a class="button button-ghost" href="https://github.com/ZanwingMak/PhotoCleaner" data-i18n="secondaryCta">View source</a>
+        </div>
+        <dl class="hero-facts" aria-label="Highlights">
+          <div>
+            <dt data-i18n="factOneValue">100%</dt>
+            <dd data-i18n="factOneLabel">on-device</dd>
+          </div>
+          <div>
+            <dt data-i18n="factTwoValue">4</dt>
+            <dd data-i18n="factTwoLabel">languages</dd>
+          </div>
+          <div>
+            <dt data-i18n="factThreeValue">iOS 17+</dt>
+            <dd data-i18n="factThreeLabel">native SwiftUI</dd>
+          </div>
+        </dl>
+      </div>
+    </section>
+
+    <section class="strip-section reveal" aria-label="Product summary">
+      <p data-i18n="stripOne">Swipe review</p>
+      <p data-i18n="stripTwo">Smart albums</p>
+      <p data-i18n="stripThree">Local processing</p>
+      <p data-i18n="stripFour">Multilingual</p>
+    </section>
+
+    <section id="features" class="section feature-section">
+      <div class="section-heading reveal">
+        <p class="eyebrow" data-i18n="featuresEyebrow">Designed for daily cleanup</p>
+        <h2 data-i18n="featuresTitle">A focused workflow for the photos that pile up.</h2>
+        <p data-i18n="featuresCopy">Photo Cleaner turns a crowded library into a set of clear decisions: keep, skip, or mark for deletion.</p>
+      </div>
+      <div class="feature-grid">
+        <article class="feature-card feature-card-wide reveal tilt-card">
+          <span class="line-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+          </span>
+          <h3 data-i18n="featureOneTitle">Swipe through decisions</h3>
+          <p data-i18n="featureOneCopy">Left, right, and up gestures make review fast without hiding what is about to be deleted.</p>
+        </article>
+        <article class="feature-card reveal tilt-card">
+          <span class="line-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M4 7h16M7 12h10M10 17h4"/></svg>
+          </span>
+          <h3 data-i18n="featureTwoTitle">Smart cleanup entry points</h3>
+          <p data-i18n="featureTwoCopy">Jump into screenshots, videos, selfies, large files, Live Photos, and low-resolution images.</p>
+        </article>
+        <article class="feature-card reveal tilt-card">
+          <span class="line-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M12 4l7 4v5c0 4-3 6-7 7-4-1-7-3-7-7V8l7-4z"/></svg>
+          </span>
+          <h3 data-i18n="featureThreeTitle">Private by default</h3>
+          <p data-i18n="featureThreeCopy">Photos stay on your iPhone. Deletions still go through the native iOS confirmation sheet.</p>
+        </article>
+        <article class="feature-card feature-card-tall reveal tilt-card">
+          <span class="line-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M5 5h14v14H5zM8 9h8M8 13h5"/></svg>
+          </span>
+          <h3 data-i18n="featureFourTitle">Timeline and albums</h3>
+          <p data-i18n="featureFourCopy">Browse by month or system album, then open a focused review flow from any category.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="section showcase-section">
+      <div class="section-heading reveal">
+        <p class="eyebrow" data-i18n="showcaseEyebrow">Real interface</p>
+        <h2 data-i18n="showcaseTitle">Built around the screens you actually use.</h2>
+      </div>
+      <div class="showcase-grid">
+        <figure class="phone-frame reveal">
+          <img src="./screenshots/01-home.png" alt="Photo Cleaner home screen">
+          <figcaption data-i18n="shotOne">Home cleanup overview</figcaption>
+        </figure>
+        <figure class="phone-frame reveal">
+          <img src="./screenshots/02-albums.png" alt="Photo Cleaner albums screen">
+          <figcaption data-i18n="shotTwo">Albums and smart categories</figcaption>
+        </figure>
+        <figure class="phone-frame reveal">
+          <img src="./screenshots/03-settings.png" alt="Photo Cleaner settings screen">
+          <figcaption data-i18n="shotThree">Themes, language, and sponsor settings</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section id="privacy" class="section privacy-section reveal">
+      <div>
+        <p class="eyebrow" data-i18n="privacyEyebrow">Privacy posture</p>
+        <h2 data-i18n="privacyTitle">Your photos stay where they belong.</h2>
+      </div>
+      <div class="privacy-copy">
+        <p data-i18n="privacyCopy">Photo Cleaner processes your library locally. It only checks GitHub Releases when looking for app updates, and deletion always requires iOS system confirmation.</p>
+        <ul>
+          <li data-i18n="privacyOne">No photo uploads</li>
+          <li data-i18n="privacyTwo">Native iOS permission prompts</li>
+          <li data-i18n="privacyThree">Open-source SwiftUI project</li>
+        </ul>
+      </div>
+    </section>
+
+    <section id="download" class="section download-section reveal">
+      <div class="download-copy">
+        <p class="eyebrow" data-i18n="downloadEyebrow">Get the app</p>
+        <h2 data-i18n="downloadTitle">Install the latest unsigned IPA or build it yourself.</h2>
+        <p data-i18n="downloadCopy">The release artifact is unsigned. You can self-sign it with tools such as Sideloadly, AltStore, or Xcode using your own Apple ID.</p>
+      </div>
+      <div class="download-actions">
+        <a class="button button-primary" href="https://github.com/ZanwingMak/PhotoCleaner/releases/latest" data-i18n="downloadRelease">Open latest release</a>
+        <a class="button button-ghost" href="https://github.com/ZanwingMak/PhotoCleaner/blob/main/README.md" data-i18n="downloadReadme">Read installation notes</a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <p data-i18n="footerText">Photo Cleaner is open source under GPL-3.0.</p>
+    <div>
+      <a href="https://github.com/ZanwingMak/PhotoCleaner" data-i18n="footerGithub">GitHub</a>
+      <a href="https://github.com/ZanwingMak/PhotoCleaner/releases" data-i18n="footerReleases">Releases</a>
+      <a href="https://github.com/ZanwingMak/PhotoCleaner/issues" data-i18n="footerIssues">Issues</a>
+    </div>
+  </footer>
+
+  <script src="./site.js"></script>
+</body>
+</html>

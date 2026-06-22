@@ -121,6 +121,7 @@ bash scripts/build-ipa.sh
 
 ## 链接
 
+- [官方网站](https://zanwingmak.github.io/PhotoCleaner/)
 - [更新日志 CHANGELOG.md](CHANGELOG.md)
 - [功能文档 FEATURES.md](FEATURES.md)
 - [测试用例 TEST_PLAN.md](TEST_PLAN.md)

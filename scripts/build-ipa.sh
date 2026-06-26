@@ -17,7 +17,7 @@ if [ -z "$VERSION" ]; then VERSION="0.0.0"; fi
 
 IPA_PATH="$BUILD_DIR/PhotoCleaner-v${VERSION}.ipa"
 
-BUNDLE_ID="com.maizhenying.PhotoCleaner"
+BUNDLE_ID="app.photocleaner.PhotoCleaner"
 APP_NAME="PhotoCleaner"
 APP_DISPLAY_NAME="Photo Cleaner"
 MIN_IOS="17.0"

@@ -10,7 +10,7 @@ import Foundation
 final class UpdateChecker: ObservableObject {
     /// 仓库 owner / repo
     private let owner = "ZanwingMak"
-    private let repo = "PhotoCleaner"
+    private let repo = "PhotoCleaner-OpenSource"
 
     /// 远端最新版本号（不含 v 前缀）
     @Published var latestVersion: String?

@@ -15,11 +15,11 @@ APP_DIR="$BUILD_DIR/PhotoCleaner.app"
 VERSION="$(grep -m1 -oE '## \[[0-9]+\.[0-9]+\.[0-9]+\]' "$PROJECT_DIR/CHANGELOG.md" | head -1 | tr -d '[]## ')"
 if [ -z "$VERSION" ]; then VERSION="0.0.0"; fi
 
-IPA_PATH="$BUILD_DIR/PhotoCleaner-v${VERSION}.ipa"
+IPA_PATH="$BUILD_DIR/RollKeep-v${VERSION}.ipa"
 
-BUNDLE_ID="app.photocleaner.PhotoCleaner"
+BUNDLE_ID="app.rollkeep.RollKeep"
 APP_NAME="PhotoCleaner"
-APP_DISPLAY_NAME="Photo Cleaner"
+APP_DISPLAY_NAME="RollKeep"
 MIN_IOS="17.0"
 SDK_NAME="iphoneos26.5"
 TARGET="arm64-apple-ios${MIN_IOS}"

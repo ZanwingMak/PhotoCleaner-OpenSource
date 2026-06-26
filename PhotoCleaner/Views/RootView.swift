@@ -114,7 +114,7 @@ struct PermissionDeniedView: View {
                 .foregroundStyle(.secondary)
             Text(lm.t("无法访问照片"))
                 .font(.title2.weight(.semibold))
-            Text(lm.t("请在「设置 → 隐私与安全性 → 照片」中允许 PhotoCleaner 访问。"))
+            Text(lm.t("请在「设置 → 隐私与安全性 → 照片」中允许 RollKeep 访问。"))
                 .font(.callout)
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)

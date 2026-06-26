@@ -72,13 +72,13 @@ struct SettingsView: View {
                             }
                             divider
                             linkRow(label: lm.t("GitHub 仓库"), symbol: "chevron.left.forwardslash.chevron.right",
-                                     url: "https://github.com/ZanwingMak/PhotoCleaner")
+                                     url: "https://github.com/ZanwingMak/PhotoCleaner-OpenSource")
                             divider
                             linkRow(label: lm.t("反馈问题"), symbol: "exclamationmark.bubble",
-                                     url: "https://github.com/ZanwingMak/PhotoCleaner/issues")
+                                     url: "https://github.com/ZanwingMak/PhotoCleaner-OpenSource/issues")
                             divider
                             linkRow(label: lm.t("更新日志"), symbol: "list.bullet.rectangle",
-                                     url: "https://github.com/ZanwingMak/PhotoCleaner/blob/main/CHANGELOG.md")
+                                     url: "https://github.com/ZanwingMak/PhotoCleaner-OpenSource/blob/main/CHANGELOG.md")
                         }
 
                         footerNote
@@ -246,7 +246,7 @@ struct SettingsView: View {
             }
             .shadow(color: AppPalette.brand.opacity(0.5), radius: 16, x: 0, y: 8)
 
-            Text("PhotoCleaner")
+            Text("RollKeep")
                 .font(.system(size: 22, weight: .bold, design: .rounded))
                 .foregroundStyle(AppPalette.textPrimary(for: theme))
             Text(lm.t("整理你的照片库，腾出存储空间"))
@@ -459,7 +459,7 @@ struct SettingsView: View {
             Image(systemName: "lock.fill")
                 .font(.system(size: 14, weight: .bold))
                 .foregroundStyle(AppPalette.textTertiary(for: theme))
-            Text(lm.t("PhotoCleaner 在本地处理你的所有照片\n绝不上传任何数据"))
+            Text(lm.t("RollKeep 在本地处理你的所有照片\n绝不上传任何数据"))
                 .font(.system(size: 11))
                 .foregroundStyle(AppPalette.textTertiary(for: theme))
                 .multilineTextAlignment(.center)

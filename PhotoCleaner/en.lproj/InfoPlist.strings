@@ -1,2 +1,2 @@
-"NSPhotoLibraryUsageDescription" = "Photo Cleaner needs access to your photos to organize your library and free up storage. All deletions require your confirmation.";
-"NSPhotoLibraryAddUsageDescription" = "Photo Cleaner uses add-only access only when saving photos back to your library.";
+"NSPhotoLibraryUsageDescription" = "RollKeep needs access to your photos to organize your library and free up storage. All deletions require your confirmation.";
+"NSPhotoLibraryAddUsageDescription" = "RollKeep uses add-only access only when saving photos back to your library.";

@@ -8,7 +8,7 @@ import Foundation
 enum L10n {
     static let dict: [String: [AppLanguage: String]] = [
         // 通用
-        "PhotoCleaner": [.zh: "PhotoCleaner", .en: "PhotoCleaner", .ja: "PhotoCleaner", .ko: "PhotoCleaner"],
+        "RollKeep": [.zh: "RollKeep", .en: "RollKeep", .ja: "RollKeep", .ko: "RollKeep"],
         "整理你的照片库，腾出存储空间": [.en: "Tidy your photo library, free up space", .ja: "写真ライブラリを整理して空き容量を確保", .ko: "사진 라이브러리 정리, 저장 공간 확보"],
 
         // 退出确认
@@ -170,10 +170,10 @@ enum L10n {
         "查看更新": [.en: "Tap to view release", .ja: "リリースを見る", .ko: "릴리스 보기"],
 
         // 隐私
-        "PhotoCleaner 在本地处理你的所有照片\n绝不上传任何数据": [
-            .en: "PhotoCleaner handles all photos on-device.\nNothing is uploaded.",
-            .ja: "PhotoCleaner はすべて端末内で処理\nアップロードは一切しません",
-            .ko: "PhotoCleaner는 모든 사진을 기기에서 처리\n업로드 전혀 없음"
+        "RollKeep 在本地处理你的所有照片\n绝不上传任何数据": [
+            .en: "RollKeep handles all photos on-device.\nNothing is uploaded.",
+            .ja: "RollKeep はすべて端末内で処理\nアップロードは一切しません",
+            .ko: "RollKeep는 모든 사진을 기기에서 처리\n업로드 전혀 없음"
         ],
 
         // 权限页
@@ -228,10 +228,10 @@ enum L10n {
             .ja: "整理と空き容量確保のため写真ライブラリへのアクセスが必要です。削除は全て手動確認です。",
             .ko: "정리와 저장 공간 확보를 위해 사진 라이브러리 접근이 필요합니다. 모든 작업은 수동 확인입니다."
         ],
-        "请在「设置 → 隐私与安全性 → 照片」中允许 PhotoCleaner 访问。": [
-            .en: "Allow PhotoCleaner access via Settings → Privacy → Photos.",
-            .ja: "「設定 → プライバシーとセキュリティ → 写真」で PhotoCleaner を許可してください。",
-            .ko: "설정 → 개인정보 보호 및 보안 → 사진 에서 PhotoCleaner 접근을 허용하세요."
+        "请在「设置 → 隐私与安全性 → 照片」中允许 RollKeep 访问。": [
+            .en: "Allow RollKeep access via Settings → Privacy → Photos.",
+            .ja: "「設定 → プライバシーとセキュリティ → 写真」で RollKeep を許可してください。",
+            .ko: "설정 → 개인정보 보호 및 보안 → 사진 에서 RollKeep 접근을 허용하세요."
         ],
 
         // 加载中

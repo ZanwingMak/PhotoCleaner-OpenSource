@@ -207,7 +207,7 @@ struct CategoryListView: View {
                 Text(lm.t(greetingHello))
                     .font(.system(size: 13, weight: .medium))
                     .foregroundStyle(AppPalette.textSecondary)
-                Text("PhotoCleaner")
+                Text("RollKeep")
                     .font(.system(size: 28, weight: .bold, design: .rounded))
                     .foregroundStyle(AppPalette.textPrimary)
             }

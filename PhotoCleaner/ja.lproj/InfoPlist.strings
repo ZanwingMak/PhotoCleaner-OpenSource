@@ -1,2 +1,2 @@
-"NSPhotoLibraryUsageDescription" = "Photo Cleaner は写真ライブラリの整理と空き容量の確保のために写真へのアクセスが必要です。削除操作はすべて手動確認が必要です。";
+"NSPhotoLibraryUsageDescription" = "RollKeep は写真ライブラリの整理と空き容量の確保のために写真へのアクセスが必要です。削除操作はすべて手動確認が必要です。";
 "NSPhotoLibraryAddUsageDescription" = "写真をライブラリに保存し直す必要がある場合にのみ、追加アクセスを使用します。";

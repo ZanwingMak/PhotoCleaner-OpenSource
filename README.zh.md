@@ -121,11 +121,13 @@ bash scripts/build-ipa.sh
 
 ## 链接
 
-- [官方网站](https://zanwingmak.github.io/PhotoCleaner/)
+- [官方网站](https://zanwingmak.github.io/PhotoCleaner-OpenSource/)
+- [隐私政策](https://zanwingmak.github.io/PhotoCleaner-OpenSource/privacy.html)
+- [使用条款](https://zanwingmak.github.io/PhotoCleaner-OpenSource/terms.html)
 - [更新日志 CHANGELOG.md](CHANGELOG.md)
 - [功能文档 FEATURES.md](FEATURES.md)
 - [测试用例 TEST_PLAN.md](TEST_PLAN.md)
-- [Releases](https://github.com/ZanwingMak/PhotoCleaner/releases)
+- [Releases](https://github.com/ZanwingMak/PhotoCleaner-OpenSource/releases)
 
 ## 许可
 

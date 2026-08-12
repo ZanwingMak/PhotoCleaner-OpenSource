@@ -121,11 +121,13 @@ Open the project in Xcode, set Signing → Team to your free Apple ID, ⌘R to y
 
 ## Links
 
-- [Official Website](https://zanwingmak.github.io/PhotoCleaner/)
+- [Official Website](https://zanwingmak.github.io/PhotoCleaner-OpenSource/)
+- [Privacy Policy](https://zanwingmak.github.io/PhotoCleaner-OpenSource/privacy.html)
+- [Terms of Use](https://zanwingmak.github.io/PhotoCleaner-OpenSource/terms.html)
 - [CHANGELOG](CHANGELOG.md)
 - [FEATURES](FEATURES.md)
 - [TEST PLAN](TEST_PLAN.md)
-- [Releases](https://github.com/ZanwingMak/PhotoCleaner/releases)
+- [Releases](https://github.com/ZanwingMak/PhotoCleaner-OpenSource/releases)
 
 ## License
 

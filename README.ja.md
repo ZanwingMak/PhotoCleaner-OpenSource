@@ -89,11 +89,13 @@ Xcode でプロジェクトを開く → Signing → Team に無料 Apple ID を
 
 ## リンク
 
-- [公式サイト](https://zanwingmak.github.io/PhotoCleaner/)
+- [公式サイト](https://zanwingmak.github.io/PhotoCleaner-OpenSource/)
+- [プライバシーポリシー](https://zanwingmak.github.io/PhotoCleaner-OpenSource/privacy.html)
+- [利用規約](https://zanwingmak.github.io/PhotoCleaner-OpenSource/terms.html)
 - [更新履歴 CHANGELOG.md](CHANGELOG.md)
 - [機能仕様 FEATURES.md](FEATURES.md)
 - [テスト計画 TEST_PLAN.md](TEST_PLAN.md)
-- [Releases](https://github.com/ZanwingMak/PhotoCleaner/releases)
+- [Releases](https://github.com/ZanwingMak/PhotoCleaner-OpenSource/releases)
 
 ## ライセンス
 

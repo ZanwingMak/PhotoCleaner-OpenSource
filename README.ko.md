@@ -89,11 +89,13 @@ Xcode 에서 프로젝트 열고 Signing → Team 에 무료 Apple ID 선택, �
 
 ## 링크
 
-- [공식 웹사이트](https://zanwingmak.github.io/PhotoCleaner/)
+- [공식 웹사이트](https://zanwingmak.github.io/PhotoCleaner-OpenSource/)
+- [개인정보 처리방침](https://zanwingmak.github.io/PhotoCleaner-OpenSource/privacy.html)
+- [이용 약관](https://zanwingmak.github.io/PhotoCleaner-OpenSource/terms.html)
 - [변경 사항 CHANGELOG.md](CHANGELOG.md)
 - [기능 명세 FEATURES.md](FEATURES.md)
 - [테스트 계획 TEST_PLAN.md](TEST_PLAN.md)
-- [Releases](https://github.com/ZanwingMak/PhotoCleaner/releases)
+- [Releases](https://github.com/ZanwingMak/PhotoCleaner-OpenSource/releases)
 
 ## 라이선스
 

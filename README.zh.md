@@ -6,6 +6,8 @@
 
 <p align="center"><a href="README.md">English</a> · <b>中文</b> · <a href="README.ja.md">日本語</a> · <a href="README.ko.md">한국어</a></p>
 
+<p align="center"><a href="https://apps.apple.com/us/app/rollkeep/id6784522025">在 App Store 下载 RollKeep</a></p>
+
 > 类 Slidebox 的 iOS 照片整理工具。SwiftUI 原生，iOS 26 液态玻璃语言。
 
 ![iOS](https://img.shields.io/badge/iOS-17%2B-black?logo=apple)

@@ -6,6 +6,8 @@
 
 <p align="center"><a href="README.md">English</a> · <a href="README.zh.md">中文</a> · <b>日本語</b> · <a href="README.ko.md">한국어</a></p>
 
+<p align="center"><a href="https://apps.apple.com/us/app/rollkeep/id6784522025">App Store で RollKeep をダウンロード</a></p>
+
 > Slidebox 風の iOS 写真整理ツール。SwiftUI ネイティブ、iOS 26 リキッドグラス。
 
 ![iOS](https://img.shields.io/badge/iOS-17%2B-black?logo=apple)
